@@ -72,10 +72,7 @@ public class ShopGuiManager {
     public void openMainMenu(Player player) {
         ConfigurationSection guiConfig = guisConfig.getConfig().getConfigurationSection("main-menu");
         if (guiConfig == null) {
-            player.sendMessage("§cThe main menu GUI is not configured in guis.yml.");
-            if (player.hasPermission("bshop.admin.debug")) {
-                player.sendMessage("§c[bShop Debug] main-menu section missing from guis.yml");
-            }
+            messageService.send(player, "gui.main_menu_not_configured");
             return;
         }
         String title = guiConfig.getString("title", "Shop");
@@ -170,6 +167,13 @@ public class ShopGuiManager {
             PaginationItem nextButton = shop.paginationItems().get("next_page");
             if (nextButton != null) inventory.setItem(nextButton.slot(), createPaginationItemStack(nextButton));
         }
+        
+        // Add back to main menu button
+        PaginationItem backButton = shop.paginationItems().get("back_to_menu");
+        if (backButton != null) {
+            inventory.setItem(backButton.slot(), createPaginationItemStack(backButton));
+        }
+        
         player.openInventory(inventory);
         openShopInventories.put(player.getUniqueId(), new PageInfo(shopId, page));
     }
@@ -188,7 +192,7 @@ public class ShopGuiManager {
         activeTransactions.put(player.getUniqueId(), context);
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");
         if (config == null) {
-            player.sendMessage("§cThe quantity menu GUI is not configured in guis.yml.");
+            messageService.send(player, "gui.quantity_menu_not_configured");
             return;
         }
         try {
@@ -197,18 +201,19 @@ public class ShopGuiManager {
             updateQuantityGui(inventory, context);
             player.openInventory(inventory);
         } catch (Exception e) {
-            player.sendMessage("§cError opening quantity GUI: " + e.getMessage());
+            messageService.send(player, "gui.error_opening_quantity_gui", Placeholder.unparsed("error", e.getMessage()));
         }
     }
 
     public void openStackGui(Player player, TransactionContext context) {
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu.stack_gui");
         if (config == null) {
-            player.sendMessage("§cThe stack selection GUI is not configured in guis.yml.");
+            messageService.send(player, "gui.stack_gui_not_configured");
             return;
         }
         String title = messageService.serialize(messageService.parse(config.getString("title", "Select Stacks")));
-        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), 18, title);
+        int size = config.getInt("size", 2) * 9; // Size in rows, convert to slots
+        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), size, title);
         ShopItem shopItem = context.getItem();
         TransactionType type = context.getType();
         double pricePerItem = (type == TransactionType.BUY) ? shopItem.buyPrice() : shopItem.sellPrice();
@@ -228,9 +233,25 @@ public class ShopGuiManager {
                     .withDisplayName(name).withLore(lore).withPDCString("bshop_action", "set_quantity_stacks:" + i).build();
             inventory.setItem(i - 1, stackSelectItem);
         }
-        ItemStack backButton = new ItemBuilder(plugin, Material.REDSTONE, messageService)
-                .withDisplayName("<red>Go Back").withPDCString("bshop_action", "open_quantity_menu").build();
-        inventory.setItem(13, backButton);
+        
+        // Add configurable back button
+        ConfigurationSection backButtonConfig = config.getConfigurationSection("back_button");
+        if (backButtonConfig != null) {
+            Material backMaterial = Material.matchMaterial(backButtonConfig.getString("material", "REDSTONE"));
+            if (backMaterial != null) {
+                String backName = backButtonConfig.getString("display-name", "<red>Go Back");
+                List<String> backLore = backButtonConfig.getStringList("lore");
+                int backSlot = backButtonConfig.getInt("slot", 13);
+                String backAction = backButtonConfig.getString("action", "open_quantity_menu");
+                
+                ItemStack backButton = new ItemBuilder(plugin, backMaterial, messageService)
+                        .withDisplayName(backName)
+                        .withLore(backLore)
+                        .withPDCString("bshop_action", backAction)
+                        .build();
+                inventory.setItem(backSlot, backButton);
+            }
+        }
         
         // Add filler items to stack GUI
         ConfigurationSection fillerConfig = config.getConfigurationSection("filler");

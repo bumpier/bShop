@@ -115,6 +115,9 @@ public class ShopListener implements Listener {
             case "open_quantity_menu":
                 shopGuiManager.openQuantityGui(player, context);
                 break;
+            case "back_to_main_menu":
+                shopGuiManager.openMainMenu(player);
+                break;
         }
     }
 
@@ -130,6 +133,11 @@ public class ShopListener implements Listener {
         PaginationItem prevPage = openShop.paginationItems().get("previous_page");
         if (prevPage != null && clickedSlot == prevPage.slot()) {
             shopGuiManager.openShop(player, pageInfo.shopId(), pageInfo.currentPage() - 1);
+            return;
+        }
+        PaginationItem backToMenu = openShop.paginationItems().get("back_to_menu");
+        if (backToMenu != null && clickedSlot == backToMenu.slot()) {
+            shopGuiManager.openMainMenu(player);
             return;
         }
         ShopItem shopItem = openShop.items().stream()

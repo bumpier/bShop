@@ -11,6 +11,12 @@ pagination:
     material: RED_STAINED_GLASS_PANE
     display-name: "<red><- Previous Page</red>"
     slot: 36
+  back_to_menu:
+    material: BARRIER
+    display-name: "<red>Back to Main Menu"
+    lore: ["<gray>Return to shop categories"]
+    slot: 40
+    action: "back_to_main_menu"
   filler:
     material: GRAY_STAINED_GLASS_PANE
     display-name: " "

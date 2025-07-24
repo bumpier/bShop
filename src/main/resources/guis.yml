@@ -100,6 +100,7 @@ quantity-menu:
       action: "open_stacks_menu"
   stack_gui:
     title: "<gradient:#F3904F:#3B4371>Select Stacks (1-9)</gradient>"
+    size: 2  # Size in rows (2 rows = 18 slots)
     item:
       material: LIGHT_BLUE_STAINED_GLASS_PANE
       buy_display-name: "<aqua>Buy {stacks} Stack(s)"
@@ -107,6 +108,13 @@ quantity-menu:
       lore:
         - "<gray>Contains <light_purple>{amount}</light_purple> items."
         - "<gray>Total Price: <gold>${price}</gold>"
+    # Back button configuration
+    back_button:
+      material: REDSTONE
+      display-name: "<red>Go Back"
+      lore: ["<gray>Return to quantity selection"]
+      slot: 13
+      action: "open_quantity_menu"
     # Filler item configuration for stack selection GUI
     filler:
       enabled: true
