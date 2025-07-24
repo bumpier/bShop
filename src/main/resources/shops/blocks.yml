@@ -5,7 +5,7 @@
 # ╰───────────────────────────────────────────────────╯
 
 # Shop's title and size (number of rows).
-title: "<bold><gradient:#558B2F:#A1887F>🌳 ɴᴀᴛᴜʀᴀʟ ʙʟᴏᴄᴋs</gradient></bold>"
+title: "Blocks"
 size: 4
 
 # ---------------------------------------------------- #
@@ -14,22 +14,22 @@ size: 4
 pagination:
   next_page:
     material: LIME_STAINED_GLASS_PANE
-    display-name: "<#76FF03><bold>NEXT »</bold></#76FF03>"
+    display-name: "<#76FF03><bold>NEXT PAGE »</bold></#76FF03>"
     lore:
       - "<#BDBDBD><i>Click to go to the next page.</i>"
-    slot: 44
+    slot: 32
   previous_page:
     material: RED_STAINED_GLASS_PANE
-    display-name: "<#FF5252><bold>« PREVIOUS</bold></#FF5252>"
+    display-name: "<#FF5252><bold>« PREVIOUS PAGE</bold></#FF5252>"
     lore:
       - "<#BDBDBD><i>Click to go to the previous page.</i>"
-    slot: 36
+    slot: 30
   back_to_menu:
     material: BARRIER
     display-name: "<#FF5252><bold>⌂ MAIN MENU</bold></#FF5252>"
     lore:
-      - "<#BDBDBD>Return to the main shop categories."
-    slot: 40
+      - "<#BDBDBD><i>Return to the main shop categories."
+    slot: 31
     action: "back_to_main_menu"
   filler:
     material: GRAY_STAINED_GLASS_PANE
