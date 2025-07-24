@@ -226,6 +226,29 @@ public class ShopGuiManager {
         ItemStack backButton = new ItemBuilder(plugin, Material.REDSTONE, messageService)
                 .withDisplayName("<red>Go Back").withPDCString("bshop_action", "open_quantity_menu").build();
         inventory.setItem(13, backButton);
+        
+        // Add filler items to stack GUI
+        ConfigurationSection fillerConfig = config.getConfigurationSection("filler");
+        if (fillerConfig != null && fillerConfig.getBoolean("enabled", false)) {
+            Material fillerMaterial = Material.matchMaterial(fillerConfig.getString("material", "BLACK_STAINED_GLASS_PANE"));
+            if (fillerMaterial != null) {
+                String fillerName = fillerConfig.getString("display-name", " ");
+                List<String> fillerLore = fillerConfig.getStringList("lore");
+                
+                ItemStack fillerItem = new ItemBuilder(plugin, fillerMaterial, messageService)
+                        .withDisplayName(fillerName)
+                        .withLore(fillerLore)
+                        .build();
+                
+                // Fill all empty slots (avoid slots 0-8 for stack buttons and slot 13 for back button)
+                for (int i = 0; i < inventory.getSize(); i++) {
+                    if (inventory.getItem(i) == null) {
+                        inventory.setItem(i, fillerItem);
+                    }
+                }
+            }
+        }
+        
         player.openInventory(inventory);
     }
 
@@ -296,6 +319,28 @@ public class ShopGuiManager {
             ItemStack buttonItem = new ItemBuilder(plugin, material, messageService)
                     .withDisplayName(buttonName).withLore(buttonLore).withPDCString("bshop_action", action).build();
             inventory.setItem(slot, buttonItem);
+        }
+        
+        // Add filler items
+        ConfigurationSection fillerConfig = config.getConfigurationSection("filler");
+        if (fillerConfig != null && fillerConfig.getBoolean("enabled", false)) {
+            Material fillerMaterial = Material.matchMaterial(fillerConfig.getString("material", "GRAY_STAINED_GLASS_PANE"));
+            if (fillerMaterial != null) {
+                String fillerName = fillerConfig.getString("display-name", " ");
+                List<String> fillerLore = fillerConfig.getStringList("lore");
+                
+                ItemStack fillerItem = new ItemBuilder(plugin, fillerMaterial, messageService)
+                        .withDisplayName(fillerName)
+                        .withLore(fillerLore)
+                        .build();
+                
+                // Fill all empty slots
+                for (int i = 0; i < inventory.getSize(); i++) {
+                    if (inventory.getItem(i) == null) {
+                        inventory.setItem(i, fillerItem);
+                    }
+                }
+            }
         }
     }
 
