@@ -119,8 +119,10 @@ public class ShopGuiManager {
         }
         String inventoryTitle = messageService.serialize(messageService.parse(shop.title()));
         Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), shop.size(), inventoryTitle);
-        List<Integer> reservedSlots = shop.paginationItems().values().stream()
-                .map(PaginationItem::slot).collect(Collectors.toList());
+        List<Integer> reservedSlots = shop.paginationItems().entrySet().stream()
+                .filter(entry -> !entry.getKey().equals("filler")) // Exclude filler as it doesn't have a specific slot
+                .map(entry -> entry.getValue().slot())
+                .collect(Collectors.toList());
         List<Integer> takenSlots = new ArrayList<>(reservedSlots);
         shop.items().stream().filter(ShopItem::isPinned).filter(item -> item.getPinnedPage().orElse(-1) == page)
                 .forEach(item -> {
@@ -151,14 +153,6 @@ public class ShopGuiManager {
         int maxPinnedPage = shop.items().stream().filter(ShopItem::isPinned)
                 .mapToInt(item -> item.getPinnedPage().orElse(0)).max().orElse(0);
         int totalPages = Math.max(maxPinnedPage + 1, totalFlowPages);
-        PaginationItem filler = shop.paginationItems().get("filler");
-        if (filler != null) {
-            ItemStack fillerStack = new ItemBuilder(plugin, filler.material(), messageService)
-                    .withDisplayName(filler.displayName()).build();
-            for (int slot : reservedSlots) {
-                if (slot >= 0 && inventory.getItem(slot) == null) inventory.setItem(slot, fillerStack);
-            }
-        }
         if (page > 0) {
             PaginationItem prevButton = shop.paginationItems().get("previous_page");
             if (prevButton != null) inventory.setItem(prevButton.slot(), createPaginationItemStack(prevButton));

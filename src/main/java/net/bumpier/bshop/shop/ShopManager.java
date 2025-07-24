@@ -112,18 +112,30 @@ public class ShopManager {
         for (String key : section.getKeys(false)) {
             try {
                 int slot = section.getInt(key + ".slot", -1);
-                // ADDED: Validation check for the slot
-                if (slot < 0) {
-                    plugin.getLogger().warning("   - CONFIG ERROR: Pagination item '" + key + "' in shop file is missing a valid 'slot'. This item will be ignored.");
-                    continue; // Skip this misconfigured item
+                
+                // Special handling for filler - it doesn't need a specific slot
+                if (key.equals("filler")) {
+                    Material material = Material.valueOf(section.getString(key + ".material", "GRAY_STAINED_GLASS_PANE").toUpperCase());
+                    paginationItems.put(key, new PaginationItem(
+                            material,
+                            section.getString(key + ".display-name", " "),
+                            section.getStringList(key + ".lore"),
+                            -1 // Filler uses -1 as a special slot indicator
+                    ));
+                } else {
+                    // ADDED: Validation check for the slot (non-filler items)
+                    if (slot < 0) {
+                        plugin.getLogger().warning("   - CONFIG ERROR: Pagination item '" + key + "' in shop file is missing a valid 'slot'. This item will be ignored.");
+                        continue; // Skip this misconfigured item
+                    }
+                    Material material = Material.valueOf(section.getString(key + ".material", "STONE").toUpperCase());
+                    paginationItems.put(key, new PaginationItem(
+                            material,
+                            section.getString(key + ".display-name", " "),
+                            section.getStringList(key + ".lore"),
+                            slot
+                    ));
                 }
-                Material material = Material.valueOf(section.getString(key + ".material", "STONE").toUpperCase());
-                paginationItems.put(key, new PaginationItem(
-                        material,
-                        section.getString(key + ".display-name", " "),
-                        section.getStringList(key + ".lore"),
-                        slot
-                ));
             } catch (Exception e) {
                 plugin.getLogger().log(Level.SEVERE, "   - FAILED: Could not parse pagination item '" + key + "'.", e);
             }
