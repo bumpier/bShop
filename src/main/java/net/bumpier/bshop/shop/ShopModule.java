@@ -34,7 +34,7 @@ public class ShopModule implements Module {
         // --- Register Commands and Listeners ---
         // Inject the ModuleManager into the command handler
         plugin.getCommand("shop").setExecutor(new ShopCommand(shopGuiManager, messageService, shopManager, moduleManager));
-        plugin.getServer().getPluginManager().registerEvents(new ShopListener(shopGuiManager, transactionService, shopManager), plugin);
+        plugin.getServer().getPluginManager().registerEvents(new ShopListener(shopGuiManager, transactionService, shopManager, messageService), plugin);
     }
 
     @Override

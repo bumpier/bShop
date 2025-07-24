@@ -60,3 +60,20 @@ items:
     lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
     buy-price: 4.0
     sell-price: 2.0
+  - id: special_buy_only
+    material: DIAMOND_BLOCK
+    display-name: "<aqua>Diamond Block (Buy Only)"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<red>Cannot be sold!"]
+    buy-price: 100.0
+    # No sell-price defined - defaults to -1
+  - id: special_sell_only
+    material: EMERALD_BLOCK
+    display-name: "<green>Emerald Block (Sell Only)"
+    lore: ["<red>Cannot be bought!", "<gray>Sell for: <red>${sell_price}"]
+    # No buy-price defined - defaults to -1
+    sell-price: 50.0
+  - id: display_only
+    material: BEACON
+    display-name: "<yellow>Beacon (Display Only)"
+    lore: ["<red>Cannot be bought or sold!", "<gray>For display purposes only."]
+    # No buy-price or sell-price defined - both default to -1

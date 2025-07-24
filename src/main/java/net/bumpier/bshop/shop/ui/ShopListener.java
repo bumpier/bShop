@@ -8,6 +8,7 @@ import net.bumpier.bshop.shop.model.ShopItem;
 import net.bumpier.bshop.shop.transaction.TransactionContext;
 import net.bumpier.bshop.shop.transaction.ShopTransactionService;
 import net.bumpier.bshop.shop.transaction.TransactionType;
+import net.bumpier.bshop.util.message.MessageService;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -28,11 +29,13 @@ public class ShopListener implements Listener {
     private final ShopGuiManager shopGuiManager;
     private final ShopTransactionService transactionService;
     private final ShopManager shopManager;
+    private final MessageService messageService;
 
-    public ShopListener(ShopGuiManager shopGuiManager, ShopTransactionService transactionService, ShopManager shopManager) {
+    public ShopListener(ShopGuiManager shopGuiManager, ShopTransactionService transactionService, ShopManager shopManager, MessageService messageService) {
         this.shopGuiManager = shopGuiManager;
         this.transactionService = transactionService;
         this.shopManager = shopManager;
+        this.messageService = messageService;
     }
 
     @EventHandler
@@ -149,9 +152,21 @@ public class ShopListener implements Listener {
                 .filter(item -> item.getAssignedSlot() == clickedSlot).findFirst().orElse(null);
         if (shopItem == null) return;
         if (event.getClick() == ClickType.LEFT) {
-            shopGuiManager.openQuantityGui(player, shopItem, TransactionType.BUY, pageInfo.shopId(), pageInfo.currentPage());
+            // Check if item can be bought (has valid buy price)
+            if (shopItem.buyPrice() >= 0) {
+                shopGuiManager.openQuantityGui(player, shopItem, TransactionType.BUY, pageInfo.shopId(), pageInfo.currentPage());
+            } else {
+                // Send buy disabled message
+                messageService.send(player, "shop.buy_disabled");
+            }
         } else if (event.getClick() == ClickType.RIGHT) {
-            shopGuiManager.openQuantityGui(player, shopItem, TransactionType.SELL, pageInfo.shopId(), pageInfo.currentPage());
+            // Check if item can be sold (has valid sell price)
+            if (shopItem.sellPrice() >= 0) {
+                shopGuiManager.openQuantityGui(player, shopItem, TransactionType.SELL, pageInfo.shopId(), pageInfo.currentPage());
+            } else {
+                // Send sell disabled message
+                messageService.send(player, "shop.sell_disabled");
+            }
         }
     }
 
