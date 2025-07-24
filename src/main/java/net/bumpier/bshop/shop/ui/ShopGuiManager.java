@@ -269,6 +269,7 @@ public class ShopGuiManager {
                 ItemStack stackItem = new ItemBuilder(plugin, material, messageService)
                         .withDisplayName(displayName)
                         .withLore(lore)
+                        .withAmount(Math.min(amount, 64)) // Set the visual amount (clamped to max stack size)
                         .withPDCString("bshop_action", action)
                         .build();
                 

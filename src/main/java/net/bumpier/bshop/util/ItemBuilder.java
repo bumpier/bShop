@@ -74,6 +74,13 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder withAmount(int amount) {
+        if (amount > 0 && amount <= 64) {
+            itemStack.setAmount(amount);
+        }
+        return this;
+    }
+
     public ItemStack build() {
         return this.itemStack;
     }
