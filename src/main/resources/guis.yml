@@ -101,13 +101,117 @@ quantity-menu:
   stack_gui:
     title: "<gradient:#F3904F:#3B4371>Select Stacks (1-9)</gradient>"
     size: 2  # Size in rows (2 rows = 18 slots)
-    item:
-      material: LIGHT_BLUE_STAINED_GLASS_PANE
-      buy_display-name: "<aqua>Buy {stacks} Stack(s)"
-      sell_display-name: "<aqua>Sell {stacks} Stack(s)"
-      lore:
-        - "<gray>Contains <light_purple>{amount}</light_purple> items."
-        - "<gray>Total Price: <gold>${price}</gold>"
+    # Configurable stack items - you can define custom amounts and appearances
+    # Available placeholders: {stacks}, {amount}, {price}, {item_name}
+    items:
+      stack_1:
+        material: LIGHT_BLUE_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stack"
+        sell_display-name: "<red>Sell {stacks} Stack"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 0
+        stacks: 1
+        action: "set_quantity_stacks:1"
+      stack_2:
+        material: LIGHT_BLUE_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stacks"
+        sell_display-name: "<red>Sell {stacks} Stacks"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 1
+        stacks: 2
+        action: "set_quantity_stacks:2"
+      stack_3:
+        material: CYAN_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stacks"
+        sell_display-name: "<red>Sell {stacks} Stacks"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 2
+        stacks: 3
+        action: "set_quantity_stacks:3"
+      stack_4:
+        material: CYAN_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stacks"
+        sell_display-name: "<red>Sell {stacks} Stacks"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 3
+        stacks: 4
+        action: "set_quantity_stacks:4"
+      stack_5:
+        material: BLUE_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stacks"
+        sell_display-name: "<red>Sell {stacks} Stacks"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 4
+        stacks: 5
+        action: "set_quantity_stacks:5"
+      stack_6:
+        material: BLUE_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stacks"
+        sell_display-name: "<red>Sell {stacks} Stacks"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 5
+        stacks: 6
+        action: "set_quantity_stacks:6"
+      stack_7:
+        material: PURPLE_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stacks"
+        sell_display-name: "<red>Sell {stacks} Stacks"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 6
+        stacks: 7
+        action: "set_quantity_stacks:7"
+      stack_8:
+        material: PURPLE_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stacks"
+        sell_display-name: "<red>Sell {stacks} Stacks"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 7
+        stacks: 8
+        action: "set_quantity_stacks:8"
+      stack_9:
+        material: MAGENTA_STAINED_GLASS_PANE
+        display-name: "<aqua>Buy {stacks} Stacks"
+        sell_display-name: "<red>Sell {stacks} Stacks"
+        lore:
+          - "<gray>Contains <light_purple>{amount}</light_purple> items"
+          - "<gray>Total Price: <gold>${price}</gold>"
+          - ""
+          - "<yellow>Click to select this amount"
+        slot: 8
+        stacks: 9
+        action: "set_quantity_stacks:9"
     # Back button configuration
     back_button:
       material: REDSTONE

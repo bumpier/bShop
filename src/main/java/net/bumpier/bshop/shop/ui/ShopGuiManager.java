@@ -216,27 +216,60 @@ public class ShopGuiManager {
             messageService.send(player, "gui.stack_gui_not_configured");
             return;
         }
+        
         String title = messageService.serialize(messageService.parse(config.getString("title", "Select Stacks")));
         int size = config.getInt("size", 2) * 9; // Size in rows, convert to slots
         Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), size, title);
+        
         ShopItem shopItem = context.getItem();
         TransactionType type = context.getType();
         double pricePerItem = (type == TransactionType.BUY) ? shopItem.buyPrice() : shopItem.sellPrice();
         int stackSize = shopItem.material().getMaxStackSize();
-        Material itemMaterial = Material.matchMaterial(config.getString("item.material", "PAPER"));
-        for (int i = 1; i <= 9; i++) {
-            int totalAmount = stackSize * i;
-            double totalPrice = pricePerItem * totalAmount;
-            String nameKey = (type == TransactionType.BUY) ? "item.buy_display-name" : "item.sell_display-name";
-            String name = config.getString(nameKey, "<aqua>Buy {stacks} Stack(s)")
-                    .replace("{stacks}", String.valueOf(i));
-            List<String> lore = config.getStringList("item.lore").stream()
-                    .map(line -> line.replace("{amount}", String.valueOf(totalAmount))
-                            .replace("{price}", String.format("%,.2f", totalPrice)))
-                    .collect(Collectors.toList());
-            ItemStack stackSelectItem = new ItemBuilder(plugin, itemMaterial, messageService)
-                    .withDisplayName(name).withLore(lore).withPDCString("bshop_action", "set_quantity_stacks:" + i).build();
-            inventory.setItem(i - 1, stackSelectItem);
+        
+        // Add configurable stack items
+        ConfigurationSection itemsConfig = config.getConfigurationSection("items");
+        if (itemsConfig != null) {
+            for (String key : itemsConfig.getKeys(false)) {
+                ConfigurationSection itemConfig = itemsConfig.getConfigurationSection(key);
+                if (itemConfig == null) continue;
+                
+                Material material = Material.matchMaterial(itemConfig.getString("material", "LIGHT_BLUE_STAINED_GLASS_PANE"));
+                if (material == null) continue;
+                
+                int stacks = itemConfig.getInt("stacks", 1);
+                int slot = itemConfig.getInt("slot", 0);
+                String action = itemConfig.getString("action", "set_quantity_stacks:" + stacks);
+                
+                int totalAmount = stackSize * stacks;
+                double totalPrice = pricePerItem * totalAmount;
+                
+                // Get display name based on transaction type
+                String displayName = (type == TransactionType.BUY) ? 
+                    itemConfig.getString("display-name", "<aqua>Buy {stacks} Stack(s)") : 
+                    itemConfig.getString("sell_display-name", itemConfig.getString("display-name", "<red>Sell {stacks} Stack(s)"));
+                
+                // Process placeholders in display name
+                displayName = displayName.replace("{stacks}", String.valueOf(stacks))
+                        .replace("{amount}", String.valueOf(totalAmount))
+                        .replace("{price}", String.format("%,.2f", totalPrice))
+                        .replace("{item_name}", shopItem.displayName());
+                
+                // Process placeholders in lore
+                List<String> lore = itemConfig.getStringList("lore").stream()
+                        .map(line -> line.replace("{stacks}", String.valueOf(stacks))
+                                .replace("{amount}", String.valueOf(totalAmount))
+                                .replace("{price}", String.format("%,.2f", totalPrice))
+                                .replace("{item_name}", shopItem.displayName()))
+                        .collect(Collectors.toList());
+                
+                ItemStack stackItem = new ItemBuilder(plugin, material, messageService)
+                        .withDisplayName(displayName)
+                        .withLore(lore)
+                        .withPDCString("bshop_action", action)
+                        .build();
+                
+                inventory.setItem(slot, stackItem);
+            }
         }
         
         // Add configurable back button
@@ -271,7 +304,7 @@ public class ShopGuiManager {
                         .withLore(fillerLore)
                         .build();
                 
-                // Fill all empty slots (avoid slots 0-8 for stack buttons and slot 13 for back button)
+                // Fill all empty slots
                 for (int i = 0; i < inventory.getSize(); i++) {
                     if (inventory.getItem(i) == null) {
                         inventory.setItem(i, fillerItem);
