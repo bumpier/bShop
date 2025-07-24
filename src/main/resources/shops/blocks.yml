@@ -1,79 +1,223 @@
-# Building Blocks Shop Configuration
-title: "<gradient:#4CAF50:#8BC34A>Building Blocks</gradient>"
-size: 5
+# ╭───────────────────────────────────────────────────╮
+# │            NATURAL BLOCKS SHOP                    │
+# │   Based on the provided layout image.             │
+# │   Features: Hex Colors, Unicode Icons             │
+# ╰───────────────────────────────────────────────────╯
 
+# Shop's title and size (number of rows).
+title: "Blocks"
+size: 4
+
+# ---------------------------------------------------- #
+#                   PAGINATION ITEMS                   #
+# ---------------------------------------------------- #
 pagination:
   next_page:
     material: LIME_STAINED_GLASS_PANE
-    display-name: "<green>Next Page -></green>"
-    slot: 44
+    display-name: "<#76FF03><bold>NEXT PAGE »</bold></#76FF03>"
+    lore:
+      - "<#BDBDBD><i>Click to go to the next page.</i>"
+    slot: 32
   previous_page:
     material: RED_STAINED_GLASS_PANE
-    display-name: "<red><- Previous Page</red>"
-    slot: 36
+    display-name: "<#FF5252><bold>« PREVIOUS PAGE</bold></#FF5252>"
+    lore:
+      - "<#BDBDBD><i>Click to go to the previous page.</i>"
+    slot: 30
   back_to_menu:
     material: BARRIER
-    display-name: "<red>Back to Main Menu"
-    lore: ["<gray>Return to shop categories"]
-    slot: 40
+    display-name: "<#FF5252><bold>⌂ MAIN MENU</bold></#FF5252>"
+    lore:
+      - "<#BDBDBD><i>Return to the main shop categories."
+    slot: 31
     action: "back_to_main_menu"
   filler:
     material: GRAY_STAINED_GLASS_PANE
     display-name: " "
-    lore: []
 
-# Building block items
+# ---------------------------------------------------- #
+#                     SHOP ITEMS                       #
+# ---------------------------------------------------- #
 items:
+  # --- Row 1 from Image ---
+  - id: grass_block
+    material: GRASS_BLOCK
+    slot: 10
+    page: 0
+    display-name: "<#558B2F>ɢʀᴀѕѕ ʙʟᴏᴄᴋ</#558B2F>"
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 2.50
+    sell-price: 1.25
+
+  - id: dirt
+    material: DIRT
+    display-name: "<#8D6E63>ᴅɪʀᴛ</#8D6E63>"
+    slot: 11
+    page: 0
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 1.00
+    sell-price: 0.50
+
+  - id: gravel
+    material: GRAVEL
+    display-name: "<#A3A3A3>ɢʀᴀᴠᴇʟ</#A3A3A3>"
+    slot: 12
+    page: 0
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 1.20
+    sell-price: 0.60
+
+  - id: sand
+    material: SAND
+    slot: 13
+    page: 0
+    display-name: "<#F5E0C3>ѕᴀɴᴅ</#F5E0C3>"
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 1.50
+    sell-price: 0.75
+
+  - id: red_sand
+    material: RED_SAND
+    slot: 14
+    page: 0
+    display-name: "<#D87F33>ʀᴇᴅ ѕᴀɴᴅ</#D87F33>"
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 1.75
+    sell-price: 0.85
+
   - id: stone
     material: STONE
-    display-name: "<gray>Stone"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
-    buy-price: 1.0
-    sell-price: 0.5
+    display-name: "<#BDBDBD>ѕᴛᴏɴᴇ</#BDBDBD>"
+    slot: 15
+    page: 0
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 1.25
+    sell-price: 0.60
+
   - id: cobblestone
     material: COBBLESTONE
-    display-name: "<dark_gray>Cobblestone"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
-    buy-price: 0.8
-    sell-price: 0.4
-  - id: oak_planks
-    material: OAK_PLANKS
-    display-name: "<#DEB887>Oak Planks"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
-    buy-price: 2.0
-    sell-price: 1.0
-  - id: bricks
-    material: BRICKS
-    display-name: "<#CD5C5C>Bricks"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
-    buy-price: 5.0
-    sell-price: 2.5
-  - id: glass
-    material: GLASS
-    display-name: "<#F0F8FF>Glass"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
-    buy-price: 3.0
-    sell-price: 1.5
-  - id: wool
-    material: WHITE_WOOL
-    display-name: "<white>White Wool"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
-    buy-price: 4.0
-    sell-price: 2.0
+    display-name: "<#757575>ᴄᴏʙʙʟᴇѕᴛᴏɴᴇ</#757575>"
+    slot: 16
+    page: 0
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 0.80
+    sell-price: 0.40
+
+  # --- Row 2 from Image ---
+  - id: granite
+    material: GRANITE
+    slot: 19
+    page: 0
+    display-name: "<#9A6C5B>ɢʀᴀɴɪᴛᴇ</#9A6C5B>"
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 1.50
+    sell-price: 0.75
+
+  - id: diorite
+    material: DIORITE
+    display-name: "<#E8E8E8>ᴅɪᴏʀɪᴛᴇ</#E8E8E8>"
+    slot: 20
+    page: 0
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 1.50
+    sell-price: 0.75
+
+  - id: andesite
+    material: ANDESITE
+    display-name: "<#8F8F8F>ᴀɴᴅᴇѕɪᴛᴇ</#8F8F8F>"
+    slot: 21
+    page: 0
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 1.50
+    sell-price: 0.75
+
+  - id: birch_log
+    material: BIRCH_LOG
+    slot: 22
+    page: 0
+    display-name: "<#E0E0E0>ʙɪʀᴄʜ ʟᴏɢ</#E0E0E0>"
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 3.00
+    sell-price: 1.50
+
+  - id: oak_log
+    material: OAK_LOG
+    slot: 23
+    page: 0
+    display-name: "<#A1887F>ᴏᴀᴋ ʟᴏɢ</#A1887F>"
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 3.00
+    sell-price: 1.50
+
+  - id: spruce_log
+    material: SPRUCE_LOG
+    slot: 24
+    page: 0
+    display-name: "<#6D4C41>ѕᴘʀᴜᴄᴇ ʟᴏɢ</#6D4C41>"
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 3.00
+    sell-price: 1.50
+
+  - id: dark_oak_log
+    material: DARK_OAK_LOG
+    slot: 25
+    page: 0
+    display-name: "<#4E342E>ᴅᴀʀᴋ ᴏᴀᴋ ʟᴏɢ</#4E342E>"
+    lore:
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    buy-price: 3.50
+    sell-price: 1.75
+
+  # --- Test Items for Price Validation ---
   - id: special_buy_only
     material: DIAMOND_BLOCK
-    display-name: "<aqua>Diamond Block (Buy Only)"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<red>Cannot be sold!"]
+    display-name: "<#00E5FF>ᴅɪᴀᴍᴏɴᴅ ʙʟᴏᴄᴋ (ʙᴜʏ ᴏɴʟʏ)</#00E5FF>"
+    lore: 
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FF5252>Cannot be sold!</#FF5252>"
     buy-price: 100.0
     # No sell-price defined - defaults to -1
+
   - id: special_sell_only
     material: EMERALD_BLOCK
-    display-name: "<green>Emerald Block (Sell Only)"
-    lore: ["<red>Cannot be bought!", "<gray>Sell for: <red>${sell_price}"]
+    display-name: "<#4CAF50>ᴇᴍᴇʀᴀʟᴅ ʙʟᴏᴄᴋ (ѕᴇʟʟ ᴏɴʟʏ)</#4CAF50>"
+    lore: 
+      - "<#FF5252>Cannot be bought!</#FF5252>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
     # No buy-price defined - defaults to -1
     sell-price: 50.0
+
   - id: display_only
     material: BEACON
-    display-name: "<yellow>Beacon (Display Only)"
-    lore: ["<red>Cannot be bought or sold!", "<gray>For display purposes only."]
+    display-name: "<#FFD700>ʙᴇᴀᴄᴏɴ (ᴅɪѕᴘʟᴀʏ ᴏɴʟʏ)</#FFD700>"
+    lore: 
+      - "<#FF5252>Cannot be bought or sold!</#FF5252>"
+      - "<#BDBDBD>For display purposes only.</#BDBDBD>"
     # No buy-price or sell-price defined - both default to -1
