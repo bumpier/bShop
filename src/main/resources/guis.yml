@@ -40,6 +40,12 @@ quantity-menu:
       - "<gray>Total Price: <gold>${total_price}</gold>"
       - ""
       - "<gray>Use the buttons below to adjust quantity"
+  # Filler item configuration - fills empty slots
+  filler:
+    enabled: true
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: " "
+    lore: []
   buttons:
     add_1:
       material: GREEN_STAINED_GLASS_PANE
@@ -101,3 +107,9 @@ quantity-menu:
       lore:
         - "<gray>Contains <light_purple>{amount}</light_purple> items."
         - "<gray>Total Price: <gold>${price}</gold>"
+    # Filler item configuration for stack selection GUI
+    filler:
+      enabled: true
+      material: BLACK_STAINED_GLASS_PANE
+      display-name: " "
+      lore: []
