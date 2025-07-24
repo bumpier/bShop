@@ -1,0 +1,44 @@
+# A shop demonstrating automatic pagination with "flow" items.
+title: "<gradient:#6A82FB:#FC5C7D>Ores & Minerals</gradient>"
+size: 5
+
+pagination:
+  next_page:
+    material: LIME_STAINED_GLASS_PANE
+    display-name: "<green>Next Page -></green>"
+    slot: 44
+  previous_page:
+    material: RED_STAINED_GLASS_PANE
+    display-name: "<red><- Previous Page</red>"
+    slot: 36
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: " "
+    slot: 1
+
+# These items will be placed automatically by the plugin.
+items:
+  - id: coal
+    material: COAL
+    display-name: "<#3A3B3C>Coal"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 10.0
+    sell-price: 2.5
+  - id: raw_iron
+    material: RAW_IRON
+    display-name: "<#D8D8D8>Raw Iron"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 25.0
+    sell-price: 12.0
+  - id: raw_gold
+    material: RAW_GOLD
+    display-name: "<#FFD700>Raw Gold"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 45.0
+    sell-price: 22.5
+  - id: diamond
+    material: DIAMOND
+    display-name: "<#B9F2FF>Diamond"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 150.0
+    sell-price: 75.0

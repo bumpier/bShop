@@ -1,0 +1,16 @@
+name: bShop
+version: 1.0.0
+main: net.bumpier.bshop.BShop
+api-version: 1.20
+author: bumpier.dev
+description: A modern, modular, and high-performance GUI shop plugin.
+softdepend: [Vault]
+commands:
+  shop:
+    description: Opens the main shop GUI or performs an admin action.
+    usage: /shop [category|reload]
+    aliases: [bshop, eshop]
+permissions:
+  bshop.admin.reload:
+    description: Allows the user to reload the bShop plugin configuration.
+    default: op

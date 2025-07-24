@@ -1,0 +1,35 @@
+# bShop Messages
+# Supports MiniMessage formatting for colors, gradients, and more.
+# Placeholders MUST use the <placeholder> format.
+
+# General plugin prefix. Can be used in any message with <prefix>.
+prefix: "<gray>[<gradient:#F7971E:#FFD200>bShop</gradient>] </gray>"
+
+# General command/error messages
+no_permission: "<prefix><red>You do not have permission to do that.</red>"
+player_only_command: "<prefix><red>This command can only be executed by players.</red>"
+
+# Shop messages
+shop:
+  # The corrected placeholder is <id>
+  not_found: "<prefix><red>The shop '<id>' could not be found.</red>"
+
+  # Corrected placeholders: <amount>, <item_name>, <price>
+  buy_success: "<prefix><green>You purchased <aqua><amount>x <item_name></aqua> for <gold>$<price></gold>.</green>"
+  buy_disabled: "<prefix><red>This item cannot be purchased.</red>"
+
+  # Corrected placeholders: <price>, <balance>
+  insufficient_funds: "<prefix><red>You need <gold>$<price></gold> but only have <gold>$<balance></gold>.</red>"
+  inventory_full: "<prefix><red>Your inventory is full!</red>"
+
+  # Corrected placeholders: <amount>, <item_name>, <price>
+  sell_success: "<prefix><green>You sold <aqua><amount>x <item_name></aqua> for <gold>$<price></gold>.</green>"
+  sell_disabled: "<prefix><red>This item cannot be sold.</red>"
+
+  # Corrected placeholders: <amount>, <item_name>
+  item_not_owned: "<prefix><red>You do not have <aqua><amount>x <item_name></aqua> to sell.</red>"
+
+# Admin command messages
+admin:
+  reload_start: "<prefix><yellow>Reloading bShop configurations...</yellow>"
+  reload_complete: "<prefix><green>Reload complete.</green>"

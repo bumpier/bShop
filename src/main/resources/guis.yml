@@ -1,0 +1,67 @@
+# bShop - Centralized GUI Configuration
+
+# --- Main Shop Category Menu ---
+main-menu:
+  title: "<gradient:#55A3F6:#297ACC>Shop Categories</gradient>"
+  size: 3
+  items:
+    blocks:
+      material: GRASS_BLOCK
+      slot: 11
+      display-name: "<green>Building Blocks</green>"
+      lore:
+        - "<gray>Click to browse building blocks."
+      action: "shop:blocks"
+    ores:
+      material: DIAMOND_ORE
+      slot: 13
+      display-name: "<aqua>Ores & Minerals</aqua>"
+      lore:
+        - "<gray>Click to browse valuable ores."
+      action: "shop:ores"
+  filler:
+    enabled: true
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: " "
+
+# --- Quantity Selection Menu ---
+quantity-menu:
+  title: "<gradient:#8E2DE2:#4A00E0>Select Quantity</gradient>"
+  size: 4
+  display_item_slot: 13
+  buttons:
+    add_1: { material: GREEN_STAINED_GLASS_PANE, display-name: "<green>+1", slot: 24, action: "add_quantity:1" }
+    add_16: { material: GREEN_STAINED_GLASS_PANE, display-name: "<green>+16", slot: 25, action: "add_quantity:16" }
+    add_max: { material: LIME_STAINED_GLASS_PANE, display-name: "<green>+64", slot: 26, action: "add_quantity:64" }
+    remove_1: { material: RED_STAINED_GLASS_PANE, display-name: "<red>-1", slot: 22, action: "remove_quantity:1" }
+    remove_16: { material: RED_STAINED_GLASS_PANE, display-name: "<red>-16", slot: 21, action: "remove_quantity:16" }
+    remove_max: { material: ORANGE_STAINED_GLASS_PANE, display-name: "<red>-64", slot: 20, action: "remove_quantity:64" }
+    confirm:
+      buy_material: LIME_CONCRETE
+      sell_material: LIME_CONCRETE
+      display-name: "<green>Confirm Purchase"
+      sell_display-name: "<green>Confirm Sale"
+      lore: ["<gray>Click to complete the transaction."]
+      slot: 31
+      action: "confirm_transaction"
+    cancel:
+      material: RED_CONCRETE
+      display-name: "<red>Cancel / Go Back"
+      lore: ["<gray>Return to the previous menu."]
+      slot: 28
+      action: "go_back"
+    bulk_stacks:
+      material: CHEST_MINECART
+      display-name: "<gold>Buy/Sell Stacks"
+      lore: ["<gray>Click to open the bulk stacks menu."]
+      slot: 34
+      action: "open_stacks_menu"
+  stack_gui:
+    title: "<gradient:#F3904F:#3B4371>Select Stacks (1-9)</gradient>"
+    item:
+      material: LIGHT_BLUE_STAINED_GLASS_PANE
+      buy_display-name: "<aqua>Buy {stacks} Stack(s)"
+      sell_display-name: "<aqua>Sell {stacks} Stack(s)"
+      lore:
+        - "<gray>Contains <light_purple>{amount}</light_purple> items."
+        - "<gray>Total Price: <gold>${price}</gold>"

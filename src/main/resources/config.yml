@@ -1,0 +1,12 @@
+# bShop Configuration
+
+# Database settings
+# type: "SQLite" or "MySQL"
+database:
+  type: "SQLite"
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "bshop"
+    username: "user"
+    password: "password"
