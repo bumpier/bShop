@@ -30,16 +30,41 @@ quantity-menu:
   size: 4
   display_item_slot: 13
   buttons:
-    add_1: { material: GREEN_STAINED_GLASS_PANE, display-name: "<green>+1", slot: 24, action: "add_quantity:1" }
-    add_16: { material: GREEN_STAINED_GLASS_PANE, display-name: "<green>+16", slot: 25, action: "add_quantity:16" }
-    add_max: { material: LIME_STAINED_GLASS_PANE, display-name: "<green>+64", slot: 26, action: "add_quantity:64" }
-    remove_1: { material: RED_STAINED_GLASS_PANE, display-name: "<red>-1", slot: 22, action: "remove_quantity:1" }
-    remove_16: { material: RED_STAINED_GLASS_PANE, display-name: "<red>-16", slot: 21, action: "remove_quantity:16" }
-    remove_max: { material: ORANGE_STAINED_GLASS_PANE, display-name: "<red>-64", slot: 20, action: "remove_quantity:64" }
+    add_1:
+      material: GREEN_STAINED_GLASS_PANE
+      display-name: "<green>+1"
+      slot: 24
+      action: "add_quantity:1"
+    add_16:
+      material: GREEN_STAINED_GLASS_PANE
+      display-name: "<green>+16"
+      slot: 25
+      action: "add_quantity:16"
+    add_max:
+      material: LIME_STAINED_GLASS_PANE
+      display-name: "<green>+64"
+      slot: 26
+      action: "add_quantity:64"
+    remove_1:
+      material: RED_STAINED_GLASS_PANE
+      display-name: "<red>-1"
+      slot: 22
+      action: "remove_quantity:1"
+    remove_16:
+      material: RED_STAINED_GLASS_PANE
+      display-name: "<red>-16"
+      slot: 21
+      action: "remove_quantity:16"
+    remove_max:
+      material: ORANGE_STAINED_GLASS_PANE
+      display-name: "<red>-64"
+      slot: 20
+      action: "remove_quantity:64"
     confirm:
       buy_material: LIME_CONCRETE
       sell_material: LIME_CONCRETE
       display-name: "<green>Confirm Purchase"
+      buy_display-name: "<green>Confirm Purchase"
       sell_display-name: "<green>Confirm Sale"
       lore: ["<gray>Click to complete the transaction."]
       slot: 31

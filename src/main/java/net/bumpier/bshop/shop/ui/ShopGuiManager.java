@@ -246,22 +246,30 @@ public class ShopGuiManager {
         ConfigurationSection buttons = config.getConfigurationSection("buttons");
         if (buttons == null) return;
         for (String key : buttons.getKeys(false)) {
-            String path = "buttons." + key + ".";
-            int slot = config.getInt(path + "slot");
-            String action = config.getString(path + "action");
-            List<String> buttonLore = config.getStringList(path + "lore");
+            ConfigurationSection buttonConfig = buttons.getConfigurationSection(key);
+            if (buttonConfig == null) continue;
+            
+            int slot = buttonConfig.getInt("slot");
+            String action = buttonConfig.getString("action");
+            List<String> buttonLore = buttonConfig.getStringList("lore");
             String buttonName;
             Material material;
             if (key.equals("confirm")) {
-                buttonName = (type == TransactionType.BUY) ? config.getString(path + "buy_display-name", config.getString(path + "display-name")) : config.getString(path + "sell_display-name", config.getString(path + "display-name"));
-                material = (type == TransactionType.BUY) ? Material.matchMaterial(config.getString(path + "buy_material")) : Material.matchMaterial(config.getString(path + "sell_material"));
+                buttonName = (type == TransactionType.BUY) ? buttonConfig.getString("buy_display-name", buttonConfig.getString("display-name")) : buttonConfig.getString("sell_display-name", buttonConfig.getString("display-name"));
+                material = (type == TransactionType.BUY) ? Material.matchMaterial(buttonConfig.getString("buy_material")) : Material.matchMaterial(buttonConfig.getString("sell_material"));
             } else {
-                buttonName = config.getString(path + "display-name");
-                material = Material.matchMaterial(config.getString(path + "material"));
+                buttonName = buttonConfig.getString("display-name");
+                material = Material.matchMaterial(buttonConfig.getString("material"));
             }
             if (material == null) continue;
-            inventory.setItem(slot, new ItemBuilder(plugin, material, messageService)
-                    .withDisplayName(buttonName).withLore(buttonLore).withPDCString("bshop_action", action).build());
+            ItemStack buttonItem = new ItemBuilder(plugin, material, messageService)
+                    .withDisplayName(buttonName).withLore(buttonLore).withPDCString("bshop_action", action).build();
+            inventory.setItem(slot, buttonItem);
+            
+            // Debug logging
+            if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
+                plugin.getLogger().fine("Created button '" + key + "' with action: " + action + " at slot: " + slot);
+            }
         }
     }
 
