@@ -3,7 +3,7 @@ package net.bumpier.bshop.shop;
 import net.bumpier.bshop.BShop;
 import net.bumpier.bshop.module.Module;
 import net.bumpier.bshop.module.ModuleManager; // Import ModuleManager
-import net.bumpier.bshop.shop.command.ShopCommand;
+import net.bumpier.bshop.command.ShopCommand;
 import net.bumpier.bshop.shop.transaction.ShopTransactionService;
 import net.bumpier.bshop.shop.ui.ShopGuiManager;
 import net.bumpier.bshop.shop.ui.ShopListener;

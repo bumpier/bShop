@@ -79,7 +79,6 @@ public class ShopListener implements Listener {
                 break;
             case "remove_quantity":
                 context.addQuantity(-Integer.parseInt(parts[1]));
-                context.setQuantity(context.getQuantity());
                 shopGuiManager.updateQuantityGui(inventory, context);
                 break;
             case "confirm_transaction":

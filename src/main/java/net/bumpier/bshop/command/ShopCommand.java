@@ -1,4 +1,4 @@
-package net.bumpier.bshop.shop.command;
+package net.bumpier.bshop.command;
 
 import net.bumpier.bshop.module.ModuleManager;
 import net.bumpier.bshop.shop.ShopManager;

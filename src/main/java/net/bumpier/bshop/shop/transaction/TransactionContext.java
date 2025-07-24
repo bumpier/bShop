@@ -24,6 +24,6 @@ public final class TransactionContext {
     }
 
     public void addQuantity(int amount) {
-        this.quantity += amount;
+        this.quantity = Math.max(1, this.quantity + amount); // Ensure quantity never goes below 1
     }
 }

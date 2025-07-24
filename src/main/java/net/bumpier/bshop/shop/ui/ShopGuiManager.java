@@ -65,6 +65,9 @@ public class ShopGuiManager {
         ConfigurationSection guiConfig = guisConfig.getConfig().getConfigurationSection("main-menu");
         if (guiConfig == null) {
             player.sendMessage("§cThe main menu GUI is not configured in guis.yml.");
+            if (player.hasPermission("bshop.admin.debug")) {
+                player.sendMessage("§c[bShop Debug] main-menu section missing from guis.yml");
+            }
             return;
         }
         String title = guiConfig.getString("title", "Shop");
@@ -169,12 +172,23 @@ public class ShopGuiManager {
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");
         if (config == null) {
             player.sendMessage("§cThe quantity menu GUI is not configured in guis.yml.");
+            if (player.hasPermission("bshop.admin.debug")) {
+                player.sendMessage("§c[bShop Debug] quantity-menu section missing from guis.yml");
+            }
             return;
         }
-        String title = messageService.serialize(messageService.parse(config.getString("title", "Select Quantity")));
-        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), config.getInt("size", 4) * 9, title);
-        updateQuantityGui(inventory, context);
-        player.openInventory(inventory);
+        try {
+            String title = messageService.serialize(messageService.parse(config.getString("title", "Select Quantity")));
+            Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), config.getInt("size", 4) * 9, title);
+            updateQuantityGui(inventory, context);
+            player.openInventory(inventory);
+        } catch (Exception e) {
+            player.sendMessage("§cError opening quantity GUI: " + e.getMessage());
+            if (player.hasPermission("bshop.admin.debug")) {
+                player.sendMessage("§c[bShop Debug] Exception in openQuantityGui: " + e.getClass().getSimpleName());
+                e.printStackTrace();
+            }
+        }
     }
 
     public void openStackGui(Player player, TransactionContext context) {
