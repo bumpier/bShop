@@ -194,3 +194,30 @@ items:
       - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
     buy-price: 3.50
     sell-price: 1.75
+
+  # --- Test Items for Price Validation ---
+  - id: special_buy_only
+    material: DIAMOND_BLOCK
+    display-name: "<#00E5FF>ᴅɪᴀᴍᴏɴᴅ ʙʟᴏᴄᴋ (ʙᴜʏ ᴏɴʟʏ)</#00E5FF>"
+    lore: 
+      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
+      - "<#FF5252>Cannot be sold!</#FF5252>"
+    buy-price: 100.0
+    # No sell-price defined - defaults to -1
+
+  - id: special_sell_only
+    material: EMERALD_BLOCK
+    display-name: "<#4CAF50>ᴇᴍᴇʀᴀʟᴅ ʙʟᴏᴄᴋ (ѕᴇʟʟ ᴏɴʟʏ)</#4CAF50>"
+    lore: 
+      - "<#FF5252>Cannot be bought!</#FF5252>"
+      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+    # No buy-price defined - defaults to -1
+    sell-price: 50.0
+
+  - id: display_only
+    material: BEACON
+    display-name: "<#FFD700>ʙᴇᴀᴄᴏɴ (ᴅɪѕᴘʟᴀʏ ᴏɴʟʏ)</#FFD700>"
+    lore: 
+      - "<#FF5252>Cannot be bought or sold!</#FF5252>"
+      - "<#BDBDBD>For display purposes only.</#BDBDBD>"
+    # No buy-price or sell-price defined - both default to -1
