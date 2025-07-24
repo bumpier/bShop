@@ -174,6 +174,17 @@ public class ShopGuiManager {
             inventory.setItem(backButton.slot(), createPaginationItemStack(backButton));
         }
         
+        // Add filler items for shops
+        PaginationItem fillerItem = shop.paginationItems().get("filler");
+        if (fillerItem != null) {
+            ItemStack fillerStack = createPaginationItemStack(fillerItem);
+            for (int i = 0; i < inventory.getSize(); i++) {
+                if (inventory.getItem(i) == null) {
+                    inventory.setItem(i, fillerStack);
+                }
+            }
+        }
+        
         player.openInventory(inventory);
         openShopInventories.put(player.getUniqueId(), new PageInfo(shopId, page));
     }

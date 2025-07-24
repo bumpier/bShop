@@ -20,7 +20,7 @@ pagination:
   filler:
     material: GRAY_STAINED_GLASS_PANE
     display-name: " "
-    slot: 1
+    lore: []
 
 # Building block items
 items:

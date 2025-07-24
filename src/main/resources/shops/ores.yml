@@ -20,7 +20,7 @@ pagination:
   filler:
     material: GRAY_STAINED_GLASS_PANE
     display-name: " "
-    slot: 1
+    lore: []
 
 # These items will be placed automatically by the plugin.
 items:
