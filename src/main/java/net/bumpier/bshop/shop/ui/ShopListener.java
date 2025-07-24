@@ -43,24 +43,10 @@ public class ShopListener implements Listener {
         event.setCancelled(true);
         if (!(event.getWhoClicked() instanceof Player)) return;
         Player player = (Player) event.getWhoClicked();
-        
-        // Debug: Log all inventory clicks
-        if (player.hasPermission("bshop.admin.debug")) {
-            player.sendMessage("§e[bShop Debug] Inventory click detected");
-        }
-        
         ItemStack clickedItem = event.getCurrentItem();
-        if (clickedItem == null || clickedItem.getType().isAir()) {
-            if (player.hasPermission("bshop.admin.debug")) {
-                player.sendMessage("§c[bShop Debug] Clicked item is null or air");
-            }
-            return;
-        }
+        if (clickedItem == null || clickedItem.getType().isAir()) return;
 
         TransactionContext context = shopGuiManager.getTransactionContext(player);
-        if (player.hasPermission("bshop.admin.debug")) {
-            player.sendMessage("§e[bShop Debug] Transaction context: " + (context != null ? "Found" : "Not found"));
-        }
         
         if (context != null) {
             handleTransactionGuiClick(player, context, clickedItem, event.getInventory());
@@ -77,62 +63,25 @@ public class ShopListener implements Listener {
     }
 
     private void handleTransactionGuiClick(Player player, TransactionContext context, ItemStack clickedItem, Inventory inventory) {
-        if (player.hasPermission("bshop.admin.debug")) {
-            player.sendMessage("§a[bShop Debug] handleTransactionGuiClick called");
-        }
-        
         ItemMeta meta = clickedItem.getItemMeta();
-        if (meta == null) {
-            if (player.hasPermission("bshop.admin.debug")) {
-                player.sendMessage("§c[bShop Debug] Item meta is null");
-            }
-            return;
-        }
+        if (meta == null) return;
         
         NamespacedKey key = new NamespacedKey(BShop.getInstance(), "bshop_action");
-        PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        
-        if (player.hasPermission("bshop.admin.debug")) {
-            player.sendMessage("§e[bShop Debug] PDC keys: " + pdc.getKeys().toString());
-            player.sendMessage("§e[bShop Debug] Has bshop_action key: " + pdc.has(key, PersistentDataType.STRING));
-        }
-        
-        if (!pdc.has(key, PersistentDataType.STRING)) {
-            if (player.hasPermission("bshop.admin.debug")) {
-                player.sendMessage("§c[bShop Debug] Clicked item has no action tag. (Material: " + clickedItem.getType() + ")");
-            }
+        if (!meta.getPersistentDataContainer().has(key, PersistentDataType.STRING)) {
             return;
         }
         String action = meta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
-        if (player.hasPermission("bshop.admin.debug")) {
-            player.sendMessage("§a[bShop Debug] Button clicked with action: " + action);
-        }
         String[] parts = action.split(":");
         switch (parts[0]) {
             case "add_quantity":
-                if (player.hasPermission("bshop.admin.debug")) {
-                    player.sendMessage("§a[bShop Debug] Processing add_quantity action with value: " + parts[1]);
-                }
                 context.addQuantity(Integer.parseInt(parts[1]));
                 shopGuiManager.updateQuantityGui(inventory, context);
-                if (player.hasPermission("bshop.admin.debug")) {
-                    player.sendMessage("§a[bShop Debug] Updated quantity to: " + context.getQuantity());
-                }
                 break;
             case "remove_quantity":
-                if (player.hasPermission("bshop.admin.debug")) {
-                    player.sendMessage("§a[bShop Debug] Processing remove_quantity action with value: " + parts[1]);
-                }
                 context.addQuantity(-Integer.parseInt(parts[1]));
                 shopGuiManager.updateQuantityGui(inventory, context);
-                if (player.hasPermission("bshop.admin.debug")) {
-                    player.sendMessage("§a[bShop Debug] Updated quantity to: " + context.getQuantity());
-                }
                 break;
             case "confirm_transaction":
-                if (player.hasPermission("bshop.admin.debug")) {
-                    player.sendMessage("§a[bShop Debug] Processing confirm_transaction action");
-                }
                 if (context.getType() == TransactionType.BUY) {
                     transactionService.buyItem(player, context.getItem(), context.getQuantity());
                 } else {
@@ -141,9 +90,6 @@ public class ShopListener implements Listener {
                 player.closeInventory();
                 break;
             case "go_back":
-                if (player.hasPermission("bshop.admin.debug")) {
-                    player.sendMessage("§a[bShop Debug] Processing go_back action");
-                }
                 player.closeInventory();
                 break;
             case "open_stacks_menu":
@@ -153,15 +99,9 @@ public class ShopListener implements Listener {
                 int stackCount = Integer.parseInt(parts[1]);
                 int newQuantity = stackCount * context.getItem().material().getMaxStackSize();
                 context.setQuantity(newQuantity);
-                if (player.hasPermission("bshop.admin.debug")) {
-                    player.sendMessage("§a[bShop Debug] Set quantity to " + stackCount + " stack(s) = " + newQuantity + " items");
-                }
                 shopGuiManager.openQuantityGui(player, context);
                 break;
             case "open_quantity_menu":
-                if (player.hasPermission("bshop.admin.debug")) {
-                    player.sendMessage("§a[bShop Debug] Returning to quantity menu with current quantity: " + context.getQuantity());
-                }
                 shopGuiManager.openQuantityGui(player, context);
                 break;
         }

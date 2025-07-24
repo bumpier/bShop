@@ -29,6 +29,17 @@ quantity-menu:
   title: "<gradient:#8E2DE2:#4A00E0>Select Quantity</gradient>"
   size: 4
   display_item_slot: 13
+  # Display item configuration - shows what the player is buying/selling
+  # Available placeholders: {item_name}, {quantity}, {price_per_item}, {total_price}
+  display_item:
+    buy_display-name: "<green>Buying: {item_name}"
+    sell_display-name: "<red>Selling: {item_name}"
+    lore:
+      - "<gray>Quantity: <yellow>{quantity}</yellow>"
+      - "<gray>Price per item: <gold>${price_per_item}</gold>"
+      - "<gray>Total Price: <gold>${total_price}</gold>"
+      - ""
+      - "<gray>Use the buttons below to adjust quantity"
   buttons:
     add_1:
       material: GREEN_STAINED_GLASS_PANE
