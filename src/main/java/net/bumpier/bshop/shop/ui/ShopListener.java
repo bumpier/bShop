@@ -8,6 +8,7 @@ import net.bumpier.bshop.shop.model.ShopItem;
 import net.bumpier.bshop.shop.transaction.TransactionContext;
 import net.bumpier.bshop.shop.transaction.ShopTransactionService;
 import net.bumpier.bshop.shop.transaction.TransactionType;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -199,12 +200,24 @@ public class ShopListener implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
         if (event.getInventory().getHolder() instanceof BShopGUIHolder && event.getPlayer() instanceof Player) {
-            shopGuiManager.onGuiClose((Player) event.getPlayer());
+            Player player = (Player) event.getPlayer();
+            
+            // Always clear the shop page info immediately
+            shopGuiManager.onGuiClose(player);
+            
+            // But delay clearing transaction context to allow GUI transitions
+            Bukkit.getScheduler().runTaskLater(BShop.getInstance(), () -> {
+                // Only clear transaction context if the player doesn't have any BShop GUI open
+                if (!(player.getOpenInventory().getTopInventory().getHolder() instanceof BShopGUIHolder)) {
+                    shopGuiManager.clearTransactionContext(player);
+                }
+            }, 2L); // 2 tick delay to ensure GUI transitions complete
         }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         shopGuiManager.onGuiClose(event.getPlayer());
+        shopGuiManager.clearTransactionContext(event.getPlayer());
     }
 }

@@ -51,7 +51,15 @@ public class ShopGuiManager {
     public PageInfo getOpenPageInfo(Player player) { return openShopInventories.get(player.getUniqueId()); }
     public void onGuiClose(Player player) {
         openShopInventories.remove(player.getUniqueId());
-        activeTransactions.remove(player.getUniqueId());
+        // Only clear transaction context if player is not opening another BShop GUI
+        // This prevents clearing the context during GUI transitions
+    }
+    
+    public void clearTransactionContext(Player player) {
+        if (activeTransactions.containsKey(player.getUniqueId())) {
+            plugin.getLogger().info("Clearing transaction context for player: " + player.getName());
+            activeTransactions.remove(player.getUniqueId());
+        }
     }
 
     public boolean isMainMenu(InventoryView view) {
@@ -172,6 +180,7 @@ public class ShopGuiManager {
     public void openQuantityGui(Player player, ShopItem item, TransactionType type) {
         TransactionContext context = new TransactionContext(item, type);
         activeTransactions.put(player.getUniqueId(), context);
+        plugin.getLogger().info("Created transaction context for player: " + player.getName() + " - Item: " + item.displayName() + " - Type: " + type);
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");
         if (config == null) {
             player.sendMessage("§cThe quantity menu GUI is not configured in guis.yml.");
