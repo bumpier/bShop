@@ -6,17 +6,31 @@ public final class TransactionContext {
     private final ShopItem item;
     private final TransactionType type;
     private int quantity;
+    private String sourceShopId;
+    private int sourceShopPage;
 
     public TransactionContext(ShopItem item, TransactionType type) {
         this.item = item;
         this.type = type;
         this.quantity = 1;
+        this.sourceShopId = null;
+        this.sourceShopPage = 0;
+    }
+    
+    public TransactionContext(ShopItem item, TransactionType type, String sourceShopId, int sourceShopPage) {
+        this.item = item;
+        this.type = type;
+        this.quantity = 1;
+        this.sourceShopId = sourceShopId;
+        this.sourceShopPage = sourceShopPage;
     }
 
     // Getters
     public ShopItem getItem() { return item; }
     public TransactionType getType() { return type; }
     public int getQuantity() { return quantity; }
+    public String getSourceShopId() { return sourceShopId; }
+    public int getSourceShopPage() { return sourceShopPage; }
 
     // Setters for quantity
     public void setQuantity(int quantity) {
