@@ -152,23 +152,32 @@ public class ShopListener implements Listener {
                 .filter(item -> item.getAssignedSlot() == clickedSlot).findFirst().orElse(null);
         if (shopItem == null) return;
         if (shopItem.isCommandBased()) {
-            String command = null;
-            int amount = 1; // Default amount for command-based
-            if (event.getClick() == ClickType.LEFT && shopItem.getBuyCommand() != null) {
-                command = shopItem.getBuyCommand();
-            } else if (event.getClick() == ClickType.RIGHT && shopItem.getSellCommand() != null) {
-                command = shopItem.getSellCommand();
-            }
-            if (command != null) {
-                command = command.replace("%player%", player.getName()).replace("%amount%", String.valueOf(amount));
-                if (command.startsWith("/")) command = command.substring(1);
-                if (command.startsWith("console:")) {
-                    org.bukkit.Bukkit.dispatchCommand(org.bukkit.Bukkit.getConsoleSender(), command.substring(8).trim());
-                } else {
-                    player.performCommand(command);
+            // If quantity-gui is enabled, open the quantity GUI
+            if (shopItem.isQuantityGui()) {
+                if (event.getClick() == ClickType.LEFT && shopItem.getBuyCommand() != null) {
+                    shopGuiManager.openQuantityGui(player, shopItem, TransactionType.BUY, pageInfo.shopId(), pageInfo.currentPage());
+                } else if (event.getClick() == ClickType.RIGHT && shopItem.getSellCommand() != null) {
+                    shopGuiManager.openQuantityGui(player, shopItem, TransactionType.SELL, pageInfo.shopId(), pageInfo.currentPage());
                 }
+            } else {
+                String command = null;
+                int amount = 1; // Default amount for command-based
+                if (event.getClick() == ClickType.LEFT && shopItem.getBuyCommand() != null) {
+                    command = shopItem.getBuyCommand();
+                } else if (event.getClick() == ClickType.RIGHT && shopItem.getSellCommand() != null) {
+                    command = shopItem.getSellCommand();
+                }
+                if (command != null) {
+                    command = command.replace("%player%", player.getName()).replace("%amount%", String.valueOf(amount)).replace("{quantity}", String.valueOf(amount));
+                    if (command.startsWith("/")) command = command.substring(1);
+                    if (command.startsWith("console:")) {
+                        org.bukkit.Bukkit.dispatchCommand(org.bukkit.Bukkit.getConsoleSender(), command.substring(8).trim());
+                    } else {
+                        player.performCommand(command);
+                    }
+                }
+                event.getWhoClicked().closeInventory();
             }
-            event.getWhoClicked().closeInventory();
             return;
         }
         if (event.getClick() == ClickType.LEFT) {

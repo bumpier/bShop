@@ -22,7 +22,10 @@ public class ShopTransactionService {
 
     public void buyItem(Player player, ShopItem item, int quantity) {
         if (item.isCommandBased() && item.getBuyCommand() != null) {
-            String command = item.getBuyCommand().replace("%player%", player.getName()).replace("%amount%", String.valueOf(quantity));
+            String command = item.getBuyCommand()
+                .replace("%player%", player.getName())
+                .replace("%amount%", String.valueOf(quantity))
+                .replace("{quantity}", String.valueOf(quantity));
             if (command.startsWith("/")) command = command.substring(1);
             if (command.startsWith("console:")) {
                 org.bukkit.Bukkit.dispatchCommand(org.bukkit.Bukkit.getConsoleSender(), command.substring(8).trim());
@@ -68,7 +71,10 @@ public class ShopTransactionService {
 
     public void sellItem(Player player, ShopItem item, int quantity) {
         if (item.isCommandBased() && item.getSellCommand() != null) {
-            String command = item.getSellCommand().replace("%player%", player.getName()).replace("%amount%", String.valueOf(quantity));
+            String command = item.getSellCommand()
+                .replace("%player%", player.getName())
+                .replace("%amount%", String.valueOf(quantity))
+                .replace("{quantity}", String.valueOf(quantity));
             if (command.startsWith("/")) command = command.substring(1);
             if (command.startsWith("console:")) {
                 org.bukkit.Bukkit.dispatchCommand(org.bukkit.Bukkit.getConsoleSender(), command.substring(8).trim());

@@ -39,6 +39,17 @@ pagination:
 #                     SHOP ITEMS                       #
 # ---------------------------------------------------- #
 items:
+  - id: "bulk_xp"
+    material: EXPERIENCE_BOTTLE
+    display-name: "SPAWNER TEST"
+    lore:
+    - "Choose how many XP bottles you want!"
+    command-based: true
+    quantity-gui: true
+    buy-command: "stacker give %player% spawner wither %amount%"
+    buy-price: 10
+    sell-price: -1
+
   # --- Row 1 from Image ---
   - id: grass_block
     material: GRASS_BLOCK

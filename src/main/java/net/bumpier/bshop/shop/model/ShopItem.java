@@ -25,11 +25,13 @@ public final class ShopItem {
     private final boolean commandBased;
     private final String buyCommand;
     private final String sellCommand;
+    private final boolean quantityGui;
+    private final String base64Head;
 
     // The final slot this item is assigned to on a generated GUI page.
     private int assignedSlot;
 
-    public ShopItem(String id, Material material, String displayName, List<String> lore, int customModelData, double buyPrice, double sellPrice, Integer pinnedPage, Integer pinnedSlot, Boolean commandBased, String buyCommand, String sellCommand) {
+    public ShopItem(String id, Material material, String displayName, List<String> lore, int customModelData, double buyPrice, double sellPrice, Integer pinnedPage, Integer pinnedSlot, Boolean commandBased, String buyCommand, String sellCommand, Boolean quantityGui, String base64Head) {
         this.id = id;
         this.material = material;
         this.displayName = displayName;
@@ -43,6 +45,8 @@ public final class ShopItem {
         this.commandBased = commandBased != null && commandBased;
         this.buyCommand = buyCommand;
         this.sellCommand = sellCommand;
+        this.quantityGui = quantityGui != null && quantityGui;
+        this.base64Head = base64Head;
     }
 
     // --- Getters ---
@@ -64,6 +68,8 @@ public final class ShopItem {
     public boolean isCommandBased() { return commandBased; }
     public String getBuyCommand() { return buyCommand; }
     public String getSellCommand() { return sellCommand; }
+    public boolean isQuantityGui() { return quantityGui; }
+    public String getBase64Head() { return base64Head; }
 
     // --- Assigned Slot Management ---
     public int getAssignedSlot() { return assignedSlot; }

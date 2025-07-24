@@ -10,6 +10,11 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import org.bukkit.inventory.meta.SkullMeta;
+import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class ItemBuilder {
 
@@ -83,5 +88,26 @@ public class ItemBuilder {
 
     public ItemStack build() {
         return this.itemStack;
+    }
+
+    public static ItemStack createBase64Head(String base64, String displayName, List<String> lore, int customModelData) {
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        if (meta != null) {
+            GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+            profile.getProperties().put("textures", new Property("textures", base64));
+            try {
+                Field profileField = meta.getClass().getDeclaredField("profile");
+                profileField.setAccessible(true);
+                profileField.set(meta, profile);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            meta.setDisplayName(displayName);
+            meta.setLore(lore);
+            if (customModelData > 0) meta.setCustomModelData(customModelData);
+            head.setItemMeta(meta);
+        }
+        return head;
     }
 }

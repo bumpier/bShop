@@ -100,8 +100,10 @@ public class ShopManager {
                 Boolean commandBased = itemMap.get("command-based") != null ? (Boolean) itemMap.get("command-based") : null;
                 String buyCommand = itemMap.get("buy-command") != null ? (String) itemMap.get("buy-command") : null;
                 String sellCommand = itemMap.get("sell-command") != null ? (String) itemMap.get("sell-command") : null;
+                Boolean quantityGui = itemMap.get("quantity-gui") != null ? (Boolean) itemMap.get("quantity-gui") : null;
+                String base64Head = itemMap.get("base64-head") != null ? (String) itemMap.get("base64-head") : null;
 
-                items.add(new ShopItem(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot, commandBased, buyCommand, sellCommand));
+                items.add(new ShopItem(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot, commandBased, buyCommand, sellCommand, quantityGui, base64Head));
             } catch (Exception e) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to parse an item in a shop file.", e);
             }

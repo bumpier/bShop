@@ -29,6 +29,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import org.bukkit.inventory.meta.SkullMeta;
+import java.lang.reflect.Field;
 
 public class ShopGuiManager {
 
@@ -153,11 +157,36 @@ public class ShopGuiManager {
         int maxPinnedPage = shop.items().stream().filter(ShopItem::isPinned)
                 .mapToInt(item -> item.getPinnedPage().orElse(0)).max().orElse(0);
         int totalPages = Math.max(maxPinnedPage + 1, totalFlowPages);
+
+        // --- Only show prev/next if there are items on those pages ---
+        // Check for items on previous page
+        boolean hasPrev = false;
         if (page > 0) {
+            boolean prevHasPinned = shop.items().stream().anyMatch(item -> item.isPinned() && item.getPinnedPage().orElse(-1) == (page - 1));
+            boolean prevHasFlow = false;
+            if (itemsPerPage > 0) {
+                int prevStart = (page - 1) * itemsPerPage;
+                prevHasFlow = prevStart < flowItems.size();
+            }
+            hasPrev = prevHasPinned || prevHasFlow;
+        }
+        if (hasPrev) {
             PaginationItem prevButton = shop.paginationItems().get("previous_page");
             if (prevButton != null) inventory.setItem(prevButton.slot(), createPaginationItemStack(prevButton));
         }
+
+        // Check for items on next page
+        boolean hasNext = false;
         if (page < totalPages - 1) {
+            boolean nextHasPinned = shop.items().stream().anyMatch(item -> item.isPinned() && item.getPinnedPage().orElse(-1) == (page + 1));
+            boolean nextHasFlow = false;
+            if (itemsPerPage > 0) {
+                int nextStart = (page + 1) * itemsPerPage;
+                nextHasFlow = nextStart < flowItems.size();
+            }
+            hasNext = nextHasPinned || nextHasFlow;
+        }
+        if (hasNext) {
             PaginationItem nextButton = shop.paginationItems().get("next_page");
             if (nextButton != null) inventory.setItem(nextButton.slot(), createPaginationItemStack(nextButton));
         }
@@ -414,10 +443,14 @@ public class ShopGuiManager {
     }
 
     private ItemStack createShopItemStack(ShopItem shopItem) {
-        List<String> formattedLore = shopItem.lore().stream()
+        List<String> lore = shopItem.lore() != null ? shopItem.lore() : java.util.Collections.emptyList();
+        List<String> formattedLore = lore.stream()
                 .map(line -> line.replace("${buy_price}", String.format("%,.2f", shopItem.buyPrice()))
                         .replace("${sell_price}", String.format("%,.2f", shopItem.sellPrice())))
                 .collect(Collectors.toList());
+        if (shopItem.getBase64Head() != null && !shopItem.getBase64Head().isEmpty()) {
+            return ItemBuilder.createBase64Head(shopItem.getBase64Head(), shopItem.displayName(), formattedLore, shopItem.customModelData());
+        }
         return new ItemBuilder(plugin, shopItem.material(), messageService)
                 .withDisplayName(shopItem.displayName()).withLore(formattedLore)
                 .withCustomModelData(shopItem.customModelData()).build();
