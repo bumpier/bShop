@@ -1,0 +1,56 @@
+# Building Blocks Shop Configuration
+title: "<gradient:#4CAF50:#8BC34A>Building Blocks</gradient>"
+size: 5
+
+pagination:
+  next_page:
+    material: LIME_STAINED_GLASS_PANE
+    display-name: "<green>Next Page -></green>"
+    slot: 44
+  previous_page:
+    material: RED_STAINED_GLASS_PANE
+    display-name: "<red><- Previous Page</red>"
+    slot: 36
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: " "
+    slot: 1
+
+# Building block items
+items:
+  - id: stone
+    material: STONE
+    display-name: "<gray>Stone"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 1.0
+    sell-price: 0.5
+  - id: cobblestone
+    material: COBBLESTONE
+    display-name: "<dark_gray>Cobblestone"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 0.8
+    sell-price: 0.4
+  - id: oak_planks
+    material: OAK_PLANKS
+    display-name: "<#DEB887>Oak Planks"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 2.0
+    sell-price: 1.0
+  - id: bricks
+    material: BRICKS
+    display-name: "<#CD5C5C>Bricks"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 5.0
+    sell-price: 2.5
+  - id: glass
+    material: GLASS
+    display-name: "<#F0F8FF>Glass"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 3.0
+    sell-price: 1.5
+  - id: wool
+    material: WHITE_WOOL
+    display-name: "<white>White Wool"
+    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    buy-price: 4.0
+    sell-price: 2.0

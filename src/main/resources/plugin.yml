@@ -14,3 +14,6 @@ permissions:
   bshop.admin.reload:
     description: Allows the user to reload the bShop plugin configuration.
     default: op
+  bshop.admin.debug:
+    description: Allows the user to see debug messages from bShop.
+    default: op
