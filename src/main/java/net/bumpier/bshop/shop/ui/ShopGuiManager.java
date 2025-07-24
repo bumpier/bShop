@@ -236,12 +236,15 @@ public class ShopGuiManager {
                 Material material = Material.matchMaterial(itemConfig.getString("material", "LIGHT_BLUE_STAINED_GLASS_PANE"));
                 if (material == null) continue;
                 
-                int stacks = itemConfig.getInt("stacks", 1);
+                int amount = itemConfig.getInt("amount", stackSize); // Default to 1 stack worth
                 int slot = itemConfig.getInt("slot", 0);
-                String action = itemConfig.getString("action", "set_quantity_stacks:" + stacks);
+                String action = itemConfig.getString("action", "set_quantity_amount:" + amount);
                 
-                int totalAmount = stackSize * stacks;
+                int totalAmount = amount;
                 double totalPrice = pricePerItem * totalAmount;
+                
+                // Calculate stacks for display purposes
+                double stacks = (double) amount / stackSize;
                 
                 // Get display name based on transaction type
                 String displayName = (type == TransactionType.BUY) ? 
@@ -249,14 +252,15 @@ public class ShopGuiManager {
                     itemConfig.getString("sell_display-name", itemConfig.getString("display-name", "<red>Sell {stacks} Stack(s)"));
                 
                 // Process placeholders in display name
-                displayName = displayName.replace("{stacks}", String.valueOf(stacks))
+                String stacksDisplay = stacks == (int) stacks ? String.valueOf((int) stacks) : String.format("%.1f", stacks);
+                displayName = displayName.replace("{stacks}", stacksDisplay)
                         .replace("{amount}", String.valueOf(totalAmount))
                         .replace("{price}", String.format("%,.2f", totalPrice))
                         .replace("{item_name}", shopItem.displayName());
                 
                 // Process placeholders in lore
                 List<String> lore = itemConfig.getStringList("lore").stream()
-                        .map(line -> line.replace("{stacks}", String.valueOf(stacks))
+                        .map(line -> line.replace("{stacks}", stacksDisplay)
                                 .replace("{amount}", String.valueOf(totalAmount))
                                 .replace("{price}", String.format("%,.2f", totalPrice))
                                 .replace("{item_name}", shopItem.displayName()))

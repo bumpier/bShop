@@ -114,8 +114,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 0
-        stacks: 1
-        action: "set_quantity_stacks:1"
+        amount: 64
+        action: "set_quantity_amount:64"
       stack_2:
         material: LIGHT_BLUE_STAINED_GLASS_PANE
         display-name: "<aqua>Buy {stacks} Stacks"
@@ -126,8 +126,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 1
-        stacks: 2
-        action: "set_quantity_stacks:2"
+        amount: 128
+        action: "set_quantity_amount:128"
       stack_3:
         material: CYAN_STAINED_GLASS_PANE
         display-name: "<aqua>Buy {stacks} Stacks"
@@ -138,8 +138,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 2
-        stacks: 3
-        action: "set_quantity_stacks:3"
+        amount: 192
+        action: "set_quantity_amount:192"
       stack_4:
         material: CYAN_STAINED_GLASS_PANE
         display-name: "<aqua>Buy {stacks} Stacks"
@@ -150,8 +150,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 3
-        stacks: 4
-        action: "set_quantity_stacks:4"
+        amount: 256
+        action: "set_quantity_amount:256"
       stack_5:
         material: BLUE_STAINED_GLASS_PANE
         display-name: "<aqua>Buy {stacks} Stacks"
@@ -162,8 +162,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 4
-        stacks: 5
-        action: "set_quantity_stacks:5"
+        amount: 320
+        action: "set_quantity_amount:320"
       stack_6:
         material: BLUE_STAINED_GLASS_PANE
         display-name: "<aqua>Buy {stacks} Stacks"
@@ -174,8 +174,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 5
-        stacks: 6
-        action: "set_quantity_stacks:6"
+        amount: 384
+        action: "set_quantity_amount:384"
       stack_7:
         material: PURPLE_STAINED_GLASS_PANE
         display-name: "<aqua>Buy {stacks} Stacks"
@@ -186,8 +186,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 6
-        stacks: 7
-        action: "set_quantity_stacks:7"
+        amount: 448
+        action: "set_quantity_amount:448"
       stack_8:
         material: PURPLE_STAINED_GLASS_PANE
         display-name: "<aqua>Buy {stacks} Stacks"
@@ -198,8 +198,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 7
-        stacks: 8
-        action: "set_quantity_stacks:8"
+        amount: 512
+        action: "set_quantity_amount:512"
       stack_9:
         material: MAGENTA_STAINED_GLASS_PANE
         display-name: "<aqua>Buy {stacks} Stacks"
@@ -210,8 +210,8 @@ quantity-menu:
           - ""
           - "<yellow>Click to select this amount"
         slot: 8
-        stacks: 9
-        action: "set_quantity_stacks:9"
+        amount: 576
+        action: "set_quantity_amount:576"
     # Back button configuration
     back_button:
       material: REDSTONE

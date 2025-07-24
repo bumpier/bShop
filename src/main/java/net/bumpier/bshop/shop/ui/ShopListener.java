@@ -112,6 +112,11 @@ public class ShopListener implements Listener {
                 context.setQuantity(newQuantity);
                 shopGuiManager.openQuantityGui(player, context);
                 break;
+            case "set_quantity_amount":
+                int directAmount = Integer.parseInt(parts[1]);
+                context.setQuantity(directAmount);
+                shopGuiManager.openQuantityGui(player, context);
+                break;
             case "open_quantity_menu":
                 shopGuiManager.openQuantityGui(player, context);
                 break;
