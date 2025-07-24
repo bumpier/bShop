@@ -13,11 +13,14 @@ import net.bumpier.bshop.util.message.MessageService;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.inventory.InventoryView;
 
 import java.util.ArrayList;
@@ -266,9 +269,16 @@ public class ShopGuiManager {
                     .withDisplayName(buttonName).withLore(buttonLore).withPDCString("bshop_action", action).build();
             inventory.setItem(slot, buttonItem);
             
-            // Debug logging
-            if (plugin.getLogger().isLoggable(java.util.logging.Level.FINE)) {
-                plugin.getLogger().fine("Created button '" + key + "' with action: " + action + " at slot: " + slot);
+            // Debug logging - always log for debugging
+            plugin.getLogger().info("Created button '" + key + "' with action: " + action + " at slot: " + slot + " material: " + material);
+            
+            // Verify the PDC was set correctly
+            ItemMeta debugMeta = buttonItem.getItemMeta();
+            if (debugMeta != null) {
+                NamespacedKey debugKey = new NamespacedKey(plugin, "bshop_action");
+                boolean hasAction = debugMeta.getPersistentDataContainer().has(debugKey, PersistentDataType.STRING);
+                String actionValue = debugMeta.getPersistentDataContainer().get(debugKey, PersistentDataType.STRING);
+                plugin.getLogger().info("Button '" + key + "' PDC verification - Has action: " + hasAction + ", Value: " + actionValue);
             }
         }
     }
