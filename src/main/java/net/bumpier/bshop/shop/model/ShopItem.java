@@ -21,10 +21,15 @@ public final class ShopItem {
     private final Integer pinnedPage;
     private final Integer pinnedSlot;
 
+    // Command-based fields
+    private final boolean commandBased;
+    private final String buyCommand;
+    private final String sellCommand;
+
     // The final slot this item is assigned to on a generated GUI page.
     private int assignedSlot;
 
-    public ShopItem(String id, Material material, String displayName, List<String> lore, int customModelData, double buyPrice, double sellPrice, Integer pinnedPage, Integer pinnedSlot) {
+    public ShopItem(String id, Material material, String displayName, List<String> lore, int customModelData, double buyPrice, double sellPrice, Integer pinnedPage, Integer pinnedSlot, Boolean commandBased, String buyCommand, String sellCommand) {
         this.id = id;
         this.material = material;
         this.displayName = displayName;
@@ -35,6 +40,9 @@ public final class ShopItem {
         this.pinnedPage = pinnedPage;
         this.pinnedSlot = pinnedSlot;
         this.assignedSlot = -1; // Default value
+        this.commandBased = commandBased != null && commandBased;
+        this.buyCommand = buyCommand;
+        this.sellCommand = sellCommand;
     }
 
     // --- Getters ---
@@ -52,6 +60,10 @@ public final class ShopItem {
     public boolean isPinned() {
         return pinnedPage != null && pinnedSlot != null;
     }
+
+    public boolean isCommandBased() { return commandBased; }
+    public String getBuyCommand() { return buyCommand; }
+    public String getSellCommand() { return sellCommand; }
 
     // --- Assigned Slot Management ---
     public int getAssignedSlot() { return assignedSlot; }

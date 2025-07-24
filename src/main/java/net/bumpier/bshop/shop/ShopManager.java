@@ -96,7 +96,12 @@ public class ShopManager {
                 Integer pinnedPage = (Integer) itemMap.get("page");
                 Integer pinnedSlot = (Integer) itemMap.get("slot");
 
-                items.add(new ShopItem(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot));
+                // Parse command-based fields
+                Boolean commandBased = itemMap.get("command-based") != null ? (Boolean) itemMap.get("command-based") : null;
+                String buyCommand = itemMap.get("buy-command") != null ? (String) itemMap.get("buy-command") : null;
+                String sellCommand = itemMap.get("sell-command") != null ? (String) itemMap.get("sell-command") : null;
+
+                items.add(new ShopItem(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot, commandBased, buyCommand, sellCommand));
             } catch (Exception e) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to parse an item in a shop file.", e);
             }

@@ -151,6 +151,26 @@ public class ShopListener implements Listener {
         ShopItem shopItem = openShop.items().stream()
                 .filter(item -> item.getAssignedSlot() == clickedSlot).findFirst().orElse(null);
         if (shopItem == null) return;
+        if (shopItem.isCommandBased()) {
+            String command = null;
+            int amount = 1; // Default amount for command-based
+            if (event.getClick() == ClickType.LEFT && shopItem.getBuyCommand() != null) {
+                command = shopItem.getBuyCommand();
+            } else if (event.getClick() == ClickType.RIGHT && shopItem.getSellCommand() != null) {
+                command = shopItem.getSellCommand();
+            }
+            if (command != null) {
+                command = command.replace("%player%", player.getName()).replace("%amount%", String.valueOf(amount));
+                if (command.startsWith("/")) command = command.substring(1);
+                if (command.startsWith("console:")) {
+                    org.bukkit.Bukkit.dispatchCommand(org.bukkit.Bukkit.getConsoleSender(), command.substring(8).trim());
+                } else {
+                    player.performCommand(command);
+                }
+            }
+            event.getWhoClicked().closeInventory();
+            return;
+        }
         if (event.getClick() == ClickType.LEFT) {
             // Check if item can be bought (has valid buy price)
             if (shopItem.buyPrice() >= 0) {
