@@ -71,6 +71,9 @@ public class ShopListener implements Listener {
             return;
         }
         String action = meta.getPersistentDataContainer().get(key, PersistentDataType.STRING);
+        if (player.hasPermission("bshop.admin.debug")) {
+            player.sendMessage("§a[bShop Debug] Button clicked with action: " + action);
+        }
         String[] parts = action.split(":");
         switch (parts[0]) {
             case "add_quantity":
