@@ -56,10 +56,7 @@ public class ShopGuiManager {
     }
     
     public void clearTransactionContext(Player player) {
-        if (activeTransactions.containsKey(player.getUniqueId())) {
-            plugin.getLogger().info("Clearing transaction context for player: " + player.getName());
-            activeTransactions.remove(player.getUniqueId());
-        }
+        activeTransactions.remove(player.getUniqueId());
     }
 
     public boolean isMainMenu(InventoryView view) {
@@ -184,13 +181,9 @@ public class ShopGuiManager {
     
     public void openQuantityGui(Player player, TransactionContext context) {
         activeTransactions.put(player.getUniqueId(), context);
-        plugin.getLogger().info("Created/Updated transaction context for player: " + player.getName() + " - Item: " + context.getItem().displayName() + " - Type: " + context.getType() + " - Quantity: " + context.getQuantity());
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");
         if (config == null) {
             player.sendMessage("§cThe quantity menu GUI is not configured in guis.yml.");
-            if (player.hasPermission("bshop.admin.debug")) {
-                player.sendMessage("§c[bShop Debug] quantity-menu section missing from guis.yml");
-            }
             return;
         }
         try {
@@ -200,10 +193,6 @@ public class ShopGuiManager {
             player.openInventory(inventory);
         } catch (Exception e) {
             player.sendMessage("§cError opening quantity GUI: " + e.getMessage());
-            if (player.hasPermission("bshop.admin.debug")) {
-                player.sendMessage("§c[bShop Debug] Exception in openQuantityGui: " + e.getClass().getSimpleName());
-                e.printStackTrace();
-            }
         }
     }
 
@@ -249,14 +238,40 @@ public class ShopGuiManager {
         int quantity = context.getQuantity();
         double pricePerItem = (type == TransactionType.BUY) ? item.buyPrice() : item.sellPrice();
         double totalPrice = pricePerItem * quantity;
-        String displayName = (type == TransactionType.BUY) ? "<green>Buying {name}" : "<red>Selling {name}";
-        List<String> lore = new ArrayList<>();
-        lore.add("<gray>Quantity: <yellow>{quantity}");
-        lore.add("<gray>Total Price: <gold>${total_price}");
+        
+        // Get display item configuration
+        ConfigurationSection displayItemConfig = config.getConfigurationSection("display_item");
+        String displayName;
+        List<String> lore;
+        
+        if (displayItemConfig != null) {
+            // Use configured display item
+            displayName = (type == TransactionType.BUY) ? 
+                displayItemConfig.getString("buy_display-name", "<green>Buying: {item_name}") : 
+                displayItemConfig.getString("sell_display-name", "<red>Selling: {item_name}");
+            lore = displayItemConfig.getStringList("lore");
+        } else {
+            // Fallback to default format
+            displayName = (type == TransactionType.BUY) ? "<green>Buying: {item_name}" : "<red>Selling: {item_name}";
+            lore = List.of(
+                "<gray>Quantity: <yellow>{quantity}</yellow>",
+                "<gray>Price per item: <gold>${price_per_item}</gold>",
+                "<gray>Total Price: <gold>${total_price}</gold>"
+            );
+        }
+        
+        // Replace placeholders
+        displayName = displayName.replace("{item_name}", item.displayName());
+        List<String> processedLore = lore.stream()
+                .map(line -> line.replace("{quantity}", String.valueOf(quantity))
+                        .replace("{price_per_item}", String.format("%,.2f", pricePerItem))
+                        .replace("{total_price}", String.format("%,.2f", totalPrice))
+                        .replace("{item_name}", item.displayName()))
+                .collect(Collectors.toList());
+        
         ItemStack displayItem = new ItemBuilder(plugin, item.material(), messageService)
-                .withDisplayName(displayName.replace("{name}", item.displayName()))
-                .withLore(lore.stream().map(l -> l.replace("{quantity}", String.valueOf(quantity))
-                        .replace("{total_price}", String.format("%,.2f", totalPrice))).collect(Collectors.toList()))
+                .withDisplayName(displayName)
+                .withLore(processedLore)
                 .build();
         inventory.setItem(config.getInt("display_item_slot", 13), displayItem);
         ConfigurationSection buttons = config.getConfigurationSection("buttons");
@@ -281,18 +296,6 @@ public class ShopGuiManager {
             ItemStack buttonItem = new ItemBuilder(plugin, material, messageService)
                     .withDisplayName(buttonName).withLore(buttonLore).withPDCString("bshop_action", action).build();
             inventory.setItem(slot, buttonItem);
-            
-            // Debug logging - always log for debugging
-            plugin.getLogger().info("Created button '" + key + "' with action: " + action + " at slot: " + slot + " material: " + material);
-            
-            // Verify the PDC was set correctly
-            ItemMeta debugMeta = buttonItem.getItemMeta();
-            if (debugMeta != null) {
-                NamespacedKey debugKey = new NamespacedKey(plugin, "bshop_action");
-                boolean hasAction = debugMeta.getPersistentDataContainer().has(debugKey, PersistentDataType.STRING);
-                String actionValue = debugMeta.getPersistentDataContainer().get(debugKey, PersistentDataType.STRING);
-                plugin.getLogger().info("Button '" + key + "' PDC verification - Has action: " + hasAction + ", Value: " + actionValue);
-            }
         }
     }
 
