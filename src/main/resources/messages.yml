@@ -29,6 +29,13 @@ shop:
   # Corrected placeholders: <amount>, <item_name>
   item_not_owned: "<prefix><red>You do not have <aqua><amount>x <item_name></aqua> to sell.</red>"
 
+# GUI error messages
+gui:
+  main_menu_not_configured: "<prefix><red>The main menu GUI is not configured in guis.yml.</red>"
+  quantity_menu_not_configured: "<prefix><red>The quantity menu GUI is not configured in guis.yml.</red>"
+  stack_gui_not_configured: "<prefix><red>The stack selection GUI is not configured in guis.yml.</red>"
+  error_opening_quantity_gui: "<prefix><red>Error opening quantity GUI: <error></red>"
+
 # Admin command messages
 admin:
   reload_start: "<prefix><yellow>Reloading bShop configurations...</yellow>"
