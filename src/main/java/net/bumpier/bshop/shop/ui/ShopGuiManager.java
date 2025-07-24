@@ -179,8 +179,12 @@ public class ShopGuiManager {
 
     public void openQuantityGui(Player player, ShopItem item, TransactionType type) {
         TransactionContext context = new TransactionContext(item, type);
+        openQuantityGui(player, context);
+    }
+    
+    public void openQuantityGui(Player player, TransactionContext context) {
         activeTransactions.put(player.getUniqueId(), context);
-        plugin.getLogger().info("Created transaction context for player: " + player.getName() + " - Item: " + item.displayName() + " - Type: " + type);
+        plugin.getLogger().info("Created/Updated transaction context for player: " + player.getName() + " - Item: " + context.getItem().displayName() + " - Type: " + context.getType() + " - Quantity: " + context.getQuantity());
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");
         if (config == null) {
             player.sendMessage("§cThe quantity menu GUI is not configured in guis.yml.");
