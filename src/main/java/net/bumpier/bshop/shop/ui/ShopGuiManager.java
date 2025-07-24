@@ -10,7 +10,6 @@ import net.bumpier.bshop.shop.transaction.TransactionType;
 import net.bumpier.bshop.util.ItemBuilder;
 import net.bumpier.bshop.util.config.ConfigManager;
 import net.bumpier.bshop.util.message.MessageService;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -45,15 +44,8 @@ public class ShopGuiManager {
     }
 
     // --- State Management ---
-
-    public TransactionContext getTransactionContext(Player player) {
-        return activeTransactions.get(player.getUniqueId());
-    }
-
-    public PageInfo getOpenPageInfo(Player player) {
-        return openShopInventories.get(player.getUniqueId());
-    }
-
+    public TransactionContext getTransactionContext(Player player) { return activeTransactions.get(player.getUniqueId()); }
+    public PageInfo getOpenPageInfo(Player player) { return openShopInventories.get(player.getUniqueId()); }
     public void onGuiClose(Player player) {
         openShopInventories.remove(player.getUniqueId());
         activeTransactions.remove(player.getUniqueId());
@@ -75,24 +67,21 @@ public class ShopGuiManager {
             player.sendMessage("§cThe main menu GUI is not configured in guis.yml.");
             return;
         }
-
         String title = guiConfig.getString("title", "Shop");
         int size = guiConfig.getInt("size", 3) * 9;
         String serializedTitle = messageService.serialize(messageService.parse(title));
-        Inventory inventory = Bukkit.createInventory(player, size, serializedTitle);
+        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), size, serializedTitle);
 
         ConfigurationSection itemsConfig = guiConfig.getConfigurationSection("items");
         if (itemsConfig != null) {
             for (String key : itemsConfig.getKeys(false)) {
-                String path = key; // Corrected path
+                String path = key;
                 Material material = Material.matchMaterial(itemsConfig.getString(path + ".material", "STONE"));
                 if (material == null) continue;
-
                 ItemBuilder builder = new ItemBuilder(plugin, material, messageService)
                         .withDisplayName(itemsConfig.getString(path + ".display-name"))
                         .withLore(itemsConfig.getStringList(path + ".lore"))
                         .withCustomModelData(itemsConfig.getInt(path + ".custom-model-data", 0));
-
                 String action = itemsConfig.getString(path + ".action");
                 builder.withPDCString("bshop_action", action);
                 inventory.setItem(itemsConfig.getInt(path + ".slot"), builder.build());
@@ -120,18 +109,12 @@ public class ShopGuiManager {
             messageService.send(player, "shop.not_found", Placeholder.unparsed("id", shopId));
             return;
         }
-
         String inventoryTitle = messageService.serialize(messageService.parse(shop.title()));
-        Inventory inventory = Bukkit.createInventory(player, shop.size(), inventoryTitle);
-
+        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), shop.size(), inventoryTitle);
         List<Integer> reservedSlots = shop.paginationItems().values().stream()
-                .map(PaginationItem::slot)
-                .collect(Collectors.toList());
-
+                .map(PaginationItem::slot).collect(Collectors.toList());
         List<Integer> takenSlots = new ArrayList<>(reservedSlots);
-        shop.items().stream()
-                .filter(ShopItem::isPinned)
-                .filter(item -> item.getPinnedPage().orElse(-1) == page)
+        shop.items().stream().filter(ShopItem::isPinned).filter(item -> item.getPinnedPage().orElse(-1) == page)
                 .forEach(item -> {
                     int slot = item.getPinnedSlot().get();
                     if (slot < shop.size() && !takenSlots.contains(slot)) {
@@ -140,21 +123,13 @@ public class ShopGuiManager {
                         takenSlots.add(slot);
                     }
                 });
-
         List<Integer> availableSlots = new ArrayList<>();
         for (int i = 0; i < shop.size(); i++) {
-            if (!takenSlots.contains(i)) {
-                availableSlots.add(i);
-            }
+            if (!takenSlots.contains(i)) availableSlots.add(i);
         }
-
-        List<ShopItem> flowItems = shop.items().stream()
-                .filter(item -> !item.isPinned())
-                .collect(Collectors.toList());
-
+        List<ShopItem> flowItems = shop.items().stream().filter(item -> !item.isPinned()).collect(Collectors.toList());
         int itemsPerPage = availableSlots.size();
         int totalFlowPages = itemsPerPage > 0 ? (int) Math.ceil((double) flowItems.size() / itemsPerPage) : 0;
-
         int startIndex = page * itemsPerPage;
         for (int i = 0; i < itemsPerPage; i++) {
             int itemIndex = startIndex + i;
@@ -165,36 +140,25 @@ public class ShopGuiManager {
                 inventory.setItem(slot, createShopItemStack(shopItem));
             }
         }
-
-        int maxPinnedPage = shop.items().stream()
-                .filter(ShopItem::isPinned)
-                .mapToInt(item -> item.getPinnedPage().orElse(0))
-                .max().orElse(0);
+        int maxPinnedPage = shop.items().stream().filter(ShopItem::isPinned)
+                .mapToInt(item -> item.getPinnedPage().orElse(0)).max().orElse(0);
         int totalPages = Math.max(maxPinnedPage + 1, totalFlowPages);
-
         PaginationItem filler = shop.paginationItems().get("filler");
         if (filler != null) {
             ItemStack fillerStack = new ItemBuilder(plugin, filler.material(), messageService)
                     .withDisplayName(filler.displayName()).build();
             for (int slot : reservedSlots) {
-                if (slot >= 0 && inventory.getItem(slot) == null) {
-                    inventory.setItem(slot, fillerStack);
-                }
+                if (slot >= 0 && inventory.getItem(slot) == null) inventory.setItem(slot, fillerStack);
             }
         }
         if (page > 0) {
             PaginationItem prevButton = shop.paginationItems().get("previous_page");
-            if (prevButton != null) {
-                inventory.setItem(prevButton.slot(), createPaginationItemStack(prevButton));
-            }
+            if (prevButton != null) inventory.setItem(prevButton.slot(), createPaginationItemStack(prevButton));
         }
         if (page < totalPages - 1) {
             PaginationItem nextButton = shop.paginationItems().get("next_page");
-            if (nextButton != null) {
-                inventory.setItem(nextButton.slot(), createPaginationItemStack(nextButton));
-            }
+            if (nextButton != null) inventory.setItem(nextButton.slot(), createPaginationItemStack(nextButton));
         }
-
         player.openInventory(inventory);
         openShopInventories.put(player.getUniqueId(), new PageInfo(shopId, page));
     }
@@ -202,16 +166,13 @@ public class ShopGuiManager {
     public void openQuantityGui(Player player, ShopItem item, TransactionType type) {
         TransactionContext context = new TransactionContext(item, type);
         activeTransactions.put(player.getUniqueId(), context);
-
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");
         if (config == null) {
             player.sendMessage("§cThe quantity menu GUI is not configured in guis.yml.");
             return;
         }
-
         String title = messageService.serialize(messageService.parse(config.getString("title", "Select Quantity")));
-        Inventory inventory = Bukkit.createInventory(player, config.getInt("size", 4) * 9, title);
-
+        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), config.getInt("size", 4) * 9, title);
         updateQuantityGui(inventory, context);
         player.openInventory(inventory);
     }
@@ -223,78 +184,58 @@ public class ShopGuiManager {
             return;
         }
         String title = messageService.serialize(messageService.parse(config.getString("title", "Select Stacks")));
-        Inventory inventory = Bukkit.createInventory(player, 18, title);
-
+        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), 18, title);
         ShopItem shopItem = context.getItem();
         TransactionType type = context.getType();
         double pricePerItem = (type == TransactionType.BUY) ? shopItem.buyPrice() : shopItem.sellPrice();
         int stackSize = shopItem.material().getMaxStackSize();
         Material itemMaterial = Material.matchMaterial(config.getString("item.material", "PAPER"));
-
         for (int i = 1; i <= 9; i++) {
             int totalAmount = stackSize * i;
             double totalPrice = pricePerItem * totalAmount;
             String nameKey = (type == TransactionType.BUY) ? "item.buy_display-name" : "item.sell_display-name";
             String name = config.getString(nameKey, "<aqua>Buy {stacks} Stack(s)")
                     .replace("{stacks}", String.valueOf(i));
-
             List<String> lore = config.getStringList("item.lore").stream()
                     .map(line -> line.replace("{amount}", String.valueOf(totalAmount))
                             .replace("{price}", String.format("%,.2f", totalPrice)))
                     .collect(Collectors.toList());
-
             ItemStack stackSelectItem = new ItemBuilder(plugin, itemMaterial, messageService)
-                    .withDisplayName(name)
-                    .withLore(lore)
-                    .withPDCString("bshop_action", "set_quantity_stacks:" + i)
-                    .build();
+                    .withDisplayName(name).withLore(lore).withPDCString("bshop_action", "set_quantity_stacks:" + i).build();
             inventory.setItem(i - 1, stackSelectItem);
         }
-
         ItemStack backButton = new ItemBuilder(plugin, Material.REDSTONE, messageService)
-                .withDisplayName("<red>Go Back")
-                .withPDCString("bshop_action", "open_quantity_menu").build();
+                .withDisplayName("<red>Go Back").withPDCString("bshop_action", "open_quantity_menu").build();
         inventory.setItem(13, backButton);
-
         player.openInventory(inventory);
     }
-
-    // --- GUI Updaters ---
 
     public void updateQuantityGui(Inventory inventory, TransactionContext context) {
         inventory.clear();
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");
         if (config == null) return;
-
         ShopItem item = context.getItem();
         TransactionType type = context.getType();
         int quantity = context.getQuantity();
         double pricePerItem = (type == TransactionType.BUY) ? item.buyPrice() : item.sellPrice();
         double totalPrice = pricePerItem * quantity;
-
         String displayName = (type == TransactionType.BUY) ? "<green>Buying {name}" : "<red>Selling {name}";
         List<String> lore = new ArrayList<>();
         lore.add("<gray>Quantity: <yellow>{quantity}");
         lore.add("<gray>Total Price: <gold>${total_price}");
-
         ItemStack displayItem = new ItemBuilder(plugin, item.material(), messageService)
                 .withDisplayName(displayName.replace("{name}", item.displayName()))
-                .withLore(lore.stream()
-                        .map(l -> l.replace("{quantity}", String.valueOf(quantity))
-                                .replace("{total_price}", String.format("%,.2f", totalPrice)))
-                        .collect(Collectors.toList()))
+                .withLore(lore.stream().map(l -> l.replace("{quantity}", String.valueOf(quantity))
+                        .replace("{total_price}", String.format("%,.2f", totalPrice))).collect(Collectors.toList()))
                 .build();
         inventory.setItem(config.getInt("display_item_slot", 13), displayItem);
-
         ConfigurationSection buttons = config.getConfigurationSection("buttons");
         if (buttons == null) return;
-
         for (String key : buttons.getKeys(false)) {
             String path = "buttons." + key + ".";
             int slot = config.getInt(path + "slot");
             String action = config.getString(path + "action");
             List<String> buttonLore = config.getStringList(path + "lore");
-
             String buttonName;
             Material material;
             if (key.equals("confirm")) {
@@ -304,37 +245,24 @@ public class ShopGuiManager {
                 buttonName = config.getString(path + "display-name");
                 material = Material.matchMaterial(config.getString(path + "material"));
             }
-
             if (material == null) continue;
-
             inventory.setItem(slot, new ItemBuilder(plugin, material, messageService)
-                    .withDisplayName(buttonName)
-                    .withLore(buttonLore)
-                    .withPDCString("bshop_action", action)
-                    .build());
+                    .withDisplayName(buttonName).withLore(buttonLore).withPDCString("bshop_action", action).build());
         }
     }
 
-    // --- Private Helper Methods ---
-
     private ItemStack createShopItemStack(ShopItem shopItem) {
         List<String> formattedLore = shopItem.lore().stream()
-                .map(line -> line
-                        .replace("${buy_price}", String.format("%,.2f", shopItem.buyPrice()))
+                .map(line -> line.replace("${buy_price}", String.format("%,.2f", shopItem.buyPrice()))
                         .replace("${sell_price}", String.format("%,.2f", shopItem.sellPrice())))
                 .collect(Collectors.toList());
-
         return new ItemBuilder(plugin, shopItem.material(), messageService)
-                .withDisplayName(shopItem.displayName())
-                .withLore(formattedLore)
-                .withCustomModelData(shopItem.customModelData())
-                .build();
+                .withDisplayName(shopItem.displayName()).withLore(formattedLore)
+                .withCustomModelData(shopItem.customModelData()).build();
     }
 
     private ItemStack createPaginationItemStack(PaginationItem paginationItem) {
         return new ItemBuilder(plugin, paginationItem.material(), messageService)
-                .withDisplayName(paginationItem.displayName())
-                .withLore(paginationItem.lore())
-                .build();
+                .withDisplayName(paginationItem.displayName()).withLore(paginationItem.lore()).build();
     }
 }
