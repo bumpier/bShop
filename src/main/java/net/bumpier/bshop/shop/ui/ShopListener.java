@@ -150,11 +150,19 @@ public class ShopListener implements Listener {
                 shopGuiManager.openStackGui(player, context);
                 break;
             case "set_quantity_stacks":
-                context.setQuantity(Integer.parseInt(parts[1]) * context.getItem().material().getMaxStackSize());
-                shopGuiManager.openQuantityGui(player, context.getItem(), context.getType());
+                int stackCount = Integer.parseInt(parts[1]);
+                int newQuantity = stackCount * context.getItem().material().getMaxStackSize();
+                context.setQuantity(newQuantity);
+                if (player.hasPermission("bshop.admin.debug")) {
+                    player.sendMessage("§a[bShop Debug] Set quantity to " + stackCount + " stack(s) = " + newQuantity + " items");
+                }
+                shopGuiManager.openQuantityGui(player, context);
                 break;
             case "open_quantity_menu":
-                shopGuiManager.openQuantityGui(player, context.getItem(), context.getType());
+                if (player.hasPermission("bshop.admin.debug")) {
+                    player.sendMessage("§a[bShop Debug] Returning to quantity menu with current quantity: " + context.getQuantity());
+                }
+                shopGuiManager.openQuantityGui(player, context);
                 break;
         }
     }
