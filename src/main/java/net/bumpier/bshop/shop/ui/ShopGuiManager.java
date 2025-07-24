@@ -179,6 +179,11 @@ public class ShopGuiManager {
         openQuantityGui(player, context);
     }
     
+    public void openQuantityGui(Player player, ShopItem item, TransactionType type, String sourceShopId, int sourceShopPage) {
+        TransactionContext context = new TransactionContext(item, type, sourceShopId, sourceShopPage);
+        openQuantityGui(player, context);
+    }
+    
     public void openQuantityGui(Player player, TransactionContext context) {
         activeTransactions.put(player.getUniqueId(), context);
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");

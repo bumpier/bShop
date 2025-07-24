@@ -90,7 +90,13 @@ public class ShopListener implements Listener {
                 player.closeInventory();
                 break;
             case "go_back":
-                player.closeInventory();
+                // Navigate back to the source shop if available
+                if (context.getSourceShopId() != null) {
+                    shopGuiManager.openShop(player, context.getSourceShopId(), context.getSourceShopPage());
+                } else {
+                    // Fallback: open main menu if no source shop
+                    shopGuiManager.openMainMenu(player);
+                }
                 break;
             case "open_stacks_menu":
                 shopGuiManager.openStackGui(player, context);
@@ -125,9 +131,9 @@ public class ShopListener implements Listener {
                 .filter(item -> item.getAssignedSlot() == clickedSlot).findFirst().orElse(null);
         if (shopItem == null) return;
         if (event.getClick() == ClickType.LEFT) {
-            shopGuiManager.openQuantityGui(player, shopItem, TransactionType.BUY);
+            shopGuiManager.openQuantityGui(player, shopItem, TransactionType.BUY, pageInfo.shopId(), pageInfo.currentPage());
         } else if (event.getClick() == ClickType.RIGHT) {
-            shopGuiManager.openQuantityGui(player, shopItem, TransactionType.SELL);
+            shopGuiManager.openQuantityGui(player, shopItem, TransactionType.SELL, pageInfo.shopId(), pageInfo.currentPage());
         }
     }
 
