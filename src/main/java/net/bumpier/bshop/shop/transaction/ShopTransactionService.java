@@ -240,30 +240,6 @@ public class ShopTransactionService {
             shopGuiManager.recordRecentTransaction(player, shopId, item.displayName(), item.material().name(), quantity, totalPrice, "Sell", item.id());
         }
     }
-}
-            placeholders.put("amount", String.valueOf(quantity));
-            placeholders.put("item", item.displayName());
-            messageService.send(player, "shop.item_not_owned", placeholders);
-            return;
-        }
-        
-        double totalPrice = item.sellPrice() * quantity;
-        economy.depositPlayer(player, totalPrice);
-        removeItemsFromInventory(player, item.material(), quantity);
-        java.util.Map<String, String> placeholders = new java.util.HashMap<>();
-        placeholders.put("amount", String.valueOf(quantity));
-        placeholders.put("item", item.displayName());
-        placeholders.put("price", String.format("%,.2f", totalPrice));
-        messageService.send(player, "shop.sell_success", placeholders);
-        // Record transaction
-        {
-            String shopId = null;
-            var pageInfo = shopGuiManager.getOpenPageInfo(player);
-            if (pageInfo != null) shopId = pageInfo.shopId();
-            if (shopId == null) shopId = "unknown";
-            shopGuiManager.recordRecentTransaction(player, shopId, item.displayName(), item.material().name(), quantity, totalPrice, "Sell", item.id());
-        }
-    }
 
     // Helper methods for buy/sell currency commands
     private boolean hasItemsInInventory(Player player, org.bukkit.Material material, int quantity) {
