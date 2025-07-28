@@ -27,39 +27,43 @@ main-menu:
   title: "Shop Categories"
   size: 3
   items:
-    rotational_example:
-      material: "PLAYER_HEAD"
-      base64-head: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWM5NjRlZDBmNzE3YWU2NzFjZGYwZWQwZTAzNDE4ODdhZThjY2JkMjgyYzAwNThkYzExMjc2ZWYzY2Q3OGNjNyJ9fX0="
-      slot: 10
-      display-name: "<#66ff2e>⛏<bold> Rotational Example</bold>"
-      lore:
-        - ""
-        - "<#66ff2e>✔ Left-Click to browse."
-      action: "shop:brotational_example"
     advanced_shop:
-      material: MINECART
-      slot: 11
-      display-name: "<#2effa4>⛏<bold> Advanced Shop</bold>"
+      material: EMERALD
+      slot: 10
+      display-name: "<green><bold>Advanced Shop</bold>"
       lore:
+        - "<gray>Multi-page, buy/sell, limits."
         - ""
-        - "<#66ff2e>✔ Left-Click to browse."
+        - "<yellow>✔ Click to browse."
       action: "shop:advanced_shop"
-    command_based:
-      material: DIAMOND_PICKAXE
-      slot: 12
-      display-name: "<#283777>⛏<bold> Command Based Shop</bold>"
-      lore:
-        - ""
-        - "<#66ff2e>✔ Left-Click to browse."
-      action: "shop:command_based"
     quick_rotational:
-      material: DIAMOND_PICKAXE
-      slot: 12
-      display-name: "<#FFFFFF>⛏<bold> Speedy Rotational Shop</bold>"
+      material: CLOCK
+      slot: 11
+      display-name: "<gold><bold>Quick Rotational Shop</bold>"
       lore:
+        - "<gray>Rotates every 12h, featured items."
         - ""
-        - "<#66ff2e>✔ Left-Click to browse."
+        - "<yellow>✔ Click to browse."
       action: "shop:quick_rotational"
+    rotational_example:
+      material: PLAYER_HEAD
+      base64-head: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWM5NjRlZDBmNzE3YWU2NzFjZGYwZWQwZTAzNDE4ODdhZThjY2JkMjgyYzAwNThkYzExMjc2ZWYzY2Q3OGNjNyJ9fX0="
+      slot: 12
+      display-name: "<aqua><bold>Event Rotational Shop</bold>"
+      lore:
+        - "<gray>Rotates every 6h, event items."
+        - ""
+        - "<yellow>✔ Click to browse."
+      action: "shop:rotational_example"
+    command_based:
+      material: NAME_TAG
+      slot: 13
+      display-name: "<light_purple><bold>Command Shop</bold>"
+      lore:
+        - "<gray>Items run commands on purchase."
+        - ""
+        - "<yellow>✔ Click to browse."
+      action: "shop:command_based"
     wallet:
       material: GOLD_INGOT
       slot: 4
@@ -71,11 +75,11 @@ main-menu:
     recent_purchases:
       material: BOOK
       slot: 16
-      display-name: "<#ffc31f>🕒 <bold>Recent Purchases</bold>"
+      display-name: "<yellow>🕒 <bold>Recent Purchases</bold>"
       lore:
-        - "<#BDBDBD>View your last 7 purchases and sales."
+        - "<gray>View your last 7 purchases and sales."
         - ""
-        - "<#66ff2e>✔ Click to view."
+        - "<yellow>✔ Click to view."
       action: "recent_purchases"
   filler:
     enabled: true
