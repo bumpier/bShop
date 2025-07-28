@@ -1,24 +1,79 @@
+# bShop GUI Configuration
+#
+# Standard Actions:
+#   wallet                - Opens wallet info or does nothing (default for wallet icon)
+#   back_to_main          - Returns to main menu
+#   recent_purchases      - Opens recent purchases GUI
+#   recent_purchases_next - Next page in recent purchases
+#   recent_purchases_prev - Previous page in recent purchases
+#   shop:%shop%           - Opens the specified shop
+#
+# Standard Placeholders (for display-name and lore):
+#   %item%            - Name of the item
+#   %amount%          - Amount bought/sold
+#   %price%           - Price of the transaction
+#   %type%            - Buy/Sell
+#   %date%            - Date of transaction
+#   %shop%            - Name of the shop
+#   %transaction_id%  - Unique transaction ID
+#   %balance_after%   - Player's balance after transaction
+#
+# PlaceholderAPI placeholders (e.g. %vault_eco_balance_formatted%) are also supported in lore/display-name where applicable.
+
 # bShop - Centralized GUI Configuration
 
 # --- Main Shop Category Menu ---
 main-menu:
-  title: "<gradient:#55A3F6:#297ACC>Shop Categories</gradient>"
+  title: "Shop Categories"
   size: 3
   items:
     blocks:
-      material: GRASS_BLOCK
-      slot: 11
-      display-name: "<green>Building Blocks</green>"
+      material: "PLAYER_HEAD"
+      base64-head: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWM5NjRlZDBmNzE3YWU2NzFjZGYwZWQwZTAzNDE4ODdhZThjY2JkMjgyYzAwNThkYzExMjc2ZWYzY2Q3OGNjNyJ9fX0="
+      slot: 10
+      display-name: "<#66ff2e>⛏<bold> ʙᴜɪʟᴅɪɴɢ ʙʟᴏᴄᴋs</bold>"
       lore:
-        - "<gray>Click to browse building blocks."
+        - "<#BDBDBD><i>Browse a wide variety of"
+        - "<#BDBDBD><i>blocks for your creations.</i>"
+        - ""
+        - "<#66ff2e>✔ Left-Click to browse."
       action: "shop:blocks"
     ores:
       material: DIAMOND_ORE
-      slot: 13
-      display-name: "<aqua>Ores & Minerals</aqua>"
+      slot: 11
+      display-name: "<#2effa4>⛏<bold> ᴏʀᴇs & ᴍɪɴᴇʀᴀʟs</bold>"
       lore:
-        - "<gray>Click to browse valuable ores."
+        - "<#BDBDBD><i>Trade valuable gems, ores,"
+        - "<#BDBDBD><i>and other minerals.</i>"
+        - ""
+        - "<#66ff2e>✔ Left-Click to browse."
       action: "shop:ores"
+    mob_drops:
+      material: SKELETON_SKULL
+      slot: 12
+      display-name: "<#a12eff>☠<bold> ᴍᴏʙ ᴅʀᴏᴘs</bold>"
+      lore:
+        - "<#BDBDBD><i>Trade items dropped by creatures.</i>"
+        - ""
+        - "<#66ff2e>✔ Left-Click to browse."
+      action: "shop:mob-drops"
+    wallet:
+      material: GOLD_INGOT
+      slot: 4
+      display-name: "<gold><bold>Wallet</bold>"
+      lore:
+        - "<gray>Balance: <yellow>%vault_eco_balance_formatted%"
+        - "<gray>Click for more info!"
+      action: "wallet"
+    recent_purchases:
+      material: BOOK
+      slot: 16
+      display-name: "<#ffc31f>🕒 <bold>Recent Purchases</bold>"
+      lore:
+        - "<#BDBDBD>View your last 7 purchases and sales."
+        - ""
+        - "<#66ff2e>✔ Click to view."
+      action: "recent_purchases"
   filler:
     enabled: true
     material: GRAY_STAINED_GLASS_PANE
@@ -26,20 +81,22 @@ main-menu:
 
 # --- Quantity Selection Menu ---
 quantity-menu:
-  title: "<gradient:#8E2DE2:#4A00E0>Select Quantity</gradient>"
-  size: 4
+  title: "Select Quantity"
+  size: 3
   display_item_slot: 13
   # Display item configuration - shows what the player is buying/selling
-  # Available placeholders: {item_name}, {quantity}, {price_per_item}, {total_price}
+  # Available placeholders: %item%, %quantity%, %price_per_item%, %total_price%
   display_item:
-    buy_display-name: "<green>Buying: {item_name}"
-    sell_display-name: "<red>Selling: {item_name}"
+    buy_display-name: "<#66ff2e><bold>ʙᴜʏɪɴɢ</bold> <#ffffff>%item%"
+    sell_display-name: "<#e42121><bold>sᴇʟʟɪɴɢ</bold> <#ffffff>%item%"
     lore:
-      - "<gray>Quantity: <yellow>{quantity}</yellow>"
-      - "<gray>Price per item: <gold>${price_per_item}</gold>"
-      - "<gray>Total Price: <gold>${total_price}</gold>"
+      - "<#BDBDBD>• Quantity: <#ffffff>%quantity%</#ffffff>"
+      - "<#BDBDBD>• Price/Item: <#ffffff>%price_per_item%</#ffffff>"
       - ""
-      - "<gray>Use the buttons below to adjust quantity"
+      - "<#BDBDBD>• Total Price: <#66ff2e>%total_price%</#66ff2e>"
+      - ""
+      - "<#ffc31f>ℹ <i>Use the buttons to"
+      - "<#ffc31f><i>adjust the quantity.</i>"
   # Filler item configuration - fills empty slots
   filler:
     enabled: true
@@ -48,180 +105,270 @@ quantity-menu:
     lore: []
   buttons:
     add_1:
-      material: GREEN_STAINED_GLASS_PANE
-      display-name: "<green>+1"
-      slot: 24
+      material: LIME_STAINED_GLASS_PANE
+      display-name: "<#66ff2e><bold>+1</bold>"
+      slot: 14
       action: "add_quantity:1"
     add_16:
-      material: GREEN_STAINED_GLASS_PANE
-      display-name: "<green>+16"
-      slot: 25
-      action: "add_quantity:16"
-    add_max:
       material: LIME_STAINED_GLASS_PANE
-      display-name: "<green>+64"
-      slot: 26
+      display-name: "<#66ff2e><bold>+16</bold>"
+      slot: 15
+      action: "add_quantity:16"
+    add_64:
+      material: LIME_STAINED_GLASS_PANE
+      display-name: "<#66ff2e><bold>+64</bold>"
+      slot: 16
       action: "add_quantity:64"
     remove_1:
       material: RED_STAINED_GLASS_PANE
-      display-name: "<red>-1"
-      slot: 22
+      display-name: "<#e42121><bold>-1</bold>"
+      slot: 12
       action: "remove_quantity:1"
     remove_16:
       material: RED_STAINED_GLASS_PANE
-      display-name: "<red>-16"
-      slot: 21
+      display-name: "<#e42121><bold>-16</bold>"
+      slot: 11
       action: "remove_quantity:16"
-    remove_max:
-      material: ORANGE_STAINED_GLASS_PANE
-      display-name: "<red>-64"
-      slot: 20
+    remove_64:
+      material: RED_STAINED_GLASS_PANE
+      display-name: "<#e42121><bold>-64</bold>"
+      slot: 10
       action: "remove_quantity:64"
     confirm:
-      buy_material: LIME_CONCRETE
-      sell_material: LIME_CONCRETE
-      display-name: "<green>Confirm Purchase"
-      buy_display-name: "<green>Confirm Purchase"
-      sell_display-name: "<green>Confirm Sale"
-      lore: ["<gray>Click to complete the transaction."]
-      slot: 31
+      buy_material: GREEN_STAINED_GLASS_PANE
+      sell_material: GREEN_STAINED_GLASS_PANE
+      buy_display-name: "<#66ff2e><bold>✔ ᴄᴏɴꜰɪʀᴍ ᴘᴜʀᴄʜᴀsᴇ</bold>"
+      sell_display-name: "<#66ff2e><bold>✔ ᴄᴏɴꜰɪʀᴍ sᴀʟᴇ</bold>"
+      lore:
+        - "<#BDBDBD><i>Click to complete the transaction.</i>"
+      slot: 22
       action: "confirm_transaction"
     cancel:
-      material: RED_CONCRETE
-      display-name: "<red>Cancel / Go Back"
-      lore: ["<gray>Return to the previous menu."]
-      slot: 28
+      material: ARROW
+      display-name: "<#e42121><bold>← ʙᴀᴄᴋ</bold>"
+      lore:
+        - "<#BDBDBD><i>Return to the previous menu.</i>"
+      slot: 18
       action: "go_back"
     bulk_stacks:
-      material: CHEST_MINECART
-      display-name: "<gold>Buy/Sell Stacks"
-      lore: ["<gray>Click to open the bulk stacks menu."]
-      slot: 34
+      material: CHEST
+      display-name: "<#2ecbff><bold>⭐ ʙᴜʟᴋ ᴏᴘᴛɪᴏɴs</bold>"
+      lore:
+        - "<#BDBDBD><i>Click for bulk stack options.</i>"
+      slot: 26
       action: "open_stacks_menu"
+  # --- Bulk Stack Selection GUI ---
   stack_gui:
-    title: "<gradient:#F3904F:#3B4371>Select Stacks (1-9)</gradient>"
-    size: 2  # Size in rows (2 rows = 18 slots)
-    # Configurable stack items - you can define custom amounts and appearances
-    # Available placeholders: {stacks}, {amount}, {price}, {item_name}
+    title: "Bulk Options"
+    size: 3
     items:
       stack_1:
-        material: LIGHT_BLUE_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stack"
-        sell_display-name: "<red>Sell {stacks} Stack"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>1</#B2FF96> sᴛᴀᴄᴋ"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>1</#F19090> sᴛᴀᴄᴋ"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 0
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 9
         amount: 1
         action: "set_quantity_amount:64"
       stack_2:
-        material: LIGHT_BLUE_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stacks"
-        sell_display-name: "<red>Sell {stacks} Stacks"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>2</#B2FF96> sᴛᴀᴄᴋs"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>2</#F19090> sᴛᴀᴄᴋs"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 1
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 10
         amount: 2
         action: "set_quantity_amount:128"
       stack_3:
-        material: CYAN_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stacks"
-        sell_display-name: "<red>Sell {stacks} Stacks"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>3</#B2FF96> sᴛᴀᴄᴋs"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>3</#F19090> sᴛᴀᴄᴋs"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 2
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 11
         amount: 3
         action: "set_quantity_amount:192"
       stack_4:
-        material: CYAN_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stacks"
-        sell_display-name: "<red>Sell {stacks} Stacks"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>4</#B2FF96> sᴛᴀᴄᴋs"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>4</#F19090> sᴛᴀᴄᴋs"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 3
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 12
         amount: 4
         action: "set_quantity_amount:256"
       stack_5:
-        material: BLUE_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stacks"
-        sell_display-name: "<red>Sell {stacks} Stacks"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>5</#B2FF96> sᴛᴀᴄᴋs"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>5</#F19090> sᴛᴀᴄᴋs"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 4
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 13
         amount: 5
         action: "set_quantity_amount:320"
       stack_6:
-        material: BLUE_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stacks"
-        sell_display-name: "<red>Sell {stacks} Stacks"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>6</#B2FF96> sᴛᴀᴄᴋs"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>6</#F19090> sᴛᴀᴄᴋs"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 5
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 14
         amount: 6
         action: "set_quantity_amount:384"
       stack_7:
-        material: PURPLE_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stacks"
-        sell_display-name: "<red>Sell {stacks} Stacks"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>7</#B2FF96> sᴛᴀᴄᴋs"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>7</#F19090> sᴛᴀᴄᴋs"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 6
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 15
         amount: 7
         action: "set_quantity_amount:448"
       stack_8:
-        material: PURPLE_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stacks"
-        sell_display-name: "<red>Sell {stacks} Stacks"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>8</#B2FF96> sᴛᴀᴄᴋs"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>8</#F19090> sᴛᴀᴄᴋs"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 7
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 16
         amount: 8
         action: "set_quantity_amount:512"
       stack_9:
-        material: MAGENTA_STAINED_GLASS_PANE
-        display-name: "<aqua>Buy {stacks} Stacks"
-        sell_display-name: "<red>Sell {stacks} Stacks"
+        material: CHEST
+        display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>9</#B2FF96> sᴛᴀᴄᴋs"
+        sell_display-name: "<#e42121>sᴇʟʟ <#F19090>9</#F19090> sᴛᴀᴄᴋs"
         lore:
-          - "<gray>Contains <light_purple>{amount}</light_purple> items"
-          - "<gray>Total Price: <gold>${price}</gold>"
           - ""
-          - "<yellow>Click to select this amount"
-        slot: 8
+          - "<#BDBDBD><i>Click to select this amount.</i>"
+        slot: 17
         amount: 9
         action: "set_quantity_amount:576"
     # Back button configuration
     back_button:
-      material: REDSTONE
-      display-name: "<red>Go Back"
-      lore: ["<gray>Return to quantity selection"]
-      slot: 13
+      material: ARROW
+      display-name: "<#e42121><bold>← ʙᴀᴄᴋ</bold>"
+      lore: ["<#BDBDBD><i>Return to quantity selection.</i>"]
+      slot: 22
       action: "open_quantity_menu"
     # Filler item configuration for stack selection GUI
     filler:
       enabled: true
-      material: BLACK_STAINED_GLASS_PANE
+      material: GRAY_STAINED_GLASS_PANE
       display-name: " "
       lore: []
+
+recent-purchases-menu:
+  title: "<gold>Recent Purchases"
+  size: 3
+  purchase_1:
+    slot: 10
+    material: PAPER
+    display-name: "<green>%type%: %item%"
+    lore:
+      - "<gray>Amount: <yellow>%amount%"
+      - "<gray>Price: <gold>$%price%"
+      - "<gray>Date: <white>%date%"
+      - "<gray>Shop: <aqua>%shop%"
+      - "<gray>ID: <white>%transaction_id%"
+      - "<gray>Balance After: <green>$%balance_after%"
+  purchase_2:
+    slot: 11
+    material: PAPER
+    display-name: "<green>%type%: %item%"
+    lore:
+      - "<gray>Amount: <yellow>%amount%"
+      - "<gray>Price: <gold>$%price%"
+      - "<gray>Date: <white>%date%"
+      - "<gray>Shop: <aqua>%shop%"
+      - "<gray>ID: <white>%transaction_id%"
+      - "<gray>Balance After: <green>$%balance_after%"
+  purchase_3:
+    slot: 12
+    material: PAPER
+    display-name: "<green>%type%: %item%"
+    lore:
+      - "<gray>Amount: <yellow>%amount%"
+      - "<gray>Price: <gold>$%price%"
+      - "<gray>Date: <white>%date%"
+      - "<gray>Shop: <aqua>%shop%"
+      - "<gray>ID: <white>%transaction_id%"
+      - "<gray>Balance After: <green>$%balance_after%"
+  purchase_4:
+    slot: 13
+    material: PAPER
+    display-name: "<green>%type%: %item%"
+    lore:
+      - "<gray>Amount: <yellow>%amount%"
+      - "<gray>Price: <gold>$%price%"
+      - "<gray>Date: <white>%date%"
+      - "<gray>Shop: <aqua>%shop%"
+      - "<gray>ID: <white>%transaction_id%"
+      - "<gray>Balance After: <green>$%balance_after%"
+  purchase_5:
+    slot: 14
+    material: PAPER
+    display-name: "<green>%type%: %item%"
+    lore:
+      - "<gray>Amount: <yellow>%amount%"
+      - "<gray>Price: <gold>$%price%"
+      - "<gray>Date: <white>%date%"
+      - "<gray>Shop: <aqua>%shop%"
+      - "<gray>ID: <white>%transaction_id%"
+      - "<gray>Balance After: <green>$%balance_after%"
+  purchase_6:
+    slot: 15
+    material: PAPER
+    display-name: "<green>%type%: %item%"
+    lore:
+      - "<gray>Amount: <yellow>%amount%"
+      - "<gray>Price: <gold>$%price%"
+      - "<gray>Date: <white>%date%"
+      - "<gray>Shop: <aqua>%shop%"
+      - "<gray>ID: <white>%transaction_id%"
+      - "<gray>Balance After: <green>$%balance_after%"
+  purchase_7:
+    slot: 16
+    material: PAPER
+    display-name: "<green>%type%: %item%"
+    lore:
+      - "<gray>Amount: <yellow>%amount%"
+      - "<gray>Price: <gold>$%price%"
+      - "<gray>Date: <white>%date%"
+      - "<gray>Shop: <aqua>%shop%"
+      - "<gray>ID: <white>%transaction_id%"
+      - "<gray>Balance After: <green>$%balance_after%"
+  previous_page:
+    slot: 18
+    material: RED_STAINED_GLASS_PANE
+    display-name: "<red><bold>Previous Page"
+    action: "recent_purchases_prev"
+  next_page:
+    slot: 26
+    material: LIME_STAINED_GLASS_PANE
+    display-name: "<green><bold>Next Page"
+    action: "recent_purchases_next"
+  back:
+    slot: 22
+    material: BARRIER
+    display-name: "<red>Back"
+    action: "back_to_main"
+  wallet:
+    slot: 4
+    material: GOLD_INGOT
+    display-name: "<gold><bold>Wallet</bold>"
+    lore:
+      - "<gray>Your balance: %vault_eco_balance_formatted%"
+    action: "wallet"
+  filler:
+    enabled: true
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: " "

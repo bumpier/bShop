@@ -6,6 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.block.CreatureSpawner;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
@@ -15,6 +18,15 @@ import com.mojang.authlib.properties.Property;
 import org.bukkit.inventory.meta.SkullMeta;
 import java.lang.reflect.Field;
 import java.util.UUID;
+// Try both possible imports for XHead
+// import com.cryptomorin.xseries.XHead;
+import com.cryptomorin.xseries.XMaterial;
+import com.cryptomorin.xseries.profiles.objects.Profileable;
+import com.cryptomorin.xseries.profiles.builder.XSkull;
+// import com.cryptomorin.xseries.head.XHead;
+import org.jetbrains.annotations.Nullable;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 
 public class ItemBuilder {
 
@@ -32,6 +44,7 @@ public class ItemBuilder {
         ItemMeta meta = itemStack.getItemMeta();
         if (meta != null && displayName != null) {
             meta.setDisplayName(messageService.serialize(messageService.parse(displayName)));
+            meta.addItemFlags(ItemFlag.values());
             itemStack.setItemMeta(meta);
         }
         return this;
@@ -39,11 +52,29 @@ public class ItemBuilder {
 
     public ItemBuilder withLore(List<String> lore) {
         ItemMeta meta = itemStack.getItemMeta();
-        if (meta != null && lore != null) {
-            List<String> serializedLore = lore.stream()
-                    .map(line -> messageService.serialize(messageService.parse(line)))
-                    .collect(Collectors.toList());
+        if (meta != null) {
+            // Always set lore, even if empty, to override vanilla tooltips
+            List<String> serializedLore = lore != null
+                ? lore.stream().map(line -> messageService.serialize(messageService.parse(line))).collect(Collectors.toList())
+                : new java.util.ArrayList<>();
             meta.setLore(serializedLore);
+
+            meta.addItemFlags(ItemFlag.values());
+
+            // Special case: remove spawner tooltip
+            if (meta instanceof BlockStateMeta) {
+                BlockStateMeta bsm = (BlockStateMeta) meta;
+                if (bsm.getBlockState() instanceof CreatureSpawner) {
+                    CreatureSpawner spawner = (CreatureSpawner) bsm.getBlockState();
+                    // Optionally set a default type or leave as is
+                    // spawner.setSpawnedType(EntityType.PIG);
+                    bsm.setBlockState(spawner);
+                    // Explicitly clear lore to remove Minecraft's warning
+                    bsm.setLore(serializedLore);
+                    meta = bsm;
+                }
+            }
+
             itemStack.setItemMeta(meta);
         }
         return this;
@@ -54,6 +85,7 @@ public class ItemBuilder {
             ItemMeta meta = itemStack.getItemMeta();
             if (meta != null) {
                 meta.setCustomModelData(modelData);
+                meta.addItemFlags(ItemFlag.values());
                 itemStack.setItemMeta(meta);
             }
         }
@@ -90,22 +122,58 @@ public class ItemBuilder {
         return this.itemStack;
     }
 
-    public static ItemStack createBase64Head(String base64, String displayName, List<String> lore, int customModelData) {
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD, 1);
-        SkullMeta meta = (SkullMeta) head.getItemMeta();
+    public static ItemStack createBase64Head(String base64, String displayName, List<String> lore, int customModelData, MessageService messageService) {
+        ItemStack head = XMaterial.PLAYER_HEAD.parseItem();
+        Profileable profile = Profileable.detect(base64);
+        ItemStack customHead = XSkull.of(head).profile(profile).apply();
+        ItemMeta meta = customHead.getItemMeta();
         if (meta != null) {
-            GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-            profile.getProperties().put("textures", new Property("textures", base64));
-            try {
-                Field profileField = meta.getClass().getDeclaredField("profile");
-                profileField.setAccessible(true);
-                profileField.set(meta, profile);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            meta.setDisplayName(displayName);
-            meta.setLore(lore);
+            meta.setDisplayName(messageService.serialize(messageService.parse(displayName)));
+            List<String> serializedLore = lore != null
+                ? lore.stream().map(line -> messageService.serialize(messageService.parse(line))).collect(Collectors.toList())
+                : new java.util.ArrayList<>();
+            meta.setLore(serializedLore);
             if (customModelData > 0) meta.setCustomModelData(customModelData);
+            meta.addItemFlags(ItemFlag.values());
+            customHead.setItemMeta(meta);
+        }
+        return customHead;
+    }
+
+    public static ItemStack createSkull(String texture, String base64, String displayName, List<String> lore, int customModelData, MessageService messageService, @Nullable String playerName) {
+        ItemStack head = XMaterial.PLAYER_HEAD.parseItem();
+        String base64ToUse = null;
+        if (texture != null && texture.startsWith("base64:")) {
+            base64ToUse = texture.substring("base64:".length());
+        } else if (base64 != null && !base64.isEmpty()) {
+            base64ToUse = base64;
+        }
+        if (base64ToUse != null && !base64ToUse.isEmpty()) {
+            Profileable profile = Profileable.detect(base64ToUse);
+            ItemStack customHead = XSkull.of(head).profile(profile).apply();
+            ItemMeta meta = customHead.getItemMeta();
+            if (meta != null) {
+                meta.setDisplayName(messageService.serialize(messageService.parse(displayName)));
+                List<String> serializedLore = lore != null
+                    ? lore.stream().map(line -> messageService.serialize(messageService.parse(line))).collect(Collectors.toList())
+                    : new java.util.ArrayList<>();
+                meta.setLore(serializedLore);
+                if (customModelData > 0) meta.setCustomModelData(customModelData);
+                meta.addItemFlags(ItemFlag.values());
+                customHead.setItemMeta(meta);
+            }
+            return customHead;
+        }
+        // fallback to default head
+        ItemMeta meta = head.getItemMeta();
+        if (meta != null) {
+            meta.setDisplayName(messageService.serialize(messageService.parse(displayName)));
+            List<String> serializedLore = lore != null
+                ? lore.stream().map(line -> messageService.serialize(messageService.parse(line))).collect(Collectors.toList())
+                : new java.util.ArrayList<>();
+            meta.setLore(serializedLore);
+            if (customModelData > 0) meta.setCustomModelData(customModelData);
+            meta.addItemFlags(ItemFlag.values());
             head.setItemMeta(meta);
         }
         return head;

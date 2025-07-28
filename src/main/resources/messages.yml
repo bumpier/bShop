@@ -1,42 +1,46 @@
 # bShop Messages
 # Supports MiniMessage formatting for colors, gradients, and more.
-# Placeholders MUST use the <placeholder> format.
+# Placeholders MUST use the %placeholder% format.
 
-# General plugin prefix. Can be used in any message with <prefix>.
+# General plugin prefix. Can be used in any message with %prefix%.
 prefix: "<gray>[<gradient:#F7971E:#FFD200>bShop</gradient>] </gray>"
 
 # General command/error messages
-no_permission: "<prefix><red>You do not have permission to do that.</red>"
-player_only_command: "<prefix><red>This command can only be executed by players.</red>"
+no_permission: "%prefix%<red>You do not have permission to do that.</red>"
+player_only_command: "%prefix%<red>This command can only be executed by players.</red>"
+player_not_found: "%prefix%<red>Player <gray>%player%</gray> not found.</red>"
 
 # Shop messages
 shop:
-  # The corrected placeholder is <id>
-  not_found: "<prefix><red>The shop '<id>' could not be found.</red>"
+  not_found: "%prefix%<red>The shop '%shop%' could not be found.</red>"
+  buy_success: "%prefix%<green>You purchased <aqua>%amount%x %item%</aqua> for <gold>$%price%</gold>.</green>"
+  buy_disabled: "%prefix%<red>This item cannot be purchased.</red>"
+  insufficient_funds: "%prefix%<red>You need <gold>$%price%</gold> but only have <gold>$%balance%</gold>.</red>"
+  inventory_full: "%prefix%<red>Your inventory is full!</red>"
+  sell_success: "%prefix%<green>You sold <aqua>%amount%x %item%</aqua> for <gold>$%price%</gold>.</green>"
+  sell_success_with_multiplier: "%prefix%<green>You sold <aqua>%amount%x %item%</aqua> for <gold>$%price%</gold> <gray>(%multiplier% multiplier)</gray>.</green>"
+  sell_disabled: "%prefix%<red>This item cannot be sold.</red>"
+  item_not_owned: "%prefix%<red>You do not have <aqua>%amount%x %item%</aqua> to sell.</red>"
+  insufficient_custom_currency: "<red>You do not have enough tokens to buy this item!</red>"
+  purchase_limit_reached: "%prefix%<red>You have reached the purchase limit for this item!</red>"
+  sell_limit_reached: "%prefix%<red>You have reached the sell limit for this item!</red>"
 
-  # Corrected placeholders: <amount>, <item_name>, <price>
-  buy_success: "<prefix><green>You purchased <aqua><amount>x <item_name></aqua> for <gold>$<price></gold>.</green>"
-  buy_disabled: "<prefix><red>This item cannot be purchased.</red>"
-
-  # Corrected placeholders: <price>, <balance>
-  insufficient_funds: "<prefix><red>You need <gold>$<price></gold> but only have <gold>$<balance></gold>.</red>"
-  inventory_full: "<prefix><red>Your inventory is full!</red>"
-
-  # Corrected placeholders: <amount>, <item_name>, <price>
-  sell_success: "<prefix><green>You sold <aqua><amount>x <item_name></aqua> for <gold>$<price></gold>.</green>"
-  sell_disabled: "<prefix><red>This item cannot be sold.</red>"
-
-  # Corrected placeholders: <amount>, <item_name>
-  item_not_owned: "<prefix><red>You do not have <aqua><amount>x <item_name></aqua> to sell.</red>"
+# Multiplier messages
+multiplier:
+  current: "%prefix%<green>Your current sell multiplier is <gold>%multiplier%</gold>.</green>"
+  other: "%prefix%<green><gray>%player%</gray>'s current sell multiplier is <gold>%multiplier%</gold>.</green>"
 
 # GUI error messages
 gui:
-  main_menu_not_configured: "<prefix><red>The main menu GUI is not configured in guis.yml.</red>"
-  quantity_menu_not_configured: "<prefix><red>The quantity menu GUI is not configured in guis.yml.</red>"
-  stack_gui_not_configured: "<prefix><red>The stack selection GUI is not configured in guis.yml.</red>"
-  error_opening_quantity_gui: "<prefix><red>Error opening quantity GUI: <error></red>"
+  main_menu_not_configured: "%prefix%<red>The main menu GUI is not configured in guis.yml.</red>"
+  quantity_menu_not_configured: "%prefix%<red>The quantity menu GUI is not configured in guis.yml.</red>"
+  stack_gui_not_configured: "%prefix%<red>The stack selection GUI is not configured in guis.yml.</red>"
+  error_opening_quantity_gui: "%prefix%<red>Error opening quantity GUI: %error%</red>"
 
 # Admin command messages
 admin:
-  reload_start: "<prefix><yellow>Reloading bShop configurations...</yellow>"
-  reload_complete: "<prefix><green>Reload complete.</green>"
+  reload_start: "%prefix%<yellow>Reloading bShop configurations...</yellow>"
+  reload_complete: "%prefix%<green>Reload complete.</green>"
+  rotate_usage: "<red>Usage: /shop rotate <shop>"
+  rotate_not_rotational: "<red>The shop <gray>%shop%</gray> is not a rotational shop."
+  rotate_success: "<green>Rotated the <gray>%shop%</gray> shop!"

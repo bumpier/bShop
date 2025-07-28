@@ -38,6 +38,27 @@ public class ShopListener implements Listener {
         this.messageService = messageService;
     }
 
+    private void handleMenuClick(InventoryClickEvent event, Player player, ItemStack clickedItem) {
+        ItemMeta meta = clickedItem.getItemMeta();
+        if (meta == null) return;
+        PersistentDataContainer container = meta.getPersistentDataContainer();
+        NamespacedKey key = new NamespacedKey(BShop.getInstance(), "bshop_action");
+        if (!container.has(key, PersistentDataType.STRING)) return;
+
+        String action = container.get(key, PersistentDataType.STRING);
+
+        if (action.startsWith("shop:")) {
+            String shopId = action.substring(5);
+            shopGuiManager.openShop(player, shopId, 0);
+        } else if ("recent_purchases".equals(action)) {
+            shopGuiManager.openRecentPurchasesMenu(player);
+        } else if ("back_to_main".equals(action)) {
+            shopGuiManager.openMainMenu(player);
+        } else if ("recent_purchases_next".equals(action) || "recent_purchases_prev".equals(action)) {
+            shopGuiManager.handleRecentPurchasesPageAction(player, action);
+        }
+    }
+
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         if (!(event.getInventory().getHolder() instanceof BShopGUIHolder)) {
@@ -50,7 +71,6 @@ public class ShopListener implements Listener {
         if (clickedItem == null || clickedItem.getType().isAir()) return;
 
         TransactionContext context = shopGuiManager.getTransactionContext(player);
-        
         if (context != null) {
             handleTransactionGuiClick(player, context, clickedItem, event.getInventory());
             return;
@@ -60,8 +80,8 @@ public class ShopListener implements Listener {
             handlePaginatedShopClick(event, player, pageInfo);
             return;
         }
-        if (shopGuiManager.isMainMenu(event.getView())) {
-            handleMainMenuClick(event, player, clickedItem);
+        if (shopGuiManager.isMainMenu(event.getView()) || shopGuiManager.isRecentPurchasesMenu(event.getView())) {
+            handleMenuClick(event, player, clickedItem);
         }
     }
 
@@ -133,20 +153,33 @@ public class ShopListener implements Listener {
         Shop openShop = shopManager.getShop(pageInfo.shopId());
         if (openShop == null) return;
         int clickedSlot = event.getRawSlot();
+        ItemStack clickedItem = event.getCurrentItem();
+        // --- Next Page ---
         PaginationItem nextPage = openShop.paginationItems().get("next_page");
         if (nextPage != null && clickedSlot == nextPage.slot()) {
-            shopGuiManager.openShop(player, pageInfo.shopId(), pageInfo.currentPage() + 1);
-            return;
+            ItemStack expected = shopGuiManager.createPaginationItemStack(nextPage);
+            if (clickedItem != null && clickedItem.isSimilar(expected)) {
+                shopGuiManager.openShop(player, pageInfo.shopId(), pageInfo.currentPage() + 1);
+                return;
+            }
         }
+        // --- Previous Page ---
         PaginationItem prevPage = openShop.paginationItems().get("previous_page");
         if (prevPage != null && clickedSlot == prevPage.slot()) {
-            shopGuiManager.openShop(player, pageInfo.shopId(), pageInfo.currentPage() - 1);
-            return;
+            ItemStack expected = shopGuiManager.createPaginationItemStack(prevPage);
+            if (clickedItem != null && clickedItem.isSimilar(expected)) {
+                shopGuiManager.openShop(player, pageInfo.shopId(), pageInfo.currentPage() - 1);
+                return;
+            }
         }
+        // --- Back to Menu ---
         PaginationItem backToMenu = openShop.paginationItems().get("back_to_menu");
         if (backToMenu != null && clickedSlot == backToMenu.slot()) {
-            shopGuiManager.openMainMenu(player);
-            return;
+            ItemStack expected = shopGuiManager.createPaginationItemStack(backToMenu);
+            if (clickedItem != null && clickedItem.isSimilar(expected)) {
+                shopGuiManager.openMainMenu(player);
+                return;
+            }
         }
         ShopItem shopItem = openShop.items().stream()
                 .filter(item -> item.getAssignedSlot() == clickedSlot).findFirst().orElse(null);
@@ -209,6 +242,8 @@ public class ShopListener implements Listener {
             if (action != null && action.startsWith("shop:")) {
                 String shopId = action.substring(5);
                 shopGuiManager.openShop(player, shopId, 0);
+            } else if ("recent_purchases".equals(action)) {
+                shopGuiManager.openRecentPurchasesMenu(player);
             }
         }
     }
@@ -235,5 +270,16 @@ public class ShopListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         shopGuiManager.onGuiClose(event.getPlayer());
         shopGuiManager.clearTransactionContext(event.getPlayer());
+    }
+
+    // Helper to get a field by reflection (for action field)
+    private Object getField(Object obj, String fieldName) {
+        try {
+            java.lang.reflect.Field f = obj.getClass().getDeclaredField(fieldName);
+            f.setAccessible(true);
+            return f.get(obj);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

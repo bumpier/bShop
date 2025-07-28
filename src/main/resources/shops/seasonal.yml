@@ -1,0 +1,84 @@
+# Example Seasonal Shop (Rotational)
+title: "Seasonal Shop"
+type: rotational
+size: 4
+rotation-interval: 24h
+slots: 5
+item-slots: [10, 12, 14, 16, 28]
+announce-rotation: true
+rotation-message: "<gold>The %shop% shop has rotated! Check out the new items!"
+
+pagination:
+  next_page:
+    material: LIME_STAINED_GLASS_PANE
+    display-name: "<#66ff2e><bold>ɴᴇxᴛ ᴘᴀɢᴇ →</bold>"
+    slot: 35
+  previous_page:
+    material: RED_STAINED_GLASS_PANE
+    display-name: "<#e42121><bold>← ᴘʀᴇᴠɪᴏᴜs ᴘᴀɢᴇ</bold>"
+    slot: 27
+  back_to_menu:
+    material: BARRIER
+    display-name: "<#e42121><bold>ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴍᴇɴᴜ</bold>"
+    lore: ["<#BDBDBD><i>Return to shop categories.</i>"]
+    slot: 31
+    action: "back_to_main_menu"
+  filler:
+    material: GRAY_STAINED_GLASS_PANE
+    display-name: " "
+
+featured-items:
+  - id: rare_sword
+    material: DIAMOND_SWORD
+    display-name: "<gold>Rare Sword"
+    lore:
+      - "<gray>Only available this season!"
+    buy-price: 5000
+    sell-price: 2500
+    buy-limit: 1
+    slot: 20
+  - id: elytra
+    material: ELYTRA
+    display-name: "<aqua>Wings of Flight"
+    lore:
+      - "<gray>Soar through the skies!"
+    buy-price: 20000
+    sell-price: 10000
+    buy-limit: 1
+    slot: 24
+featured-slots: [20, 24]
+
+items:
+  - id: magic_apple
+    material: ENCHANTED_GOLDEN_APPLE
+    display-name: "<light_purple>Magic Apple"
+    lore:
+      - "<gray>Restores all your health!"
+    buy-price: 10000
+    sell-price: 5000
+    buy-limit: 2
+  - id: emerald
+    material: EMERALD
+    display-name: "<green>Emerald"
+    lore:
+      - "<gray>Trade for rare goods."
+    buy-price: 100
+    sell-price: 50
+    buy-limit: 16
+  - id: mystery_box
+    material: CHEST
+    display-name: "<yellow>Mystery Box"
+    lore:
+      - "<gray>Contains a random surprise!"
+    buy-price: 2500
+    sell-price: 0
+    buy-limit: 1
+  - id: deco_chest
+    material: ENDER_CHEST
+    display-name: "<aqua>Special Chest"
+    lore:
+      - "<gray>Contains rare items!"
+    slot: 22
+    buy-price: -1
+    sell-price: -1
+    action: "none" 

@@ -19,7 +19,7 @@ public class MessageService {
     private final LegacyComponentSerializer legacySerializer;
     private final ConfigManager messagesConfig;
     private final BukkitAudiences adventure;
-    private final String prefix;
+    public final String prefix;
 
     public MessageService(BShop plugin, ConfigManager messagesConfig) {
         this.adventure = plugin.adventure();
@@ -50,6 +50,24 @@ public class MessageService {
         return legacySerializer.serialize(component);
     }
 
+    public void send(CommandSender sender, String key, java.util.Map<String, String> placeholders) {
+        String message = messagesConfig.getConfig().getString(key);
+        if (message == null || message.isEmpty()) {
+            Component errorMsg = Component.text("Missing message in messages.yml: " + key)
+                    .color(net.kyori.adventure.text.format.NamedTextColor.RED);
+            adventure.sender(sender).sendMessage(errorMsg);
+            return;
+        }
+        if (placeholders != null) {
+            for (var entry : placeholders.entrySet()) {
+                message = message.replace("%" + entry.getKey() + "%", entry.getValue());
+            }
+        }
+        message = message.replace("%prefix%", this.prefix);
+        TagResolver prefixResolver = Placeholder.component("prefix", parse(this.prefix));
+        adventure.sender(sender).sendMessage(parse(message, prefixResolver));
+    }
+
     public void send(CommandSender sender, String key, TagResolver... resolvers) {
         String message = messagesConfig.getConfig().getString(key);
         if (message == null || message.isEmpty()) {
@@ -58,12 +76,31 @@ public class MessageService {
             adventure.sender(sender).sendMessage(errorMsg);
             return;
         }
-
-        // Correctly merge resolvers
+        // Build a map for %placeholder% replacement from TagResolvers
+        java.util.Map<String, String> placeholderMap = new java.util.HashMap<>();
+        if (resolvers != null) {
+            for (TagResolver resolver : resolvers) {
+                // Only handle Placeholder.unparsed
+                if (resolver.getClass().getSimpleName().equals("Unparsed")) {
+                    try {
+                        var nameField = resolver.getClass().getDeclaredField("name");
+                        nameField.setAccessible(true);
+                        String name = (String) nameField.get(resolver);
+                        var valueField = resolver.getClass().getDeclaredField("value");
+                        valueField.setAccessible(true);
+                        String value = (String) valueField.get(resolver);
+                        placeholderMap.put(name, value);
+                    } catch (Exception ignored) {}
+                }
+                // If Placeholder.component, skip (MiniMessage handles it, but not for %placeholder% style)
+            }
+        }
+        // Always do string replacement for all %placeholder% in the message
+        for (var entry : placeholderMap.entrySet()) {
+            message = message.replace("%" + entry.getKey() + "%", entry.getValue());
+        }
+        message = message.replace("%prefix%", this.prefix);
         TagResolver prefixResolver = Placeholder.component("prefix", parse(this.prefix));
-        TagResolver finalResolvers = TagResolver.resolver(prefixResolver, TagResolver.resolver(resolvers));
-
-        // Use the Adventure platform to send the component
-        adventure.sender(sender).sendMessage(parse(message, finalResolvers));
+        adventure.sender(sender).sendMessage(parse(message, prefixResolver));
     }
 }

@@ -1,5 +1,5 @@
 name: bShop
-version: 1.0.0
+version: 1.1
 main: net.bumpier.bshop.BShop
 api-version: 1.20
 author: bumpier.dev

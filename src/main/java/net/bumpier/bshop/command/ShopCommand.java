@@ -43,6 +43,11 @@ public class ShopCommand implements CommandExecutor {
             return true;
         }
 
+        if (subCommand.equals("rotate")) {
+            handleRotate(sender, args);
+            return true;
+        }
+
         if (!(sender instanceof Player)) {
             messageService.send(sender, "player_only_command");
             return true;
@@ -56,8 +61,8 @@ public class ShopCommand implements CommandExecutor {
             messageService.send(sender, "no_permission");
             return;
         }
-
-        // Use the configurable messages from messages.yml
+        // Reload main config
+        net.bumpier.bshop.BShop.getInstance().reloadConfig();
         messageService.send(sender, "admin.reload_start");
         moduleManager.reloadModules();
         messageService.send(sender, "admin.reload_complete");
@@ -65,9 +70,119 @@ public class ShopCommand implements CommandExecutor {
 
     private void handleOpenCategory(Player player, String shopId) {
         if (shopManager.getShop(shopId) == null) {
-            messageService.send(player, "shop.not_found", Placeholder.unparsed("id", shopId));
+            messageService.send(player, "shop.not_found", Placeholder.unparsed("shop", shopId));
             return;
         }
         shopGuiManager.openShop(player, shopId, 0);
+    }
+
+    private void handleRotate(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("bshop.admin.rotate")) {
+            messageService.send(sender, "no_permission");
+            return;
+        }
+        if (args.length < 2) {
+            messageService.send(sender, "admin.rotate_usage");
+            return;
+        }
+        String shopId = args[1].toLowerCase();
+        var shop = shopManager.getShop(shopId);
+        if (shop == null || shop.type() == null || !shop.type().equalsIgnoreCase("rotational")) {
+            messageService.send(sender, "admin.rotate_not_rotational", Placeholder.unparsed("shop", shopId));
+            return;
+        }
+        // Rotate items immediately
+        java.util.List<net.bumpier.bshop.shop.model.ShopItem> shuffled = new java.util.ArrayList<>(shop.items());
+        java.util.Collections.shuffle(shuffled);
+        java.util.List<net.bumpier.bshop.shop.model.ShopItem> newActive = new java.util.ArrayList<>(shuffled.subList(0, Math.min(shop.slots(), shuffled.size())));
+        try {
+            java.lang.reflect.Field f = shop.getClass().getDeclaredField("activeItems");
+            f.setAccessible(true);
+            f.set(shop, newActive);
+        } catch (Exception ignored) {}
+        // Reset next rotation time
+        long now = System.currentTimeMillis();
+        long intervalMs = shopManager.parseInterval(shop.rotationInterval());
+        java.lang.reflect.Field nextRotationTimesField;
+        try {
+            nextRotationTimesField = shopManager.getClass().getDeclaredField("nextRotationTimes");
+            nextRotationTimesField.setAccessible(true);
+            java.util.Map<String, Long> nextRotationTimes = (java.util.Map<String, Long>) nextRotationTimesField.get(shopManager);
+            nextRotationTimes.put(shop.id(), now + intervalMs);
+        } catch (Exception ignored) {}
+        // Announce rotation if enabled
+        java.lang.reflect.Field shopAnnouncementsField;
+        try {
+            shopAnnouncementsField = shopManager.getClass().getDeclaredField("shopAnnouncements");
+            shopAnnouncementsField.setAccessible(true);
+            java.util.Map<String, ?> shopAnnouncements = (java.util.Map<String, ?>) shopAnnouncementsField.get(shopManager);
+            Object announcement = shopAnnouncements.get(shop.id());
+            if (announcement != null) {
+                java.lang.reflect.Field announceField = announcement.getClass().getDeclaredField("announce");
+                java.lang.reflect.Field messageField = announcement.getClass().getDeclaredField("message");
+                announceField.setAccessible(true);
+                messageField.setAccessible(true);
+                boolean announce = announceField.getBoolean(announcement);
+                String msg = (String) messageField.get(announcement);
+                if (announce) {
+                    org.bukkit.Bukkit.broadcastMessage(msg.replace("%shop%", shop.title()));
+                }
+            }
+        } catch (Exception ignored) {}
+        messageService.send(sender, "admin.rotate_success", Placeholder.unparsed("shop", shopId));
+    }
+}
+            shopAnnouncementsField.setAccessible(true);
+            java.util.Map<String, ?> shopAnnouncements = (java.util.Map<String, ?>) shopAnnouncementsField.get(shopManager);
+            Object announcement = shopAnnouncements.get(shop.id());
+            if (announcement != null) {
+                java.lang.reflect.Field announceField = announcement.getClass().getDeclaredField("announce");
+                java.lang.reflect.Field messageField = announcement.getClass().getDeclaredField("message");
+                announceField.setAccessible(true);
+                messageField.setAccessible(true);
+                boolean announce = announceField.getBoolean(announcement);
+                String msg = (String) messageField.get(announcement);
+                if (announce) {
+                    org.bukkit.Bukkit.broadcastMessage(msg.replace("%shop%", shop.title()));
+                }
+            }
+        } catch (Exception ignored) {}
+        messageService.send(sender, "admin.rotate_success", Placeholder.unparsed("shop", shopId));
+    }
+
+    private void handleMultiplier(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("bshop.multiplier.check")) {
+            messageService.send(sender, "no_permission");
+            return;
+        }
+
+        if (args.length < 2) {
+            // Check own multiplier
+            if (!(sender instanceof Player)) {
+                messageService.send(sender, "player_only_command");
+                return;
+            }
+            Player player = (Player) sender;
+            String multiplierDisplay = multiplierService.getMultiplierDisplay(player);
+            messageService.send(player, "multiplier.current", Placeholder.unparsed("multiplier", multiplierDisplay));
+            return;
+        }
+
+        // Check another player's multiplier (admin only)
+        if (!sender.hasPermission("bshop.multiplier.check.others")) {
+            messageService.send(sender, "no_permission");
+            return;
+        }
+
+        Player targetPlayer = org.bukkit.Bukkit.getPlayer(args[1]);
+        if (targetPlayer == null) {
+            messageService.send(sender, "player_not_found", Placeholder.unparsed("player", args[1]));
+            return;
+        }
+
+        String multiplierDisplay = multiplierService.getMultiplierDisplay(targetPlayer);
+        messageService.send(sender, "multiplier.other", 
+            Placeholder.unparsed("player", targetPlayer.getName()),
+            Placeholder.unparsed("multiplier", multiplierDisplay));
     }
 }

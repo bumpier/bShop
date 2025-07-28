@@ -43,6 +43,13 @@ public class ShopGuiManager {
     private final Map<UUID, PageInfo> openShopInventories = new ConcurrentHashMap<>();
     private final Map<UUID, TransactionContext> activeTransactions = new ConcurrentHashMap<>();
 
+    // --- Recent Purchases Tracking ---
+    private final java.util.concurrent.ConcurrentHashMap<java.util.UUID, java.util.Deque<RecentTransaction>> recentTransactions = new java.util.concurrent.ConcurrentHashMap<>();
+    private static final int MAX_RECENT = 7;
+
+    // --- Recent Purchases Pagination ---
+    private final java.util.concurrent.ConcurrentHashMap<java.util.UUID, Integer> recentPurchasesPage = new java.util.concurrent.ConcurrentHashMap<>();
+
     public ShopGuiManager(BShop plugin, ShopManager shopManager, MessageService messageService, ConfigManager guisConfig) {
         this.plugin = plugin;
         this.shopManager = shopManager;
@@ -71,6 +78,14 @@ public class ShopGuiManager {
         return configTitle.equals(inventoryTitle);
     }
 
+    public boolean isRecentPurchasesMenu(org.bukkit.inventory.InventoryView view) {
+        ConfigurationSection guiConfig = guisConfig.getConfig().getConfigurationSection("recent-purchases-menu");
+        if (guiConfig == null) return false;
+        String configTitle = messageService.serialize(messageService.parse(guiConfig.getString("title", "")));
+        String inventoryTitle = view.getTitle();
+        return configTitle.equals(inventoryTitle);
+    }
+
     // --- GUI Openers ---
 
     public void openMainMenu(Player player) {
@@ -90,13 +105,28 @@ public class ShopGuiManager {
                 String path = key;
                 Material material = Material.matchMaterial(itemsConfig.getString(path + ".material", "STONE"));
                 if (material == null) continue;
-                ItemBuilder builder = new ItemBuilder(plugin, material, messageService)
-                        .withDisplayName(itemsConfig.getString(path + ".display-name"))
-                        .withLore(itemsConfig.getStringList(path + ".lore"))
-                        .withCustomModelData(itemsConfig.getInt(path + ".custom-model-data", 0));
+                String base64 = itemsConfig.getString(path + ".base64-head");
+                List<String> lore = itemsConfig.getStringList(path + ".lore");
+                String displayName = itemsConfig.getString(path + ".display-name");
+                int customModelData = itemsConfig.getInt(path + ".custom-model-data", 0);
                 String action = itemsConfig.getString(path + ".action");
-                builder.withPDCString("bshop_action", action);
-                inventory.setItem(itemsConfig.getInt(path + ".slot"), builder.build());
+                ItemStack item;
+                if (base64 != null && !base64.isEmpty() && material == Material.PLAYER_HEAD) {
+                    item = ItemBuilder.createBase64Head(base64, displayName, lore, customModelData, messageService);
+                } else {
+                    item = new ItemBuilder(plugin, material, messageService)
+                        .withDisplayName(displayName)
+                        .withLore(lore)
+                        .withCustomModelData(customModelData)
+                        .build();
+                }
+                ItemMeta meta = item.getItemMeta();
+                if (meta != null && action != null && !action.isEmpty()) {
+                    NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                    meta.getPersistentDataContainer().set(keyNS, PersistentDataType.STRING, action);
+                    item.setItemMeta(meta);
+                }
+                inventory.setItem(itemsConfig.getInt(path + ".slot"), item);
             }
         }
 
@@ -113,22 +143,39 @@ public class ShopGuiManager {
             }
         }
         player.openInventory(inventory);
+        ConfigurationSection walletConfig = guiConfig.getConfigurationSection("items.wallet");
+        addWalletItem(inventory, walletConfig, player);
     }
 
     public void openShop(Player player, String shopId, int page) {
         Shop shop = shopManager.getShop(shopId);
         if (shop == null) {
-            messageService.send(player, "shop.not_found", Placeholder.unparsed("id", shopId));
+            messageService.send(player, "shop.not_found", Placeholder.unparsed("shop", shopId));
             return;
         }
+        // Load wallet config from /shops/{shopId}.yml
+        ConfigManager shopConfig = new ConfigManager(plugin, "shops/" + shopId + ".yml");
+        ConfigurationSection walletConfig = shopConfig.getConfig().getConfigurationSection("wallet");
+        if (walletConfig == null) {
+            // Fallback to global wallet config (main-menu)
+            walletConfig = guisConfig.getConfig().getConfigurationSection("main-menu.items.wallet");
+        }
+        // If walletConfig is still null, just skip adding the wallet item
         String inventoryTitle = messageService.serialize(messageService.parse(shop.title()));
         Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), shop.size(), inventoryTitle);
+        List<ShopItem> displayItems;
+        if (shop.type() != null && shop.type().equalsIgnoreCase("rotational") && shop.activeItems() != null) {
+            displayItems = shop.activeItems();
+        } else {
+            displayItems = shop.items();
+        }
+        // Use displayItems instead of shop.items() for flow and pinned logic
         List<Integer> reservedSlots = shop.paginationItems().entrySet().stream()
-                .filter(entry -> !entry.getKey().equals("filler")) // Exclude filler as it doesn't have a specific slot
+                .filter(entry -> !entry.getKey().equals("filler"))
                 .map(entry -> entry.getValue().slot())
                 .collect(Collectors.toList());
         List<Integer> takenSlots = new ArrayList<>(reservedSlots);
-        shop.items().stream().filter(ShopItem::isPinned).filter(item -> item.getPinnedPage().orElse(-1) == page)
+        displayItems.stream().filter(ShopItem::isPinned).filter(item -> item.getPinnedPage().orElse(-1) == page)
                 .forEach(item -> {
                     int slot = item.getPinnedSlot().get();
                     if (slot < shop.size() && !takenSlots.contains(slot)) {
@@ -137,11 +184,26 @@ public class ShopGuiManager {
                         takenSlots.add(slot);
                     }
                 });
-        List<Integer> availableSlots = new ArrayList<>();
-        for (int i = 0; i < shop.size(); i++) {
-            if (!takenSlots.contains(i)) availableSlots.add(i);
+        // Place featured items in featured slots for rotational shops
+        if (shop.type() != null && shop.type().equalsIgnoreCase("rotational") && shop.featuredItems() != null && shop.featuredSlots() != null) {
+            for (int i = 0; i < Math.min(shop.featuredItems().size(), shop.featuredSlots().size()); i++) {
+                ShopItem featured = shop.featuredItems().get(i);
+                int slot = shop.featuredSlots().get(i);
+                featured.setAssignedSlot(slot);
+                inventory.setItem(slot, createShopItemStack(featured));
+                takenSlots.add(slot);
+            }
         }
-        List<ShopItem> flowItems = shop.items().stream().filter(item -> !item.isPinned()).collect(Collectors.toList());
+        List<Integer> availableSlots;
+        if (shop.type() != null && shop.type().equalsIgnoreCase("rotational") && shop.itemSlots() != null && !shop.itemSlots().isEmpty()) {
+            availableSlots = new ArrayList<>(shop.itemSlots());
+        } else {
+            availableSlots = new ArrayList<>();
+            for (int i = 0; i < shop.size(); i++) {
+                if (!takenSlots.contains(i)) availableSlots.add(i);
+            }
+        }
+        List<ShopItem> flowItems = displayItems.stream().filter(item -> !item.isPinned()).collect(Collectors.toList());
         int itemsPerPage = availableSlots.size();
         int totalFlowPages = itemsPerPage > 0 ? (int) Math.ceil((double) flowItems.size() / itemsPerPage) : 0;
         int startIndex = page * itemsPerPage;
@@ -154,7 +216,7 @@ public class ShopGuiManager {
                 inventory.setItem(slot, createShopItemStack(shopItem));
             }
         }
-        int maxPinnedPage = shop.items().stream().filter(ShopItem::isPinned)
+        int maxPinnedPage = displayItems.stream().filter(ShopItem::isPinned)
                 .mapToInt(item -> item.getPinnedPage().orElse(0)).max().orElse(0);
         int totalPages = Math.max(maxPinnedPage + 1, totalFlowPages);
 
@@ -162,7 +224,7 @@ public class ShopGuiManager {
         // Check for items on previous page
         boolean hasPrev = false;
         if (page > 0) {
-            boolean prevHasPinned = shop.items().stream().anyMatch(item -> item.isPinned() && item.getPinnedPage().orElse(-1) == (page - 1));
+            boolean prevHasPinned = displayItems.stream().anyMatch(item -> item.isPinned() && item.getPinnedPage().orElse(-1) == (page - 1));
             boolean prevHasFlow = false;
             if (itemsPerPage > 0) {
                 int prevStart = (page - 1) * itemsPerPage;
@@ -178,7 +240,7 @@ public class ShopGuiManager {
         // Check for items on next page
         boolean hasNext = false;
         if (page < totalPages - 1) {
-            boolean nextHasPinned = shop.items().stream().anyMatch(item -> item.isPinned() && item.getPinnedPage().orElse(-1) == (page + 1));
+            boolean nextHasPinned = displayItems.stream().anyMatch(item -> item.isPinned() && item.getPinnedPage().orElse(-1) == (page + 1));
             boolean nextHasFlow = false;
             if (itemsPerPage > 0) {
                 int nextStart = (page + 1) * itemsPerPage;
@@ -210,6 +272,9 @@ public class ShopGuiManager {
         
         player.openInventory(inventory);
         openShopInventories.put(player.getUniqueId(), new PageInfo(shopId, page));
+        if (walletConfig != null) {
+            addWalletItem(inventory, walletConfig, player);
+        }
     }
 
     public void openQuantityGui(Player player, ShopItem item, TransactionType type) {
@@ -282,17 +347,17 @@ public class ShopGuiManager {
                 
                 // Process placeholders in display name
                 String stacksDisplay = stacks == (int) stacks ? String.valueOf((int) stacks) : String.format("%.1f", stacks);
-                displayName = displayName.replace("{stacks}", stacksDisplay)
-                        .replace("{amount}", String.valueOf(totalAmount))
-                        .replace("{price}", String.format("%,.2f", totalPrice))
-                        .replace("{item_name}", shopItem.displayName());
+                displayName = displayName.replace("%stacks%", stacksDisplay)
+                        .replace("%amount%", String.valueOf(totalAmount))
+                        .replace("%price%", String.format("%,.2f", totalPrice))
+                        .replace("%item_name%", shopItem.displayName());
                 
                 // Process placeholders in lore
                 List<String> lore = itemConfig.getStringList("lore").stream()
-                        .map(line -> line.replace("{stacks}", stacksDisplay)
-                                .replace("{amount}", String.valueOf(totalAmount))
-                                .replace("{price}", String.format("%,.2f", totalPrice))
-                                .replace("{item_name}", shopItem.displayName()))
+                        .map(line -> line.replace("%stacks%", stacksDisplay)
+                                .replace("%amount%", String.valueOf(totalAmount))
+                                .replace("%price%", String.format("%,.2f", totalPrice))
+                                .replace("%item_name%", shopItem.displayName()))
                         .collect(Collectors.toList());
                 
                 ItemStack stackItem = new ItemBuilder(plugin, material, messageService)
@@ -368,26 +433,27 @@ public class ShopGuiManager {
         if (displayItemConfig != null) {
             // Use configured display item
             displayName = (type == TransactionType.BUY) ? 
-                displayItemConfig.getString("buy_display-name", "<green>Buying: {item_name}") : 
-                displayItemConfig.getString("sell_display-name", "<red>Selling: {item_name}");
+                displayItemConfig.getString("buy_display-name", "<green>Buying: %item_name%") : 
+                displayItemConfig.getString("sell_display-name", "<red>Selling: %item_name%");
             lore = displayItemConfig.getStringList("lore");
         } else {
             // Fallback to default format
-            displayName = (type == TransactionType.BUY) ? "<green>Buying: {item_name}" : "<red>Selling: {item_name}";
+            displayName = (type == TransactionType.BUY) ? "<green>Buying: %item_name%" : "<red>Selling: %item_name%";
             lore = List.of(
-                "<gray>Quantity: <yellow>{quantity}</yellow>",
-                "<gray>Price per item: <gold>${price_per_item}</gold>",
-                "<gray>Total Price: <gold>${total_price}</gold>"
+                "<gray>Quantity: <yellow>%quantity%</yellow>",
+                "<gray>Price per item: <gold>%price_per_item%</gold>",
+                "<gray>Total Price: <gold>%total_price%</gold>"
             );
         }
         
         // Replace placeholders
-        displayName = displayName.replace("{item_name}", item.displayName());
+        displayName = displayName.replace("%item_name%", item.displayName()).replace("%item%", item.displayName());
         List<String> processedLore = lore.stream()
-                .map(line -> line.replace("{quantity}", String.valueOf(quantity))
-                        .replace("{price_per_item}", String.format("%,.2f", pricePerItem))
-                        .replace("{total_price}", String.format("%,.2f", totalPrice))
-                        .replace("{item_name}", item.displayName()))
+                .map(line -> line.replace("%quantity%", String.valueOf(quantity))
+                        .replace("%price_per_item%", String.format("%,.2f", pricePerItem))
+                        .replace("%total_price%", String.format("%,.2f", totalPrice))
+                        .replace("%item_name%", item.displayName())
+                        .replace("%item%", item.displayName()))
                 .collect(Collectors.toList());
         
         ItemStack displayItem = new ItemBuilder(plugin, item.material(), messageService)
@@ -442,22 +508,280 @@ public class ShopGuiManager {
         }
     }
 
-    private ItemStack createShopItemStack(ShopItem shopItem) {
-        List<String> lore = shopItem.lore() != null ? shopItem.lore() : java.util.Collections.emptyList();
-        List<String> formattedLore = lore.stream()
-                .map(line -> line.replace("${buy_price}", String.format("%,.2f", shopItem.buyPrice()))
-                        .replace("${sell_price}", String.format("%,.2f", shopItem.sellPrice())))
-                .collect(Collectors.toList());
-        if (shopItem.getBase64Head() != null && !shopItem.getBase64Head().isEmpty()) {
-            return ItemBuilder.createBase64Head(shopItem.getBase64Head(), shopItem.displayName(), formattedLore, shopItem.customModelData());
+    private String formatTimer(long millis) {
+        long seconds = millis / 1000;
+        long hours = seconds / 3600;
+        long minutes = (seconds % 3600) / 60;
+        long secs = seconds % 60;
+        if (hours > 0) {
+            return String.format("%02dh %02dm %02ds", hours, minutes, secs);
+        } else if (minutes > 0) {
+            return String.format("%02dm %02ds", minutes, secs);
+        } else {
+            return String.format("%02ds", secs);
         }
-        return new ItemBuilder(plugin, shopItem.material(), messageService)
-                .withDisplayName(shopItem.displayName()).withLore(formattedLore)
-                .withCustomModelData(shopItem.customModelData()).build();
     }
 
-    private ItemStack createPaginationItemStack(PaginationItem paginationItem) {
+    private ItemStack createShopItemStack(ShopItem shopItem) {
+        // Build the item stack using the ItemBuilder constructor and chain methods
+        ItemBuilder builder = new ItemBuilder(plugin, shopItem.material(), messageService)
+                .withDisplayName(shopItem.displayName())
+                .withLore(shopItem.lore())
+                .withCustomModelData(shopItem.customModelData());
+        ItemStack itemStack = builder.build();
+        ItemMeta meta = itemStack.getItemMeta();
+        if (meta != null) {
+            List<String> lore = meta.getLore();
+            if (lore != null) {
+                String shopId = null;
+                for (Map.Entry<UUID, PageInfo> entry : openShopInventories.entrySet()) {
+                    if (entry.getValue().shopId() != null) {
+                        shopId = entry.getValue().shopId();
+                        break;
+                    }
+                }
+                if (shopId != null) {
+                    long timeLeft = shopManager.getTimeUntilNextRotation(shopId);
+                    String timer = formatTimer(timeLeft);
+                    List<String> newLore = new ArrayList<>();
+                    for (String line : lore) {
+                        newLore.add(line.replace("%timer%", timer));
+                    }
+                    meta.setLore(newLore);
+                }
+            }
+            itemStack.setItemMeta(meta);
+        }
+        return itemStack;
+    }
+
+    public ItemStack createPaginationItemStack(PaginationItem paginationItem) {
         return new ItemBuilder(plugin, paginationItem.material(), messageService)
                 .withDisplayName(paginationItem.displayName()).withLore(paginationItem.lore()).build();
     }
+
+    public void openRecentPurchasesMenu(Player player) {
+        openRecentPurchasesMenu(player, 0);
+    }
+
+    public void openRecentPurchasesMenu(Player player, int page) {
+        ConfigurationSection guiConfig = guisConfig.getConfig().getConfigurationSection("recent-purchases-menu");
+        if (guiConfig == null) {
+            messageService.send(player, "gui.recent_purchases_not_configured");
+            return;
+        }
+        String title = guiConfig.getString("title", "Recent Purchases");
+        int size = guiConfig.getInt("size", 3) * 9;
+        String serializedTitle = messageService.serialize(messageService.parse(title));
+        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), size, serializedTitle);
+
+        // --- Retrieve recent purchases ---
+        List<RecentTransaction> allRecent = getRecentTransactionsForPlayer(player);
+        int itemsPerPage = 7;
+        int totalPages = (int) Math.ceil((double) allRecent.size() / itemsPerPage);
+        if (page < 0) page = 0;
+        if (page >= totalPages) page = Math.max(0, totalPages - 1);
+        recentPurchasesPage.put(player.getUniqueId(), page);
+        int start = page * itemsPerPage;
+        int end = Math.min(start + itemsPerPage, allRecent.size());
+        List<RecentTransaction> recent = allRecent.subList(start, end);
+
+        ConfigurationSection itemsConfig = guiConfig.getConfigurationSection("items");
+        if (itemsConfig != null) {
+            int txIndex = 0;
+            for (String key : itemsConfig.getKeys(false)) {
+                ConfigurationSection itemCfg = itemsConfig.getConfigurationSection(key);
+                if (itemCfg == null) continue;
+                int slot = itemCfg.getInt("slot");
+                String displayName = itemCfg.getString("display-name", "");
+                String materialStr = itemCfg.getString("material", "STONE");
+                List<String> lore = itemCfg.getStringList("lore");
+                String action = itemCfg.getString("action");
+                Material material = Material.matchMaterial(materialStr);
+                if (key.startsWith("purchase_") && txIndex < recent.size()) {
+                    RecentTransaction tx = recent.get(txIndex++);
+                    displayName = replaceStandardPlaceholders(displayName, tx);
+                    material = Material.matchMaterial(tx.material);
+                    List<String> processedLore = replaceStandardPlaceholders(lore, tx);
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.STONE, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(processedLore)
+                            .build();
+                    inventory.setItem(slot, item);
+                } else if ("back".equals(key)) {
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.BARRIER, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null && action != null && !action.isEmpty()) {
+                        NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                        meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, "back_to_main");
+                        item.setItemMeta(meta);
+                    }
+                    inventory.setItem(slot, item);
+                } else if ("next_page".equals(key) && page < totalPages - 1) {
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.ARROW, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null && action != null && !action.isEmpty()) {
+                        NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                        meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, action);
+                        item.setItemMeta(meta);
+                    }
+                    inventory.setItem(slot, item);
+                } else if ("previous_page".equals(key) && page > 0) {
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.ARROW, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null && action != null && !action.isEmpty()) {
+                        NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                        meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, action);
+                        item.setItemMeta(meta);
+                    }
+                    inventory.setItem(slot, item);
+                }
+            }
+        }
+        // Filler
+        ConfigurationSection fillerConfig = guiConfig.getConfigurationSection("filler");
+        if (fillerConfig != null && fillerConfig.getBoolean("enabled", false)) {
+            Material fillerMat = Material.matchMaterial(fillerConfig.getString("material", "GRAY_STAINED_GLASS_PANE"));
+            if (fillerMat != null) {
+                ItemStack fillerStack = new ItemBuilder(plugin, fillerMat, messageService)
+                        .withDisplayName(fillerConfig.getString("display-name", " ")).build();
+                for (int i = 0; i < size; i++) {
+                    if (inventory.getItem(i) == null) {
+                        inventory.setItem(i, fillerStack);
+                    }
+                }
+            }
+        }
+        player.openInventory(inventory);
+        ConfigurationSection walletConfig = guiConfig.getConfigurationSection("items.wallet");
+        addWalletItem(inventory, walletConfig, player);
+    }
+
+    public void handleRecentPurchasesPageAction(Player player, String action) {
+        int page = recentPurchasesPage.getOrDefault(player.getUniqueId(), 0);
+        if ("recent_purchases_next".equals(action)) {
+            openRecentPurchasesMenu(player, page + 1);
+        } else if ("recent_purchases_prev".equals(action)) {
+            openRecentPurchasesMenu(player, page - 1);
+        }
+    }
+
+    // Temporary stub for recent transactions
+    public List<RecentTransaction> getRecentTransactionsForPlayer(Player player) {
+        java.util.Deque<RecentTransaction> deque = recentTransactions.get(player.getUniqueId());
+        if (deque == null) return java.util.Collections.emptyList();
+        return new java.util.ArrayList<>(deque);
+    }
+
+    public void recordRecentTransaction(Player player, String shopId, String itemName, String material, int amount, double price, String type, String itemId) {
+        // For now, use dummy values for shopName, transactionId, and balanceAfter
+        String shopName = "N/A";
+        String transactionId = java.util.UUID.randomUUID().toString().substring(0, 8);
+        double balanceAfter = 0.0;
+        if (player != null && player.isOnline()) {
+            balanceAfter = plugin.getEconomy().getBalance(player);
+        }
+        java.util.Deque<RecentTransaction> deque = recentTransactions.computeIfAbsent(player.getUniqueId(), k -> new java.util.LinkedList<>());
+        String date = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").format(java.time.LocalDateTime.now());
+        deque.addFirst(new RecentTransaction(itemName, material, amount, price, type, date, shopName, transactionId, balanceAfter, itemId));
+        while (deque.size() > MAX_RECENT) deque.removeLast();
+        // Log to file
+        net.bumpier.bshop.shop.ui.ShopTransactionLogger.logTransaction(
+            player.getUniqueId().toString(), player.getName(), shopId, itemName, material, amount, price, type, balanceAfter, transactionId, date, itemId
+        );
+    }
+
+    // Update RecentTransaction class
+    private static class RecentTransaction {
+        public String itemName;
+        public String material;
+        public int amount;
+        public double price;
+        public String type; // "Buy" or "Sell"
+        public String date;
+        public String shopName;
+        public String transactionId;
+        public double balanceAfter;
+        public String itemId;
+        public RecentTransaction(String itemName, String material, int amount, double price, String type, String date, String shopName, String transactionId, double balanceAfter, String itemId) {
+            this.itemName = itemName;
+            this.material = material;
+            this.amount = amount;
+            this.price = price;
+            this.type = type;
+            this.date = date;
+            this.shopName = shopName;
+            this.transactionId = transactionId;
+            this.balanceAfter = balanceAfter;
+            this.itemId = itemId;
+        }
+    }
+
+    // Utility to replace standard placeholders in a string (now only supports %placeholder% style)
+    private String replaceStandardPlaceholders(String text, RecentTransaction tx) {
+        return text.replace("%item%", tx.itemName)
+                   .replace("%amount%", String.valueOf(tx.amount))
+                   .replace("%price%", String.format("%,.2f", tx.price))
+                   .replace("%type%", tx.type)
+                   .replace("%date%", tx.date)
+                   .replace("%shop%", tx.shopName)
+                   .replace("%transaction_id%", tx.transactionId)
+                   .replace("%balance_after%", String.format("%,.2f", tx.balanceAfter))
+                   .replace("%item_id%", tx.itemId);
+    }
+    private List<String> replaceStandardPlaceholders(List<String> lines, RecentTransaction tx) {
+        List<String> out = new java.util.ArrayList<>();
+        for (String line : lines) out.add(replaceStandardPlaceholders(line, tx));
+        return out;
+    }
+
+    // Helper to add wallet item to a GUI
+    private void addWalletItem(Inventory inventory, ConfigurationSection walletConfig, Player player) {
+        if (walletConfig == null) return;
+        Material material = Material.matchMaterial(walletConfig.getString("material", "GOLD_INGOT"));
+        int slot = walletConfig.getInt("slot", 4);
+        String displayName = walletConfig.getString("display-name", "<gold><bold>Wallet</bold>");
+        List<String> lore = walletConfig.getStringList("lore");
+        String action = walletConfig.getString("action", "wallet");
+        // Check for PlaceholderAPI
+        boolean papiPresent = false;
+        try {
+            Class.forName("me.clip.placeholderapi.PlaceholderAPI");
+            papiPresent = org.bukkit.Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI");
+        } catch (ClassNotFoundException ignored) {}
+        if (papiPresent) {
+            try {
+                Class<?> papi = Class.forName("me.clip.placeholderapi.PlaceholderAPI");
+                java.lang.reflect.Method setPlaceholders = papi.getMethod("setPlaceholders", org.bukkit.entity.Player.class, String.class);
+                displayName = (String) setPlaceholders.invoke(null, player, displayName);
+                List<String> parsedLore = new java.util.ArrayList<>();
+                for (String line : lore) {
+                    parsedLore.add((String) setPlaceholders.invoke(null, player, line));
+                }
+                lore = parsedLore;
+            } catch (Exception ignored) {}
+        }
+        ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.GOLD_INGOT, messageService)
+                .withDisplayName(displayName)
+                .withLore(lore)
+                .build();
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null && action != null && !action.isEmpty()) {
+            NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+            meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, action);
+            item.setItemMeta(meta);
+        }
+        inventory.setItem(slot, item);
+    }
+
+    public ShopManager getShopManager() { return shopManager; }
 }

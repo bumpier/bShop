@@ -1,3 +1,25 @@
+# bShop GUI Configuration
+#
+# Standard Actions:
+#   wallet                - Opens wallet info or does nothing (default for wallet icon)
+#   back_to_main          - Returns to main menu
+#   recent_purchases      - Opens recent purchases GUI
+#   recent_purchases_next - Next page in recent purchases
+#   recent_purchases_prev - Previous page in recent purchases
+#   shop:%shop%           - Opens the specified shop
+#
+# Standard Placeholders (for display-name and lore):
+#   %item%            - Name of the item
+#   %amount%          - Amount bought/sold
+#   %price%           - Price of the transaction
+#   %type%            - Buy/Sell
+#   %date%            - Date of transaction
+#   %shop%            - Name of the shop
+#   %transaction_id%  - Unique transaction ID
+#   %balance_after%   - Player's balance after transaction
+#
+# PlaceholderAPI placeholders (e.g. %vault_eco_balance_formatted%) are also supported in lore/display-name where applicable.
+
 # bShop Configuration
 
 # Database settings
@@ -10,3 +32,45 @@ database:
     database: "bshop"
     username: "user"
     password: "password"
+
+logging:
+  enabled: true
+  rotate: true
+  max_file_size_mb: 10
+  max_backup_files: 5
+
+alerts:
+  enabled: true
+  threshold: 100.0  # Only alert if transaction price is greater than this
+  permission: "bshop.alert"  # Only send to players with this permission
+  message: "%prefix%<green>%player% %type% <aqua>%amount%x %item_id%</aqua> for <gold>$%price%</gold>."
+  discord_webhook_url: "WEBHOOK_URL HERE"
+  discord_payload: |
+    {
+      "username": "bShop Alerts",
+      "avatar_url": "https://cdn-icons-png.flaticon.com/512/3523/3523887.png",
+      "content": "",
+      "embeds": [
+        {
+          "title": "Shop Alert",
+          "description": "**%player%** %type% **%amount%x %item_id%** for **$%price%**",
+          "color": 16711680,
+          "fields": [
+            { "name": "Player", "value": "%player%", "inline": true },
+            { "name": "Type", "value": "%type%", "inline": true },
+            { "name": "Amount", "value": "%amount%", "inline": true },
+            { "name": "Item", "value": "%item_id%", "inline": true },
+            { "name": "Price", "value": "$%price%", "inline": true },
+            { "name": "Shop", "value": "%shop%", "inline": true }
+          ],
+          "footer": {
+            "text": "bShop Transaction Alert"
+          },
+          "timestamp": "%date%"
+        }
+      ]
+    }
+
+dashboard:
+  admin_username: "admin"
+  admin_password: "admin" # In production, use a hashed password!

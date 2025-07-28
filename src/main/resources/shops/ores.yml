@@ -1,50 +1,117 @@
-# A shop demonstrating automatic pagination with "flow" items.
-title: "<gradient:#6A82FB:#FC5C7D>Ores & Minerals</gradient>"
-size: 5
+# Ores & Minerals Shop
+title: "Ores & Minerals"
+size: 3
 
 pagination:
   next_page:
     material: LIME_STAINED_GLASS_PANE
-    display-name: "<green>Next Page -></green>"
-    slot: 44
+    display-name: "<#66ff2e><bold>ɴᴇxᴛ ᴘᴀɢᴇ →</bold>"
+    slot: 23
   previous_page:
     material: RED_STAINED_GLASS_PANE
-    display-name: "<red><- Previous Page</red>"
-    slot: 36
+    display-name: "<#e42121><bold>← ᴘʀᴇᴠɪᴏᴜs ᴘᴀɢᴇ</bold>"
+    slot: 21
   back_to_menu:
     material: BARRIER
-    display-name: "<red>Back to Main Menu"
-    lore: ["<gray>Return to shop categories"]
-    slot: 40
+    display-name: "<#e42121><bold>ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴍᴇɴᴜ</bold>"
+    lore:
+      - "<#BDBDBD><i>Return to shop categories.</i>"
+    slot: 22
     action: "back_to_main_menu"
   filler:
-    material: GRAY_STAINED_GLASS_PANE
+    material: BLACK_STAINED_GLASS_PANE
     display-name: " "
     lore: []
 
-# These items will be placed automatically by the plugin.
 items:
   - id: coal
     material: COAL
-    display-name: "<#3A3B3C>Coal"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
-    buy-price: 10.0
+    display-name: "<bold><#3A3B3C>Coal</#3A3B3C></bold>"
+    slot: 10
+    page: 0
+    lore:
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
+    buy-price: -1
     sell-price: 2.5
+  - id: raw_copper
+    material: RAW_COPPER
+    display-name: "<bold><#ff8c2e>Raw Copper</#ff8c2e></bold>"
+    slot: 11
+    page: 0
+    lore:
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
+    buy-price: 15.0
+    sell-price: 7.5
   - id: raw_iron
     material: RAW_IRON
-    display-name: "<#D8D8D8>Raw Iron"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    display-name: "<bold><#BDBDBD>Raw Iron</#BDBDBD></bold>"
+    slot: 12
+    page: 0
+    lore:
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 25.0
     sell-price: 12.0
   - id: raw_gold
     material: RAW_GOLD
-    display-name: "<#FFD700>Raw Gold"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    display-name: "<bold><#ffdc2e>Raw Gold</#ffdc2e></bold>"
+    slot: 13
+    page: 0
+    lore:
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 45.0
     sell-price: 22.5
+  - id: redstone
+    material: REDSTONE
+    display-name: "<bold><#ff2e2e>Redstone Dust</#ff2e2e></bold>"
+    slot: 14
+    page: 0
+    lore:
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
+    buy-price: 8.0
+    sell-price: 2.0
+  - id: lapis_lazuli
+    material: LAPIS_LAZULI
+    display-name: "<bold><#2e3cff>Lapis Lazuli</#2e3cff></bold>"
+    slot: 15
+    page: 0
+    lore:
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
+    buy-price: 30.0
+    sell-price: 15.0
   - id: diamond
     material: DIAMOND
-    display-name: "<#B9F2FF>Diamond"
-    lore: ["<gray>Buy for: <green>${buy_price}", "<gray>Sell for: <red>${sell_price}"]
+    display-name: "<bold><#2ecbff>Diamond</#2ecbff></bold>"
+    slot: 16
+    page: 0
+    lore:
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 150.0
     sell-price: 75.0

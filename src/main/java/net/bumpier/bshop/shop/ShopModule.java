@@ -14,6 +14,7 @@ public class ShopModule implements Module {
 
     private final BShop plugin;
     private final ModuleManager moduleManager; // Store ModuleManager
+    public static net.bumpier.bshop.util.message.MessageService globalMessageService;
 
     public ShopModule(BShop plugin, ModuleManager moduleManager) { // Accept ModuleManager
         this.plugin = plugin;
@@ -27,9 +28,11 @@ public class ShopModule implements Module {
         ConfigManager guisConfig = new ConfigManager(plugin, "guis.yml");
 
         MessageService messageService = new MessageService(plugin, messagesConfig);
+        globalMessageService = messageService;
         ShopManager shopManager = new ShopManager(plugin);
+        shopManager.startRotationTask(plugin);
         ShopGuiManager shopGuiManager = new ShopGuiManager(plugin, shopManager, messageService, guisConfig);
-        ShopTransactionService transactionService = new ShopTransactionService(plugin, messageService);
+        ShopTransactionService transactionService = new ShopTransactionService(plugin, messageService, shopGuiManager);
 
         // --- Register Commands and Listeners ---
         // Inject the ModuleManager into the command handler

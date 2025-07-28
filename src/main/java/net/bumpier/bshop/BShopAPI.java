@@ -1,0 +1,105 @@
+package net.bumpier.bshop;
+
+import net.bumpier.bshop.database.DatabaseManager;
+import net.bumpier.bshop.module.ModuleManager;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.milkbowl.vault.economy.Economy;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import java.util.logging.Level;
+import net.bumpier.bshop.shop.ShopManager;
+import net.bumpier.bshop.shop.ui.ShopGuiManager;
+import net.bumpier.bshop.shop.transaction.ShopTransactionService;
+import net.bumpier.bshop.util.MultiplierService;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+
+/**
+ * Main API class for bShop plugin
+ * Provides access to all major functionality
+ */
+public class BShopAPI {
+    
+    private static BShopAPI instance;
+    private final BShop plugin;
+    private final ShopManager shopManager;
+    private final ShopGuiManager shopGuiManager;
+    private final ShopTransactionService transactionService;
+    private final MultiplierService multiplierService;
+    
+    private BShopAPI(BShop plugin) {
+        this.plugin = plugin;
+        this.shopManager = plugin.getShopManager();
+        this.shopGuiManager = plugin.getShopGuiManager();
+        this.transactionService = plugin.getTransactionService();
+        this.multiplierService = plugin.getMultiplierService();
+    }
+    
+    /**
+     * Get the API instance
+     * @return BShopAPI instance
+     */
+    public static BShopAPI getInstance() {
+        if (instance == null) {
+            BShop plugin = BShop.getInstance();
+            if (plugin == null) {
+                throw new IllegalStateException("bShop plugin is not enabled!");
+            }
+            instance = new BShopAPI(plugin);
+        }
+        return instance;
+    }
+    
+    /**
+     * Check if the API is available
+     * @return true if bShop is enabled and API is ready
+     */
+    public static boolean isAvailable() {
+        return BShop.getInstance() != null;
+    }
+    
+    // --- Shop Management ---
+    
+    /**
+     * Get the shop manager
+     * @return ShopManager instance
+     */
+    public ShopManager getShopManager() {
+        return shopManager;
+    }
+    
+    /**
+     * Get the GUI manager
+     * @return ShopGuiManager instance
+     */
+    public ShopGuiManager getGuiManager() {
+        return shopGuiManager;
+    }
+    
+    /**
+     * Get the transaction service
+     * @return ShopTransactionService instance
+     */
+    public ShopTransactionService getTransactionService() {
+        return transactionService;
+    }
+    
+    /**
+     * Get the multiplier service
+     * @return MultiplierService instance
+     */
+    public MultiplierService getMultiplierService() {
+        return multiplierService;
+    }
+    
+    // --- Utility Methods ---
+    
+    /**
+     * Get the main plugin instance
+     * @return BShop plugin instance
+     */
+    public BShop getPlugin() {
+        return plugin;
+    }
+}

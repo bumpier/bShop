@@ -1,234 +1,213 @@
-# ╭───────────────────────────────────────────────────╮
-# │            NATURAL BLOCKS SHOP                    │
-# │   Based on the provided layout image.             │
-# │   Features: Hex Colors, Unicode Icons             │
-# ╰───────────────────────────────────────────────────╯
-
-# Shop's title and size (number of rows).
+# Building Blocks Shop
 title: "Blocks"
 size: 4
 
-# ---------------------------------------------------- #
-#                   PAGINATION ITEMS                   #
-# ---------------------------------------------------- #
 pagination:
   next_page:
     material: LIME_STAINED_GLASS_PANE
-    display-name: "<#76FF03><bold>NEXT PAGE »</bold></#76FF03>"
-    lore:
-      - "<#BDBDBD><i>Click to go to the next page.</i>"
-    slot: 32
+    display-name: "<#66ff2e><bold>ɴᴇxᴛ ᴘᴀɢᴇ →</bold>"
+    slot: 35
   previous_page:
     material: RED_STAINED_GLASS_PANE
-    display-name: "<#FF5252><bold>« PREVIOUS PAGE</bold></#FF5252>"
-    lore:
-      - "<#BDBDBD><i>Click to go to the previous page.</i>"
-    slot: 30
+    display-name: "<#e42121><bold>← ᴘʀᴇᴠɪᴏᴜs ᴘᴀɢᴇ</bold>"
+    slot: 27
   back_to_menu:
     material: BARRIER
-    display-name: "<#FF5252><bold>⌂ MAIN MENU</bold></#FF5252>"
-    lore:
-      - "<#BDBDBD><i>Return to the main shop categories."
+    display-name: "<#e42121><bold>ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴍᴇɴᴜ</bold>"
+    lore: ["<#BDBDBD><i>Return to shop categories.</i>"]
     slot: 31
     action: "back_to_main_menu"
   filler:
-    material: GRAY_STAINED_GLASS_PANE
+    material: BLACK_STAINED_GLASS_PANE
     display-name: " "
+    lore: []
 
-# ---------------------------------------------------- #
-#                     SHOP ITEMS                       #
-# ---------------------------------------------------- #
 items:
-  - id: "bulk_xp"
-    material: EXPERIENCE_BOTTLE
-    display-name: "SPAWNER TEST"
-    lore:
-    - "Choose how many XP bottles you want!"
-    command-based: true
-    quantity-gui: true
-    buy-command: "stacker give %player% spawner wither %amount%"
-    buy-price: 10
-    sell-price: -1
-
-  # --- Row 1 from Image ---
+  # --- Row 1 ---
   - id: grass_block
     material: GRASS_BLOCK
+    display-name: "<bold><#558B2F>Grass Block</#558B2F></bold>"
     slot: 10
     page: 0
-    display-name: "<#558B2F>ɢʀᴀѕѕ ʙʟᴏᴄᴋ</#558B2F>"
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 2.50
     sell-price: 1.25
-
+    currency-command: "eco take %player% %amount%"
   - id: dirt
     material: DIRT
-    display-name: "<#8D6E63>ᴅɪʀᴛ</#8D6E63>"
+    display-name: "<bold><#8D6E63>Dirt</#8D6E63></bold>"
     slot: 11
     page: 0
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 1.00
     sell-price: 0.50
-
   - id: gravel
     material: GRAVEL
-    display-name: "<#A3A3A3>ɢʀᴀᴠᴇʟ</#A3A3A3>"
+    display-name: "<bold><#A3A3A3>Gravel</#A3A3A3></bold>"
     slot: 12
     page: 0
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 1.20
     sell-price: 0.60
-
   - id: sand
     material: SAND
+    display-name: "<bold><#F5E0C3>Sand</#F5E0C3></bold>"
     slot: 13
     page: 0
-    display-name: "<#F5E0C3>ѕᴀɴᴅ</#F5E0C3>"
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 1.50
     sell-price: 0.75
-
   - id: red_sand
     material: RED_SAND
+    display-name: "<bold><#D87F33>Red Sand</#D87F33></bold>"
     slot: 14
     page: 0
-    display-name: "<#D87F33>ʀᴇᴅ ѕᴀɴᴅ</#D87F33>"
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 1.75
     sell-price: 0.85
-
   - id: stone
     material: STONE
-    display-name: "<#BDBDBD>ѕᴛᴏɴᴇ</#BDBDBD>"
+    display-name: "<bold><#BDBDBD>Stone</#BDBDBD></bold>"
     slot: 15
     page: 0
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 1.25
     sell-price: 0.60
-
   - id: cobblestone
     material: COBBLESTONE
-    display-name: "<#757575>ᴄᴏʙʙʟᴇѕᴛᴏɴᴇ</#757575>"
+    display-name: "<bold><#757575>Cobblestone</#757575></bold>"
     slot: 16
     page: 0
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 0.80
     sell-price: 0.40
-
-  # --- Row 2 from Image ---
+  # --- Row 2 ---
   - id: granite
     material: GRANITE
+    display-name: "<bold><#9A6C5B>Granite</#9A6C5B></bold>"
     slot: 19
     page: 0
-    display-name: "<#9A6C5B>ɢʀᴀɴɪᴛᴇ</#9A6C5B>"
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 1.50
     sell-price: 0.75
-
   - id: diorite
     material: DIORITE
-    display-name: "<#E8E8E8>ᴅɪᴏʀɪᴛᴇ</#E8E8E8>"
+    display-name: "<bold><#E8E8E8>Diorite</#E8E8E8></bold>"
     slot: 20
     page: 0
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 1.50
     sell-price: 0.75
-
   - id: andesite
     material: ANDESITE
-    display-name: "<#8F8F8F>ᴀɴᴅᴇѕɪᴛᴇ</#8F8F8F>"
+    display-name: "<bold><#8F8F8F>Andesite</#8F8F8F></bold>"
     slot: 21
     page: 0
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 1.50
     sell-price: 0.75
-
-  - id: birch_log
-    material: BIRCH_LOG
-    slot: 22
-    page: 0
-    display-name: "<#E0E0E0>ʙɪʀᴄʜ ʟᴏɢ</#E0E0E0>"
-    lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
-    buy-price: 3.00
-    sell-price: 1.50
-
   - id: oak_log
     material: OAK_LOG
-    slot: 23
+    display-name: "<bold><#A1887F>Oak Log</#A1887F></bold>"
+    slot: 22
     page: 0
-    display-name: "<#A1887F>ᴏᴀᴋ ʟᴏɢ</#A1887F>"
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 3.00
     sell-price: 1.50
-
   - id: spruce_log
     material: SPRUCE_LOG
-    slot: 24
+    display-name: "<bold><#6D4C41>Spruce Log</#6D4C41></bold>"
+    slot: 23
     page: 0
-    display-name: "<#6D4C41>ѕᴘʀᴜᴄᴇ ʟᴏɢ</#6D4C41>"
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 3.00
     sell-price: 1.50
-
+  - id: birch_log
+    material: BIRCH_LOG
+    display-name: "<bold><#E0E0E0>Birch Log</#E0E0E0></bold>"
+    slot: 24
+    page: 0
+    lore:
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
+    buy-price: 3.00
+    sell-price: 1.50
   - id: dark_oak_log
     material: DARK_OAK_LOG
+    display-name: "<bold><#4E342E>Dark Oak Log</#4E342E></bold>"
     slot: 25
     page: 0
-    display-name: "<#4E342E>ᴅᴀʀᴋ ᴏᴀᴋ ʟᴏɢ</#4E342E>"
     lore:
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
+      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
+      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
+      - ""
+      - "<#66ff2e>✔ Left-Click to Buy"
+      - "<#e42121>✔ Right-Click to Sell"
     buy-price: 3.50
     sell-price: 1.75
 
-  # --- Test Items for Price Validation ---
-  - id: special_buy_only
-    material: DIAMOND_BLOCK
-    display-name: "<#00E5FF>ᴅɪᴀᴍᴏɴᴅ ʙʟᴏᴄᴋ (ʙᴜʏ ᴏɴʟʏ)</#00E5FF>"
-    lore: 
-      - "<#FFFFFF>Buy for: <#76FF03>${buy_price}</#76FF03>"
-      - "<#FF5252>Cannot be sold!</#FF5252>"
-    buy-price: 100.0
-    # No sell-price defined - defaults to -1
-
-  - id: special_sell_only
-    material: EMERALD_BLOCK
-    display-name: "<#4CAF50>ᴇᴍᴇʀᴀʟᴅ ʙʟᴏᴄᴋ (ѕᴇʟʟ ᴏɴʟʏ)</#4CAF50>"
-    lore: 
-      - "<#FF5252>Cannot be bought!</#FF5252>"
-      - "<#FFFFFF>Sell for: <#FF5252>${sell_price}</#FF5252>"
-    # No buy-price defined - defaults to -1
-    sell-price: 50.0
-
-  - id: display_only
-    material: BEACON
-    display-name: "<#FFD700>ʙᴇᴀᴄᴏɴ (ᴅɪѕᴘʟᴀʏ ᴏɴʟʏ)</#FFD700>"
-    lore: 
-      - "<#FF5252>Cannot be bought or sold!</#FF5252>"
-      - "<#BDBDBD>For display purposes only.</#BDBDBD>"
-    # No buy-price or sell-price defined - both default to -1
+announce-rotation: true
+rotation-message: "<gold>The %shop% shop has rotated! Check out the new items!"
