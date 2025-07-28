@@ -19,6 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class ShopManager {
 
@@ -38,10 +42,53 @@ public class ShopManager {
         }
     }
 
+    // Add caching fields
+    private final Map<String, Shop> shopCache = new ConcurrentHashMap<>();
+    private final Map<String, Long> cacheTimestamps = new ConcurrentHashMap<>();
+    private final Map<String, List<ShopItem>> itemCache = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService cleanupExecutor = Executors.newScheduledThreadPool(1);
+    private long cacheDuration = 300000; // 5 minutes default
+    private int maxCachedShops = 100;
+
     public ShopManager(BShop plugin) {
         this.plugin = plugin;
         this.shopsDirectory = new File(plugin.getDataFolder(), "shops");
+        
+        // Load performance settings
+        ConfigurationSection perfConfig = plugin.getConfig().getConfigurationSection("performance.caching");
+        if (perfConfig != null) {
+            this.cacheDuration = perfConfig.getLong("shop_cache_duration", 300000);
+            this.maxCachedShops = perfConfig.getInt("max_cached_shops", 100);
+        }
+        
         loadShops();
+        startCleanupTask();
+    }
+
+    private void startCleanupTask() {
+        ConfigurationSection perfConfig = plugin.getConfig().getConfigurationSection("performance.memory");
+        long cleanupInterval = perfConfig != null ? perfConfig.getLong("cleanup_interval", 300000) : 300000;
+        
+        cleanupExecutor.scheduleAtFixedRate(() -> {
+            long cutoff = System.currentTimeMillis() - cacheDuration;
+            shopCache.entrySet().removeIf(entry -> cacheTimestamps.getOrDefault(entry.getKey(), 0L) < cutoff);
+            itemCache.entrySet().removeIf(entry -> cacheTimestamps.getOrDefault(entry.getKey(), 0L) < cutoff);
+            
+            // Limit cache size
+            if (shopCache.size() > maxCachedShops) {
+                List<String> oldestKeys = cacheTimestamps.entrySet().stream()
+                        .sorted(Map.Entry.comparingByValue())
+                        .limit(shopCache.size() - maxCachedShops)
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toList());
+                
+                oldestKeys.forEach(key -> {
+                    shopCache.remove(key);
+                    itemCache.remove(key);
+                    cacheTimestamps.remove(key);
+                });
+            }
+        }, cleanupInterval / 1000, cleanupInterval / 1000, TimeUnit.SECONDS);
     }
 
     public void loadShops() {
@@ -53,9 +100,11 @@ public class ShopManager {
 
         // Save default examples if the directory is empty
         if (shopsDirectory.listFiles() == null || shopsDirectory.listFiles().length == 0) {
-            plugin.getLogger().info("Shops directory is empty. Saving default examples (blocks.yml, ores.yml).");
-            plugin.saveResource("shops/blocks.yml", false);
-            plugin.saveResource("shops/ores.yml", false);
+            plugin.getLogger().info("Shops directory is empty. Saving default examples (rotational_example.yml, command_based.yml).");
+            plugin.saveResource("shops/rotational_example.yml", false);
+            plugin.saveResource("shops/command_based.yml", false);
+            plugin.saveResource("shops/advanced_shop.yml", false);
+            plugin.saveResource("shops/quick_rotational.yml", false);
         }
 
         File[] shopFiles = shopsDirectory.listFiles((dir, name) -> name.endsWith(".yml"));
@@ -258,6 +307,31 @@ public class ShopManager {
     }
 
     public Shop getShop(String id) {
-        return loadedShops.get(id.toLowerCase());
+        // Check cache first
+        Shop cached = shopCache.get(id);
+        if (cached != null && System.currentTimeMillis() - cacheTimestamps.getOrDefault(id, 0L) < cacheDuration) {
+            return cached;
+        }
+        
+        // Load from database/file
+        Shop shop = loadedShops.get(id.toLowerCase());
+        if (shop != null) {
+            shopCache.put(id, shop);
+            cacheTimestamps.put(id, System.currentTimeMillis());
+        }
+        return shop;
+    }
+
+    public void shutdown() {
+        if (cleanupExecutor != null && !cleanupExecutor.isShutdown()) {
+            cleanupExecutor.shutdown();
+            try {
+                if (!cleanupExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    cleanupExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                cleanupExecutor.shutdownNow();
+            }
+        }
     }
 }

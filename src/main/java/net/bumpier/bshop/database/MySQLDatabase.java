@@ -33,6 +33,27 @@ public class MySQLDatabase implements Database {
         config.setJdbcUrl("jdbc:mysql://" + dbConfig.getString("host") + ":" + dbConfig.getInt("port") + "/" + dbConfig.getString("database"));
         config.setUsername(dbConfig.getString("username"));
         config.setPassword(dbConfig.getString("password"));
+        
+        // Performance-optimized connection pool settings
+        ConfigurationSection perfConfig = plugin.getConfig().getConfigurationSection("performance.database");
+        if (perfConfig != null) {
+            config.setMaximumPoolSize(perfConfig.getInt("connection_pool_size", 20));
+            config.setMinimumIdle(perfConfig.getInt("minimum_idle", 5));
+            config.setConnectionTimeout(perfConfig.getLong("connection_timeout", 30000));
+            config.setIdleTimeout(perfConfig.getLong("idle_timeout", 600000));
+            config.setMaxLifetime(perfConfig.getLong("max_lifetime", 1800000));
+            config.setLeakDetectionThreshold(perfConfig.getLong("leak_detection_threshold", 60000));
+        } else {
+            // Default high-performance settings
+            config.setMaximumPoolSize(20);
+            config.setMinimumIdle(5);
+            config.setConnectionTimeout(30000);
+            config.setIdleTimeout(600000);
+            config.setMaxLifetime(1800000);
+            config.setLeakDetectionThreshold(60000);
+        }
+        
+        // MySQL performance optimizations
         config.addDataSourceProperty("cachePrepStmts", "true");
         config.addDataSourceProperty("prepStmtCacheSize", "250");
         config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
@@ -43,9 +64,11 @@ public class MySQLDatabase implements Database {
         config.addDataSourceProperty("cacheServerConfiguration", "true");
         config.addDataSourceProperty("elideSetAutoCommits", "true");
         config.addDataSourceProperty("maintainTimeStats", "false");
+        config.addDataSourceProperty("useSSL", "false");
+        config.addDataSourceProperty("allowPublicKeyRetrieval", "true");
 
         this.dataSource = new HikariDataSource(config);
-        plugin.getLogger().info("MySQL connection pool established.");
+        plugin.getLogger().info("MySQL connection pool established with " + config.getMaximumPoolSize() + " connections.");
     }
 
     @Override

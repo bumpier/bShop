@@ -1,27 +1,30 @@
-# Example Seasonal Shop (Rotational)
-title: "Seasonal Shop"
+# Quick Rotational Shop Example
+# Demonstrates: rotational shop, featured items, announcements, item limits
+
+title: "Seasonal Rotational Shop"
 type: rotational
-size: 4
-rotation-interval: 24h
-slots: 5
-item-slots: [10, 12, 14, 16, 28]
+size: 5
+rotation-interval: 12h
+slots: 7
+item-slots: [10, 12, 14, 16, 28, 30, 32]
 announce-rotation: true
 rotation-message: "<gold>The %shop% shop has rotated! Check out the new items!"
 
 pagination:
   next_page:
     material: LIME_STAINED_GLASS_PANE
-    display-name: "<#66ff2e><bold>ɴᴇxᴛ ᴘᴀɢᴇ →</bold>"
-    slot: 35
+    display-name: "<green><bold>Next Page →</bold>"
+    slot: 44
   previous_page:
     material: RED_STAINED_GLASS_PANE
-    display-name: "<#e42121><bold>← ᴘʀᴇᴠɪᴏᴜs ᴘᴀɢᴇ</bold>"
-    slot: 27
+    display-name: "<red><bold>← Previous Page</bold>"
+    slot: 36
   back_to_menu:
     material: BARRIER
-    display-name: "<#e42121><bold>ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴍᴇɴᴜ</bold>"
-    lore: ["<#BDBDBD><i>Return to shop categories.</i>"]
-    slot: 31
+    display-name: "<red><bold>Back to Main Menu</bold>"
+    lore:
+      - "<gray><i>Return to shop categories.</i>"
+    slot: 40
     action: "back_to_main_menu"
   filler:
     material: GRAY_STAINED_GLASS_PANE
@@ -73,12 +76,3 @@ items:
     buy-price: 2500
     sell-price: 0
     buy-limit: 1
-  - id: deco_chest
-    material: ENDER_CHEST
-    display-name: "<aqua>Special Chest"
-    lore:
-      - "<gray>Contains rare items!"
-    slot: 22
-    buy-price: -1
-    sell-price: -1
-    action: "none" 

@@ -1,147 +1,90 @@
-# Mob Drops Shop
-title: "Mob Drops"
-size: 5
+# Advanced Shop Example
+# Demonstrates: multi-page, buy/sell, lore, pagination, item limits
+
+title: "Advanced Shop"
+size: 6
 
 pagination:
   next_page:
     material: LIME_STAINED_GLASS_PANE
-    display-name: "<#66ff2e><bold>ɴᴇxᴛ ᴘᴀɢᴇ →</bold>"
-    slot: 44
+    display-name: "<green><bold>Next Page →</bold>"
+    slot: 53
   previous_page:
     material: RED_STAINED_GLASS_PANE
-    display-name: "<#e42121><bold>← ᴘʀᴇᴠɪᴏᴜs ᴘᴀɢᴇ</bold>"
-    slot: 36
+    display-name: "<red><bold>← Previous Page</bold>"
+    slot: 45
   back_to_menu:
     material: BARRIER
-    display-name: "<#e42121><bold>ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴍᴇɴᴜ</bold>"
+    display-name: "<red><bold>Back to Main Menu</bold>"
     lore:
-      - "<#BDBDBD><i>Return to shop categories.</i>"
-    slot: 40
+      - "<gray><i>Return to shop categories.</i>"
+    slot: 49
     action: "back_to_main_menu"
   filler:
     material: GRAY_STAINED_GLASS_PANE
     display-name: " "
-    lore: []
 
 items:
-  - id: rotten_flesh
-    material: ROTTEN_FLESH
-    display-name: "<bold><#558B2F>Rotten Flesh</#558B2F></bold>"
+  # Page 1
+  - id: diamond_sword
+    material: DIAMOND_SWORD
+    display-name: "<aqua><bold>Diamond Sword</bold>"
     slot: 10
     page: 0
     lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 1.0
-  - id: bone
-    material: BONE
-    display-name: "<bold><#E0E0E0>Bone</#E0E0E0></bold>"
+      - "<gray>Sharp and shiny!"
+      - "<green>Buy Price: <yellow>%buy_price%"
+      - "<red>Sell Price: <yellow>%sell_price%"
+    buy-price: 1000
+    sell-price: 500
+    buy-limit: 2
+  - id: golden_apple
+    material: GOLDEN_APPLE
+    display-name: "<gold><bold>Golden Apple</bold>"
     slot: 11
     page: 0
     lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 2.5
-  - id: arrow
-    material: ARROW
-    display-name: "<bold><#A1887F>Arrow</#A1887F></bold>"
+      - "<gray>Heals you instantly."
+    buy-price: 250
+    sell-price: 100
+    buy-limit: 8
+  - id: bread
+    material: BREAD
+    display-name: "<yellow>Bread"
     slot: 12
     page: 0
     lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 4.0
-  - id: string
-    material: STRING
-    display-name: "<bold><#ffffff>String</#ffffff></bold>"
-    slot: 13
-    page: 0
-    lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 3.0
-  - id: spider_eye
-    material: SPIDER_EYE
-    display-name: "<bold><#ff2e2e>Spider Eye</#ff2e2e></bold>"
-    slot: 14
-    page: 0
-    lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 6.0
-  - id: gunpowder
-    material: GUNPOWDER
-    display-name: "<bold><#757575>Gunpowder</#757575></bold>"
-    slot: 15
-    page: 0
-    lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 10.0
+      - "<gray>Freshly baked."
+    buy-price: 10
+    sell-price: 3
+  # Page 2
   - id: ender_pearl
     material: ENDER_PEARL
-    display-name: "<bold><#2effa4>Ender Pearl</#2effa4></bold>"
-    slot: 16
-    page: 0
+    display-name: "<light_purple>Ender Pearl"
+    slot: 10
+    page: 1
     lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 17.5
+      - "<gray>Teleportation device."
+    buy-price: 200
+    sell-price: 80
+    buy-limit: 4
   - id: blaze_rod
     material: BLAZE_ROD
-    display-name: "<bold><#ffdc2e>Blaze Rod</#ffdc2e></bold>"
-    slot: 19
-    page: 0
+    display-name: "<gold>Blaze Rod"
+    slot: 11
+    page: 1
     lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 25.0
-  - id: ghast_tear
-    material: GHAST_TEAR
-    display-name: "<bold><#E8E8E8>Ghast Tear</#E8E8E8></bold>"
-    slot: 20
-    page: 0
-    lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 50.0
+      - "<gray>Hot to the touch!"
+    buy-price: 150
+    sell-price: 60
   - id: phantom_membrane
     material: PHANTOM_MEMBRANE
-    display-name: "<bold><#2e3cff>Phantom Membrane</#2e3cff></bold>"
-    slot: 21
-    page: 0
+    display-name: "<blue>Phantom Membrane"
+    slot: 12
+    page: 1
     lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 20.0
-  - id: nether_star
-    material: NETHER_STAR
-    display-name: "<bold><#2ecbff>Nether Star</#2ecbff></bold>"
-    slot: 22
-    page: 0
-    lore:
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 500.0
+      - "<gray>Rare drop from phantoms."
+    buy-price: 300
+    sell-price: 120
+    command-based: true
+    sell-command: "player:heal %player%"

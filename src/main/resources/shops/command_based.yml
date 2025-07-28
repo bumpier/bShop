@@ -1,117 +1,60 @@
-# Ores & Minerals Shop
-title: "Ores & Minerals"
+# Command-Based Shop Example
+# Demonstrates: items that execute commands, console/player actions
+
+title: "Command Shop"
 size: 3
 
 pagination:
   next_page:
     material: LIME_STAINED_GLASS_PANE
-    display-name: "<#66ff2e><bold>ɴᴇxᴛ ᴘᴀɢᴇ →</bold>"
+    display-name: "<green><bold>Next Page →</bold>"
     slot: 23
   previous_page:
     material: RED_STAINED_GLASS_PANE
-    display-name: "<#e42121><bold>← ᴘʀᴇᴠɪᴏᴜs ᴘᴀɢᴇ</bold>"
+    display-name: "<red><bold>← Previous Page</bold>"
     slot: 21
   back_to_menu:
     material: BARRIER
-    display-name: "<#e42121><bold>ʙᴀᴄᴋ ᴛᴏ ᴍᴀɪɴ ᴍᴇɴᴜ</bold>"
+    display-name: "<red><bold>Back to Main Menu</bold>"
     lore:
-      - "<#BDBDBD><i>Return to shop categories.</i>"
+      - "<gray><i>Return to shop categories.</i>"
     slot: 22
     action: "back_to_main_menu"
   filler:
     material: BLACK_STAINED_GLASS_PANE
     display-name: " "
-    lore: []
 
 items:
-  - id: coal
-    material: COAL
-    display-name: "<bold><#3A3B3C>Coal</#3A3B3C></bold>"
+  - id: rank_vip
+    material: NAME_TAG
+    display-name: "<gold><bold>VIP Rank</bold>"
     slot: 10
     page: 0
     lore:
-      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#66ff2e>✔ Left-Click to Buy"
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: -1
-    sell-price: 2.5
-  - id: raw_copper
-    material: RAW_COPPER
-    display-name: "<bold><#ff8c2e>Raw Copper</#ff8c2e></bold>"
+      - "<gray>Grants VIP rank on purchase."
+    buy-price: 10000
+    sell-price: -1
+    command-based: true
+    buy-command: "console:lp user %player% parent add vip"
+  - id: fly_ability
+    material: FEATHER
+    display-name: "<aqua>Fly Ability (1h)"
     slot: 11
     page: 0
     lore:
-      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#66ff2e>✔ Left-Click to Buy"
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: 15.0
-    sell-price: 7.5
-  - id: raw_iron
-    material: RAW_IRON
-    display-name: "<bold><#BDBDBD>Raw Iron</#BDBDBD></bold>"
+      - "<gray>Grants /fly for 1 hour."
+    buy-price: 2500
+    sell-price: -1
+    command-based: true
+    buy-command: "console:lp user %player% permission settemp essentials.fly true 1h"
+  - id: heal_command
+    material: GOLDEN_APPLE
+    display-name: "<green>Instant Heal"
     slot: 12
     page: 0
     lore:
-      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#66ff2e>✔ Left-Click to Buy"
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: 25.0
-    sell-price: 12.0
-  - id: raw_gold
-    material: RAW_GOLD
-    display-name: "<bold><#ffdc2e>Raw Gold</#ffdc2e></bold>"
-    slot: 13
-    page: 0
-    lore:
-      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#66ff2e>✔ Left-Click to Buy"
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: 45.0
-    sell-price: 22.5
-  - id: redstone
-    material: REDSTONE
-    display-name: "<bold><#ff2e2e>Redstone Dust</#ff2e2e></bold>"
-    slot: 14
-    page: 0
-    lore:
-      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#66ff2e>✔ Left-Click to Buy"
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: 8.0
-    sell-price: 2.0
-  - id: lapis_lazuli
-    material: LAPIS_LAZULI
-    display-name: "<bold><#2e3cff>Lapis Lazuli</#2e3cff></bold>"
-    slot: 15
-    page: 0
-    lore:
-      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#66ff2e>✔ Left-Click to Buy"
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: 30.0
-    sell-price: 15.0
-  - id: diamond
-    material: DIAMOND
-    display-name: "<bold><#2ecbff>Diamond</#2ecbff></bold>"
-    slot: 16
-    page: 0
-    lore:
-      - "<#BDBDBD>Buy Price: <#66ff2e>%buy_price%"
-      - "<#BDBDBD>Sell Price: <#e42121>%sell_price%"
-      - ""
-      - "<#66ff2e>✔ Left-Click to Buy"
-      - "<#e42121>✔ Right-Click to Sell"
-    buy-price: 150.0
-    sell-price: 75.0
+      - "<gray>Heals you instantly on purchase."
+    buy-price: 500
+    sell-price: -1
+    command-based: true
+    buy-command: "player:heal %player%"

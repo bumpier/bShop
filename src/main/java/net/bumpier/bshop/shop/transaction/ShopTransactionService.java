@@ -10,6 +10,19 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import java.util.concurrent.ConcurrentHashMap;
 import net.bumpier.bshop.shop.ShopManager;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.stream.Collectors;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import org.bukkit.configuration.ConfigurationSection;
 
 public class ShopTransactionService {
 
@@ -17,6 +30,11 @@ public class ShopTransactionService {
     private final Economy economy;
     private final MessageService messageService;
     private final ShopGuiManager shopGuiManager;
+
+    // Add async processing
+    private final ExecutorService transactionExecutor;
+    private final Map<UUID, Long> lastTransactionTime = new ConcurrentHashMap<>();
+    private static final long TRANSACTION_COOLDOWN = 100; // 100ms cooldown
 
     // Track purchases per player per rotation: Map<player, Map<shop, Map<item, Map<rotation, amount>>>>
     private final ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Long, Integer>>>> purchaseCounts = new ConcurrentHashMap<>();
@@ -26,6 +44,11 @@ public class ShopTransactionService {
         this.economy = plugin.getEconomy();
         this.messageService = messageService;
         this.shopGuiManager = shopGuiManager;
+        
+        // Initialize thread pool based on config
+        ConfigurationSection perfConfig = plugin.getConfig().getConfigurationSection("performance.async");
+        int threadCount = perfConfig != null ? perfConfig.getInt("transaction_threads", 4) : 4;
+        this.transactionExecutor = Executors.newFixedThreadPool(threadCount);
     }
 
     private long getCurrentRotationTimestamp(String shopId) {
@@ -147,6 +170,26 @@ public class ShopTransactionService {
         }
     }
 
+    public CompletableFuture<Boolean> buyItemAsync(Player player, ShopItem item, int quantity) {
+        // Rate limiting
+        long now = System.currentTimeMillis();
+        long lastTime = lastTransactionTime.getOrDefault(player.getUniqueId(), 0L);
+        if (now - lastTime < TRANSACTION_COOLDOWN) {
+            return CompletableFuture.completedFuture(false);
+        }
+        lastTransactionTime.put(player.getUniqueId(), now);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                buyItem(player, item, quantity);
+                return true;
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.SEVERE, "Async buy transaction failed for " + player.getName(), e);
+                return false;
+            }
+        }, transactionExecutor);
+    }
+
     public void sellItem(Player player, ShopItem item, int quantity) {
         // Enforce sell-limit if set
         Integer sellLimit = item.getSellLimit();
@@ -249,6 +292,39 @@ public class ShopTransactionService {
             if (pageInfo != null) shopId = pageInfo.shopId();
             if (shopId == null) shopId = "unknown";
             shopGuiManager.recordRecentTransaction(player, shopId, item.displayName(), item.material().name(), quantity, totalPrice, "Sell", item.id());
+        }
+    }
+
+    public CompletableFuture<Boolean> sellItemAsync(Player player, ShopItem item, int quantity) {
+        // Rate limiting
+        long now = System.currentTimeMillis();
+        long lastTime = lastTransactionTime.getOrDefault(player.getUniqueId(), 0L);
+        if (now - lastTime < TRANSACTION_COOLDOWN) {
+            return CompletableFuture.completedFuture(false);
+        }
+        lastTransactionTime.put(player.getUniqueId(), now);
+        
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                sellItem(player, item, quantity);
+                return true;
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.SEVERE, "Async sell transaction failed for " + player.getName(), e);
+                return false;
+            }
+        }, transactionExecutor);
+    }
+
+    public void shutdown() {
+        if (transactionExecutor != null && !transactionExecutor.isShutdown()) {
+            transactionExecutor.shutdown();
+            try {
+                if (!transactionExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
+                    transactionExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                transactionExecutor.shutdownNow();
+            }
         }
     }
 

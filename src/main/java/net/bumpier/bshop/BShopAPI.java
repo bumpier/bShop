@@ -1,19 +1,9 @@
 package net.bumpier.bshop;
 
-import net.bumpier.bshop.database.DatabaseManager;
-import net.bumpier.bshop.module.ModuleManager;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
-import net.milkbowl.vault.economy.Economy;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.logging.Level;
 import net.bumpier.bshop.shop.ShopManager;
 import net.bumpier.bshop.shop.ui.ShopGuiManager;
 import net.bumpier.bshop.shop.transaction.ShopTransactionService;
 import net.bumpier.bshop.util.MultiplierService;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 /**
  * Main API class for bShop plugin

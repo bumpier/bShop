@@ -61,10 +61,24 @@ public class ShopCommand implements CommandExecutor {
             messageService.send(sender, "no_permission");
             return;
         }
+        
+        messageService.send(sender, "admin.reload_start");
+        
         // Reload main config
         net.bumpier.bshop.BShop.getInstance().reloadConfig();
-        messageService.send(sender, "admin.reload_start");
+        
+        // Reload messages configuration
+        messageService.reloadConfig();
+        
+        // Reload GUIs configuration
+        shopGuiManager.reloadConfig();
+        
+        // Reload shops
+        shopManager.loadShops();
+        
+        // Reload modules
         moduleManager.reloadModules();
+        
         messageService.send(sender, "admin.reload_complete");
     }
 

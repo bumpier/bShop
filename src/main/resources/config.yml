@@ -1,31 +1,14 @@
-# bShop GUI Configuration
-#
-# Standard Actions:
-#   wallet                - Opens wallet info or does nothing (default for wallet icon)
-#   back_to_main          - Returns to main menu
-#   recent_purchases      - Opens recent purchases GUI
-#   recent_purchases_next - Next page in recent purchases
-#   recent_purchases_prev - Previous page in recent purchases
-#   shop:%shop%           - Opens the specified shop
-#
-# Standard Placeholders (for display-name and lore):
-#   %item%            - Name of the item
-#   %amount%          - Amount bought/sold
-#   %price%           - Price of the transaction
-#   %type%            - Buy/Sell
-#   %date%            - Date of transaction
-#   %shop%            - Name of the shop
-#   %transaction_id%  - Unique transaction ID
-#   %balance_after%   - Player's balance after transaction
-#
-# PlaceholderAPI placeholders (e.g. %vault_eco_balance_formatted%) are also supported in lore/display-name where applicable.
-
 # bShop Configuration
+# This file contains the core configuration for bShop plugin.
 
-# Database settings
-# type: "SQLite" or "MySQL"
+# =============================================================================
+# DATABASE CONFIGURATION
+# =============================================================================
 database:
+  # Database type: "SQLite" (default) or "MySQL"
   type: "SQLite"
+  
+  # MySQL configuration (only used if type is "MySQL")
   mysql:
     host: "localhost"
     port: 3306
@@ -33,18 +16,67 @@ database:
     username: "user"
     password: "password"
 
-logging:
+# =============================================================================
+# PERMISSION-BASED SELL PRICE MULTIPLIERS
+# =============================================================================
+multipliers:
+  # Enable permission-based sell price multipliers
   enabled: true
+  
+  # Maximum multiplier value (prevents extreme values)
+  max_multiplier: 5.0
+  
+  # Stack multipliers: true = add all applicable multipliers, false = use highest only
+  stack_multipliers: false
+  
+  # Permission-based multipliers
+  # Format: permission_node: multiplier_value
+  # Examples:
+  # bshop.multiplier.0.8: 0.8  # 20% discount on sell prices
+  # bshop.multiplier.1.2: 1.2  # 20% bonus on sell prices
+  permission_multipliers:
+    "bshop.multiplier.0.8": 0.8
+    "bshop.multiplier.0.9": 0.9
+    "bshop.multiplier.1.1": 1.1
+    "bshop.multiplier.1.2": 1.2
+    "bshop.multiplier.1.5": 1.5
+
+# =============================================================================
+# LOGGING CONFIGURATION
+# =============================================================================
+logging:
+  # Enable transaction logging
+  enabled: true
+  
+  # Enable log rotation
   rotate: true
+  
+  # Maximum file size in MB before rotation
   max_file_size_mb: 10
+  
+  # Maximum number of backup files to keep
   max_backup_files: 5
 
+# =============================================================================
+# ALERTS & NOTIFICATIONS
+# =============================================================================
 alerts:
+  # Enable transaction alerts
   enabled: true
-  threshold: 100.0  # Only alert if transaction price is greater than this
-  permission: "bshop.alert"  # Only send to players with this permission
+  
+  # Minimum transaction value to trigger alerts
+  threshold: 100.0
+  
+  # Permission required to receive alerts
+  permission: "bshop.alert"
+  
+  # In-game alert message
   message: "%prefix%<green>%player% %type% <aqua>%amount%x %item_id%</aqua> for <gold>$%price%</gold>."
-  discord_webhook_url: "WEBHOOK_URL HERE"
+  
+  # Discord webhook URL (leave empty to disable)
+  discord_webhook_url: "WEBHOOK_URL_HERE"
+  
+  # Discord webhook payload template
   discord_payload: |
     {
       "username": "bShop Alerts",
@@ -71,6 +103,37 @@ alerts:
       ]
     }
 
-dashboard:
-  admin_username: "admin"
-  admin_password: "admin" # In production, use a hashed password!
+# Add performance configuration section
+performance:
+  # Database connection pool settings (MySQL only)
+  database:
+    connection_pool_size: 20
+    minimum_idle: 5
+    connection_timeout: 30000
+    idle_timeout: 600000
+    max_lifetime: 1800000
+    leak_detection_threshold: 60000
+  
+  # Caching settings
+  caching:
+    enabled: true
+    shop_cache_duration: 300000  # 5 minutes
+    player_data_cache_duration: 60000  # 1 minute
+    max_cached_shops: 100
+    max_cached_players: 1000
+  
+  # Async processing
+  async:
+    transaction_threads: 4
+    shop_loading_threads: 2
+    gui_update_threads: 2
+  
+  # Memory optimization
+  memory:
+    cleanup_interval: 300000  # 5 minutes
+    max_recent_transactions: 50
+    batch_size: 100
+    gui_update_cooldown: 100  # milliseconds
+    inventory_check_cooldown: 500  # milliseconds
+    transaction_cooldown: 100  # milliseconds
+

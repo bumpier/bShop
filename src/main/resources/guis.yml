@@ -27,36 +27,39 @@ main-menu:
   title: "Shop Categories"
   size: 3
   items:
-    blocks:
+    rotational_example:
       material: "PLAYER_HEAD"
       base64-head: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWM5NjRlZDBmNzE3YWU2NzFjZGYwZWQwZTAzNDE4ODdhZThjY2JkMjgyYzAwNThkYzExMjc2ZWYzY2Q3OGNjNyJ9fX0="
       slot: 10
-      display-name: "<#66ff2e>⛏<bold> ʙᴜɪʟᴅɪɴɢ ʙʟᴏᴄᴋs</bold>"
+      display-name: "<#66ff2e>⛏<bold> Rotational Example</bold>"
       lore:
-        - "<#BDBDBD><i>Browse a wide variety of"
-        - "<#BDBDBD><i>blocks for your creations.</i>"
         - ""
         - "<#66ff2e>✔ Left-Click to browse."
-      action: "shop:blocks"
-    ores:
-      material: DIAMOND_ORE
+      action: "shop:brotational_example"
+    advanced_shop:
+      material: MINECART
       slot: 11
-      display-name: "<#2effa4>⛏<bold> ᴏʀᴇs & ᴍɪɴᴇʀᴀʟs</bold>"
+      display-name: "<#2effa4>⛏<bold> Advanced Shop</bold>"
       lore:
-        - "<#BDBDBD><i>Trade valuable gems, ores,"
-        - "<#BDBDBD><i>and other minerals.</i>"
         - ""
         - "<#66ff2e>✔ Left-Click to browse."
-      action: "shop:ores"
-    mob_drops:
-      material: SKELETON_SKULL
+      action: "shop:advanced_shop"
+    command_based:
+      material: DIAMOND_PICKAXE
       slot: 12
-      display-name: "<#a12eff>☠<bold> ᴍᴏʙ ᴅʀᴏᴘs</bold>"
+      display-name: "<#283777>⛏<bold> Command Based Shop</bold>"
       lore:
-        - "<#BDBDBD><i>Trade items dropped by creatures.</i>"
         - ""
         - "<#66ff2e>✔ Left-Click to browse."
-      action: "shop:mob-drops"
+      action: "shop:command_based"
+    quick_rotational:
+      material: DIAMOND_PICKAXE
+      slot: 12
+      display-name: "<#FFFFFF>⛏<bold> Speedy Rotational Shop</bold>"
+      lore:
+        - ""
+        - "<#66ff2e>✔ Left-Click to browse."
+      action: "shop:quick_rotational"
     wallet:
       material: GOLD_INGOT
       slot: 4

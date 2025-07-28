@@ -50,6 +50,12 @@ public class ShopGuiManager {
     // --- Recent Purchases Pagination ---
     private final java.util.concurrent.ConcurrentHashMap<java.util.UUID, Integer> recentPurchasesPage = new java.util.concurrent.ConcurrentHashMap<>();
 
+    // Add GUI optimization fields
+    private final Map<UUID, Long> lastGuiUpdate = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> lastInventoryCheck = new ConcurrentHashMap<>();
+    private static final long GUI_UPDATE_COOLDOWN = 100; // 100ms cooldown
+    private static final long INVENTORY_CHECK_COOLDOWN = 500; // 500ms cooldown
+
     public ShopGuiManager(BShop plugin, ShopManager shopManager, MessageService messageService, ConfigManager guisConfig) {
         this.plugin = plugin;
         this.shopManager = shopManager;
@@ -148,11 +154,25 @@ public class ShopGuiManager {
     }
 
     public void openShop(Player player, String shopId, int page) {
+        // Check if player already has this shop open
+        PageInfo currentPage = openShopInventories.get(player.getUniqueId());
+        if (currentPage != null && currentPage.shopId().equals(shopId) && currentPage.currentPage() == page) {
+            return; // Already open, skip
+        }
+        
         Shop shop = shopManager.getShop(shopId);
         if (shop == null) {
             messageService.send(player, "shop.not_found", Placeholder.unparsed("shop", shopId));
             return;
         }
+        
+        // Rate limiting for GUI updates
+        long now = System.currentTimeMillis();
+        if (now - lastGuiUpdate.getOrDefault(player.getUniqueId(), 0L) < GUI_UPDATE_COOLDOWN) {
+            return;
+        }
+        lastGuiUpdate.put(player.getUniqueId(), now);
+        
         // Load wallet config from /shops/{shopId}.yml
         ConfigManager shopConfig = new ConfigManager(plugin, "shops/" + shopId + ".yml");
         ConfigurationSection walletConfig = shopConfig.getConfig().getConfigurationSection("wallet");
@@ -297,7 +317,7 @@ public class ShopGuiManager {
         try {
             String title = messageService.serialize(messageService.parse(config.getString("title", "Select Quantity")));
             Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), config.getInt("size", 4) * 9, title);
-            updateQuantityGui(inventory, context);
+            updateQuantityGui(inventory, player, context);
             player.openInventory(inventory);
         } catch (Exception e) {
             messageService.send(player, "gui.error_opening_quantity_gui", Placeholder.unparsed("error", e.getMessage()));
@@ -415,7 +435,14 @@ public class ShopGuiManager {
         player.openInventory(inventory);
     }
 
-    public void updateQuantityGui(Inventory inventory, TransactionContext context) {
+    public void updateQuantityGui(Inventory inventory, Player player, TransactionContext context) {
+        // Rate limiting for inventory updates
+        long now = System.currentTimeMillis();
+        if (now - lastInventoryCheck.getOrDefault(player.getUniqueId(), 0L) < INVENTORY_CHECK_COOLDOWN) {
+            return;
+        }
+        lastInventoryCheck.put(player.getUniqueId(), now);
+        
         inventory.clear();
         ConfigurationSection config = guisConfig.getConfig().getConfigurationSection("quantity-menu");
         if (config == null) return;
@@ -791,4 +818,11 @@ public class ShopGuiManager {
     }
 
     public ShopManager getShopManager() { return shopManager; }
+
+    /**
+     * Reloads the GUI configuration.
+     */
+    public void reloadConfig() {
+        guisConfig.reloadConfig();
+    }
 }

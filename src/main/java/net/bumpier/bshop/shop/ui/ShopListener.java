@@ -98,11 +98,11 @@ public class ShopListener implements Listener {
         switch (parts[0]) {
             case "add_quantity":
                 context.addQuantity(Integer.parseInt(parts[1]));
-                shopGuiManager.updateQuantityGui(inventory, context);
+                shopGuiManager.updateQuantityGui(inventory, player, context);
                 break;
             case "remove_quantity":
                 context.addQuantity(-Integer.parseInt(parts[1]));
-                shopGuiManager.updateQuantityGui(inventory, context);
+                shopGuiManager.updateQuantityGui(inventory, player, context);
                 break;
             case "confirm_transaction":
                 if (context.getType() == TransactionType.BUY) {

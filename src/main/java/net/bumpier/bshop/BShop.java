@@ -6,7 +6,6 @@ import net.bumpier.bshop.shop.ui.ShopGuiManager;
 import net.bumpier.bshop.shop.transaction.ShopTransactionService;
 import net.bumpier.bshop.util.message.MessageService;
 import net.bumpier.bshop.util.config.ConfigManager;
-import net.bumpier.bshop.command.ShopCommand;
 import net.bumpier.bshop.module.ModuleManager;
 import net.bumpier.bshop.shop.ShopModule;
 import net.bumpier.bshop.util.MultiplierService;
@@ -76,9 +75,18 @@ public class BShop extends JavaPlugin {
         if (adventure != null) {
             adventure.close();
         }
+        
+        // Shutdown services gracefully
+        if (transactionService != null) {
+            transactionService.shutdown();
+        }
+        if (shopManager != null) {
+            shopManager.shutdown();
+        }
         if (moduleManager != null) {
             moduleManager.unloadModules();
         }
+        
         getLogger().info("bShop disabled!");
     }
 

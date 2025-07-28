@@ -2,8 +2,6 @@ package net.bumpier.bshop.database;
 
 import net.bumpier.bshop.BShop;
 
-import java.util.logging.Level;
-
 public class DatabaseManager {
 
     private final BShop plugin;

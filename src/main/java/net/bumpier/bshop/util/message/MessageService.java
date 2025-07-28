@@ -19,7 +19,7 @@ public class MessageService {
     private final LegacyComponentSerializer legacySerializer;
     private final ConfigManager messagesConfig;
     private final BukkitAudiences adventure;
-    public final String prefix;
+    public String prefix;
 
     public MessageService(BShop plugin, ConfigManager messagesConfig) {
         this.adventure = plugin.adventure();
@@ -102,5 +102,14 @@ public class MessageService {
         message = message.replace("%prefix%", this.prefix);
         TagResolver prefixResolver = Placeholder.component("prefix", parse(this.prefix));
         adventure.sender(sender).sendMessage(parse(message, prefixResolver));
+    }
+
+    /**
+     * Reloads the messages configuration and updates the prefix.
+     */
+    public void reloadConfig() {
+        messagesConfig.reloadConfig();
+        // Update the prefix after reload
+        this.prefix = this.messagesConfig.getConfig().getString("prefix", "");
     }
 }
