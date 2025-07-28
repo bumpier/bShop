@@ -21,7 +21,7 @@ pagination:
     slot: 49
     action: "back_to_main_menu"
   filler:
-    material: GRAY_STAINED_GLASS_PANE
+    material: BLACK_STAINED_GLASS_PANE
     display-name: " "
 
 items:
@@ -32,9 +32,9 @@ items:
     slot: 10
     page: 0
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Sharp and shiny!"
-      - "<green>Buy Price: <yellow>%buy_price%"
-      - "<red>Sell Price: <yellow>%sell_price%"
     buy-price: 1000
     sell-price: 500
     buy-limit: 2
@@ -44,6 +44,8 @@ items:
     slot: 11
     page: 0
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Heals you instantly."
     buy-price: 250
     sell-price: 100
@@ -54,6 +56,8 @@ items:
     slot: 12
     page: 0
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Freshly baked."
     buy-price: 10
     sell-price: 3
@@ -64,6 +68,8 @@ items:
     slot: 10
     page: 1
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Teleportation device."
     buy-price: 200
     sell-price: 80
@@ -74,6 +80,8 @@ items:
     slot: 11
     page: 1
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Hot to the touch!"
     buy-price: 150
     sell-price: 60
@@ -83,6 +91,8 @@ items:
     slot: 12
     page: 1
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Rare drop from phantoms."
     buy-price: 300
     sell-price: 120

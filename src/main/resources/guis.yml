@@ -83,7 +83,7 @@ main-menu:
       action: "recent_purchases"
   filler:
     enabled: true
-    material: GRAY_STAINED_GLASS_PANE
+    material: BLACK_STAINED_GLASS_PANE
     display-name: " "
 
 # --- Quantity Selection Menu ---
@@ -107,7 +107,7 @@ quantity-menu:
   # Filler item configuration - fills empty slots
   filler:
     enabled: true
-    material: GRAY_STAINED_GLASS_PANE
+    material: BLACK_STAINED_GLASS_PANE
     display-name: " "
     lore: []
   buttons:
@@ -269,113 +269,124 @@ quantity-menu:
     # Filler item configuration for stack selection GUI
     filler:
       enabled: true
-      material: GRAY_STAINED_GLASS_PANE
+      material: BLACK_STAINED_GLASS_PANE
       display-name: " "
       lore: []
 
 recent-purchases-menu:
   title: "<gold>Recent Purchases"
   size: 3
-  purchase_1:
-    slot: 10
-    material: PAPER
-    display-name: "<green>%type%: %item%"
-    lore:
-      - "<gray>Amount: <yellow>%amount%"
-      - "<gray>Price: <gold>$%price%"
-      - "<gray>Date: <white>%date%"
-      - "<gray>Shop: <aqua>%shop%"
-      - "<gray>ID: <white>%transaction_id%"
-      - "<gray>Balance After: <green>$%balance_after%"
-  purchase_2:
-    slot: 11
-    material: PAPER
-    display-name: "<green>%type%: %item%"
-    lore:
-      - "<gray>Amount: <yellow>%amount%"
-      - "<gray>Price: <gold>$%price%"
-      - "<gray>Date: <white>%date%"
-      - "<gray>Shop: <aqua>%shop%"
-      - "<gray>ID: <white>%transaction_id%"
-      - "<gray>Balance After: <green>$%balance_after%"
-  purchase_3:
-    slot: 12
-    material: PAPER
-    display-name: "<green>%type%: %item%"
-    lore:
-      - "<gray>Amount: <yellow>%amount%"
-      - "<gray>Price: <gold>$%price%"
-      - "<gray>Date: <white>%date%"
-      - "<gray>Shop: <aqua>%shop%"
-      - "<gray>ID: <white>%transaction_id%"
-      - "<gray>Balance After: <green>$%balance_after%"
-  purchase_4:
-    slot: 13
-    material: PAPER
-    display-name: "<green>%type%: %item%"
-    lore:
-      - "<gray>Amount: <yellow>%amount%"
-      - "<gray>Price: <gold>$%price%"
-      - "<gray>Date: <white>%date%"
-      - "<gray>Shop: <aqua>%shop%"
-      - "<gray>ID: <white>%transaction_id%"
-      - "<gray>Balance After: <green>$%balance_after%"
-  purchase_5:
-    slot: 14
-    material: PAPER
-    display-name: "<green>%type%: %item%"
-    lore:
-      - "<gray>Amount: <yellow>%amount%"
-      - "<gray>Price: <gold>$%price%"
-      - "<gray>Date: <white>%date%"
-      - "<gray>Shop: <aqua>%shop%"
-      - "<gray>ID: <white>%transaction_id%"
-      - "<gray>Balance After: <green>$%balance_after%"
-  purchase_6:
-    slot: 15
-    material: PAPER
-    display-name: "<green>%type%: %item%"
-    lore:
-      - "<gray>Amount: <yellow>%amount%"
-      - "<gray>Price: <gold>$%price%"
-      - "<gray>Date: <white>%date%"
-      - "<gray>Shop: <aqua>%shop%"
-      - "<gray>ID: <white>%transaction_id%"
-      - "<gray>Balance After: <green>$%balance_after%"
-  purchase_7:
-    slot: 16
-    material: PAPER
-    display-name: "<green>%type%: %item%"
-    lore:
-      - "<gray>Amount: <yellow>%amount%"
-      - "<gray>Price: <gold>$%price%"
-      - "<gray>Date: <white>%date%"
-      - "<gray>Shop: <aqua>%shop%"
-      - "<gray>ID: <white>%transaction_id%"
-      - "<gray>Balance After: <green>$%balance_after%"
-  previous_page:
-    slot: 18
-    material: RED_STAINED_GLASS_PANE
-    display-name: "<red><bold>Previous Page"
-    action: "recent_purchases_prev"
-  next_page:
-    slot: 26
-    material: LIME_STAINED_GLASS_PANE
-    display-name: "<green><bold>Next Page"
-    action: "recent_purchases_next"
-  back:
-    slot: 22
-    material: BARRIER
-    display-name: "<red>Back"
-    action: "back_to_main"
-  wallet:
-    slot: 4
-    material: GOLD_INGOT
-    display-name: "<gold><bold>Wallet</bold>"
-    lore:
-      - "<gray>Your balance: %vault_eco_balance_formatted%"
-    action: "wallet"
+  items:
+    previous_page:
+      slot: 18
+      material: RED_STAINED_GLASS_PANE
+      display-name: "<red><bold>Previous Page"
+      action: "recent_purchases_prev"
+    next_page:
+      slot: 26
+      material: LIME_STAINED_GLASS_PANE
+      display-name: "<green><bold>Next Page"
+      action: "recent_purchases_next"
+    back:
+      slot: 22
+      material: BARRIER
+      display-name: "<red>Back"
+      action: "back_to_main"
+    wallet:
+      slot: 4
+      material: GOLD_INGOT
+      display-name: "<gold><bold>Wallet</bold>"
+      lore:
+        - "<gray>Your balance: %vault_eco_balance_formatted%"
+      action: "wallet"
+    placeholder:
+      slot: 13
+      material: BARRIER
+      display-name: "<red><bold>No Recent Transactions"
+      lore:
+        - "<gray>You haven't made any"
+        - "<gray>purchases or sales yet."
+        - ""
+        - "<yellow>Make a transaction in any"
+        - "<yellow>shop to see it here!"
+    purchase_1:
+      slot: 10
+      material: PAPER
+      display-name: "<green>%type%: %item%"
+      lore:
+        - "<gray>Amount: <yellow>%amount%"
+        - "<gray>Price: <gold>$%price%"
+        - "<gray>Date: <white>%date%"
+        - "<gray>Shop: <aqua>%shop%"
+        - "<gray>ID: <white>%transaction_id%"
+        - "<gray>Balance After: <green>$%balance_after%"
+    purchase_2:
+      slot: 11
+      material: PAPER
+      display-name: "<green>%type%: %item%"
+      lore:
+        - "<gray>Amount: <yellow>%amount%"
+        - "<gray>Price: <gold>$%price%"
+        - "<gray>Date: <white>%date%"
+        - "<gray>Shop: <aqua>%shop%"
+        - "<gray>ID: <white>%transaction_id%"
+        - "<gray>Balance After: <green>$%balance_after%"
+    purchase_3:
+      slot: 12
+      material: PAPER
+      display-name: "<green>%type%: %item%"
+      lore:
+        - "<gray>Amount: <yellow>%amount%"
+        - "<gray>Price: <gold>$%price%"
+        - "<gray>Date: <white>%date%"
+        - "<gray>Shop: <aqua>%shop%"
+        - "<gray>ID: <white>%transaction_id%"
+        - "<gray>Balance After: <green>$%balance_after%"
+    purchase_4:
+      slot: 13
+      material: PAPER
+      display-name: "<green>%type%: %item%"
+      lore:
+        - "<gray>Amount: <yellow>%amount%"
+        - "<gray>Price: <gold>$%price%"
+        - "<gray>Date: <white>%date%"
+        - "<gray>Shop: <aqua>%shop%"
+        - "<gray>ID: <white>%transaction_id%"
+        - "<gray>Balance After: <green>$%balance_after%"
+    purchase_5:
+      slot: 14
+      material: PAPER
+      display-name: "<green>%type%: %item%"
+      lore:
+        - "<gray>Amount: <yellow>%amount%"
+        - "<gray>Price: <gold>$%price%"
+        - "<gray>Date: <white>%date%"
+        - "<gray>Shop: <aqua>%shop%"
+        - "<gray>ID: <white>%transaction_id%"
+        - "<gray>Balance After: <green>$%balance_after%"
+    purchase_6:
+      slot: 15
+      material: PAPER
+      display-name: "<green>%type%: %item%"
+      lore:
+        - "<gray>Amount: <yellow>%amount%"
+        - "<gray>Price: <gold>$%price%"
+        - "<gray>Date: <white>%date%"
+        - "<gray>Shop: <aqua>%shop%"
+        - "<gray>ID: <white>%transaction_id%"
+        - "<gray>Balance After: <green>$%balance_after%"
+    purchase_7:
+      slot: 16
+      material: PAPER
+      display-name: "<green>%type%: %item%"
+      lore:
+        - "<gray>Amount: <yellow>%amount%"
+        - "<gray>Price: <gold>$%price%"
+        - "<gray>Date: <white>%date%"
+        - "<gray>Shop: <aqua>%shop%"
+        - "<gray>ID: <white>%transaction_id%"
+        - "<gray>Balance After: <green>$%balance_after%"
   filler:
     enabled: true
-    material: GRAY_STAINED_GLASS_PANE
+    material: BLACK_STAINED_GLASS_PANE
     display-name: " "

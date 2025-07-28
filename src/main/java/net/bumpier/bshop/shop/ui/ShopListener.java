@@ -150,6 +150,11 @@ public class ShopListener implements Listener {
     }
 
     private void handlePaginatedShopClick(InventoryClickEvent event, Player player, PageInfo pageInfo) {
+        // Prevent auto-clicks that happen too quickly after shop opens
+        if (shopGuiManager.isWithinAutoClickPreventionCooldown(player)) {
+            return;
+        }
+        
         Shop openShop = shopManager.getShop(pageInfo.shopId());
         if (openShop == null) return;
         int clickedSlot = event.getRawSlot();

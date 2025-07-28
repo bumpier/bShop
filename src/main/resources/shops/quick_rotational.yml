@@ -27,7 +27,7 @@ pagination:
     slot: 40
     action: "back_to_main_menu"
   filler:
-    material: GRAY_STAINED_GLASS_PANE
+    material: BLACK_STAINED_GLASS_PANE
     display-name: " "
 
 featured-items:
@@ -35,6 +35,8 @@ featured-items:
     material: DIAMOND_SWORD
     display-name: "<gold>Rare Sword"
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Only available this season!"
     buy-price: 5000
     sell-price: 2500
@@ -44,6 +46,8 @@ featured-items:
     material: ELYTRA
     display-name: "<aqua>Wings of Flight"
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Soar through the skies!"
     buy-price: 20000
     sell-price: 10000
@@ -56,6 +60,8 @@ items:
     material: ENCHANTED_GOLDEN_APPLE
     display-name: "<light_purple>Magic Apple"
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Restores all your health!"
     buy-price: 10000
     sell-price: 5000
@@ -64,6 +70,8 @@ items:
     material: EMERALD
     display-name: "<green>Emerald"
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Trade for rare goods."
     buy-price: 100
     sell-price: 50
@@ -72,6 +80,8 @@ items:
     material: CHEST
     display-name: "<yellow>Mystery Box"
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Contains a random surprise!"
     buy-price: 2500
     sell-price: 0

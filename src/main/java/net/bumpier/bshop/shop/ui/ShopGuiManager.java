@@ -53,8 +53,10 @@ public class ShopGuiManager {
     // Add GUI optimization fields
     private final Map<UUID, Long> lastGuiUpdate = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastInventoryCheck = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> shopOpenTimes = new ConcurrentHashMap<>();
     private static final long GUI_UPDATE_COOLDOWN = 100; // 100ms cooldown
     private static final long INVENTORY_CHECK_COOLDOWN = 500; // 500ms cooldown
+    private static final long AUTO_CLICK_PREVENTION_COOLDOWN = 100; // 1 second cooldown to prevent auto-clicks
 
     public ShopGuiManager(BShop plugin, ShopManager shopManager, MessageService messageService, ConfigManager guisConfig) {
         this.plugin = plugin;
@@ -68,12 +70,23 @@ public class ShopGuiManager {
     public PageInfo getOpenPageInfo(Player player) { return openShopInventories.get(player.getUniqueId()); }
     public void onGuiClose(Player player) {
         openShopInventories.remove(player.getUniqueId());
+        shopOpenTimes.remove(player.getUniqueId());
         // Only clear transaction context if player is not opening another BShop GUI
         // This prevents clearing the context during GUI transitions
     }
     
     public void clearTransactionContext(Player player) {
         activeTransactions.remove(player.getUniqueId());
+    }
+    
+    public boolean isWithinAutoClickPreventionCooldown(Player player) {
+        Long openTime = shopOpenTimes.get(player.getUniqueId());
+        if (openTime == null) return false;
+        return System.currentTimeMillis() - openTime < AUTO_CLICK_PREVENTION_COOLDOWN;
+    }
+    
+    public void clearShopOpenTime(Player player) {
+        shopOpenTimes.remove(player.getUniqueId());
     }
 
     public boolean isMainMenu(InventoryView view) {
@@ -292,6 +305,7 @@ public class ShopGuiManager {
         
         player.openInventory(inventory);
         openShopInventories.put(player.getUniqueId(), new PageInfo(shopId, page));
+        shopOpenTimes.put(player.getUniqueId(), System.currentTimeMillis());
         if (walletConfig != null) {
             addWalletItem(inventory, walletConfig, player);
         }
@@ -643,6 +657,13 @@ public class ShopGuiManager {
                             .withLore(processedLore)
                             .build();
                     inventory.setItem(slot, item);
+                } else if ("placeholder".equals(key) && recent.isEmpty()) {
+                    // Show placeholder only when there are no transactions
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.BARRIER, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    inventory.setItem(slot, item);
                 } else if ("back".equals(key)) {
                     ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.BARRIER, messageService)
                             .withDisplayName(displayName)
@@ -679,6 +700,19 @@ public class ShopGuiManager {
                         item.setItemMeta(meta);
                     }
                     inventory.setItem(slot, item);
+                } else {
+                    // Handle all other items (wallet, etc.)
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.STONE, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null && action != null && !action.isEmpty()) {
+                        NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                        meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, action);
+                        item.setItemMeta(meta);
+                    }
+                    inventory.setItem(slot, item);
                 }
             }
         }
@@ -699,6 +733,133 @@ public class ShopGuiManager {
         player.openInventory(inventory);
         ConfigurationSection walletConfig = guiConfig.getConfigurationSection("items.wallet");
         addWalletItem(inventory, walletConfig, player);
+    }
+
+    public void openRecentPurchasesMenuForPlayer(Player viewer, java.util.UUID targetPlayerUuid) {
+        openRecentPurchasesMenuForPlayer(viewer, targetPlayerUuid, 0);
+    }
+
+    public void openRecentPurchasesMenuForPlayer(Player viewer, java.util.UUID targetPlayerUuid, int page) {
+        ConfigurationSection guiConfig = guisConfig.getConfig().getConfigurationSection("recent-purchases-menu");
+        if (guiConfig == null) {
+            messageService.send(viewer, "gui.recent_purchases_not_configured");
+            return;
+        }
+        String title = guiConfig.getString("title", "Recent Purchases");
+        int size = guiConfig.getInt("size", 3) * 9;
+        String serializedTitle = messageService.serialize(messageService.parse(title + " - " + org.bukkit.Bukkit.getOfflinePlayer(targetPlayerUuid).getName()));
+        Inventory inventory = Bukkit.createInventory(new BShopGUIHolder(), size, serializedTitle);
+
+        // --- Retrieve recent purchases for target player ---
+        java.util.Deque<RecentTransaction> deque = recentTransactions.get(targetPlayerUuid);
+        List<RecentTransaction> allRecent = deque != null ? new java.util.ArrayList<>(deque) : java.util.Collections.emptyList();
+        int itemsPerPage = 7;
+        int totalPages = (int) Math.ceil((double) allRecent.size() / itemsPerPage);
+        if (page < 0) page = 0;
+        if (page >= totalPages) page = Math.max(0, totalPages - 1);
+        recentPurchasesPage.put(viewer.getUniqueId(), page);
+        int start = page * itemsPerPage;
+        int end = Math.min(start + itemsPerPage, allRecent.size());
+        List<RecentTransaction> recent = allRecent.subList(start, end);
+
+        ConfigurationSection itemsConfig = guiConfig.getConfigurationSection("items");
+        if (itemsConfig != null) {
+            int txIndex = 0;
+            for (String key : itemsConfig.getKeys(false)) {
+                ConfigurationSection itemCfg = itemsConfig.getConfigurationSection(key);
+                if (itemCfg == null) continue;
+                int slot = itemCfg.getInt("slot");
+                String displayName = itemCfg.getString("display-name", "");
+                String materialStr = itemCfg.getString("material", "STONE");
+                List<String> lore = itemCfg.getStringList("lore");
+                String action = itemCfg.getString("action");
+                Material material = Material.matchMaterial(materialStr);
+                if (key.startsWith("purchase_") && txIndex < recent.size()) {
+                    RecentTransaction tx = recent.get(txIndex++);
+                    displayName = replaceStandardPlaceholders(displayName, tx);
+                    material = Material.matchMaterial(tx.material);
+                    List<String> processedLore = replaceStandardPlaceholders(lore, tx);
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.STONE, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(processedLore)
+                            .build();
+                    inventory.setItem(slot, item);
+                } else if ("placeholder".equals(key) && recent.isEmpty()) {
+                    // Show placeholder only when there are no transactions
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.BARRIER, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    inventory.setItem(slot, item);
+                } else if ("back".equals(key)) {
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.BARRIER, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null && action != null && !action.isEmpty()) {
+                        NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                        meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, "back_to_main");
+                        item.setItemMeta(meta);
+                    }
+                    inventory.setItem(slot, item);
+                } else if ("next_page".equals(key) && page < totalPages - 1) {
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.ARROW, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null && action != null && !action.isEmpty()) {
+                        NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                        meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, action);
+                        item.setItemMeta(meta);
+                    }
+                    inventory.setItem(slot, item);
+                } else if ("previous_page".equals(key) && page > 0) {
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.ARROW, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null && action != null && !action.isEmpty()) {
+                        NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                        meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, action);
+                        item.setItemMeta(meta);
+                    }
+                    inventory.setItem(slot, item);
+                } else {
+                    // Handle all other items (wallet, etc.)
+                    ItemStack item = new ItemBuilder(plugin, material != null ? material : Material.STONE, messageService)
+                            .withDisplayName(displayName)
+                            .withLore(lore)
+                            .build();
+                    ItemMeta meta = item.getItemMeta();
+                    if (meta != null && action != null && !action.isEmpty()) {
+                        NamespacedKey keyNS = new NamespacedKey(plugin, "bshop_action");
+                        meta.getPersistentDataContainer().set(keyNS, org.bukkit.persistence.PersistentDataType.STRING, action);
+                        item.setItemMeta(meta);
+                    }
+                    inventory.setItem(slot, item);
+                }
+            }
+        }
+        // Filler
+        ConfigurationSection fillerConfig = guiConfig.getConfigurationSection("filler");
+        if (fillerConfig != null && fillerConfig.getBoolean("enabled", false)) {
+            Material fillerMat = Material.matchMaterial(fillerConfig.getString("material", "GRAY_STAINED_GLASS_PANE"));
+            if (fillerMat != null) {
+                ItemStack fillerStack = new ItemBuilder(plugin, fillerMat, messageService)
+                        .withDisplayName(fillerConfig.getString("display-name", " ")).build();
+                for (int i = 0; i < size; i++) {
+                    if (inventory.getItem(i) == null) {
+                        inventory.setItem(i, fillerStack);
+                    }
+                }
+            }
+        }
+        viewer.openInventory(inventory);
+        ConfigurationSection walletConfig = guiConfig.getConfigurationSection("items.wallet");
+        addWalletItem(inventory, walletConfig, viewer);
     }
 
     public void handleRecentPurchasesPageAction(Player player, String action) {
@@ -732,6 +893,11 @@ public class ShopGuiManager {
         net.bumpier.bshop.shop.ui.ShopTransactionLogger.logTransaction(
             player.getUniqueId().toString(), player.getName(), shopId, itemName, material, amount, price, type, balanceAfter, transactionId, date, itemId
         );
+        // Refresh Recent Purchases GUI if open
+        if (player.getOpenInventory() != null && isRecentPurchasesMenu(player.getOpenInventory())) {
+            int page = recentPurchasesPage.getOrDefault(player.getUniqueId(), 0);
+            openRecentPurchasesMenu(player, page);
+        }
     }
 
     // Update RecentTransaction class

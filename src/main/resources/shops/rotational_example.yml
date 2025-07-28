@@ -27,7 +27,7 @@ pagination:
     slot: 31
     action: "back_to_main_menu"
   filler:
-    material: GRAY_STAINED_GLASS_PANE
+    material: BLACK_STAINED_GLASS_PANE
     display-name: " "
 
 featured-items:
@@ -47,6 +47,8 @@ items:
     material: CHEST
     display-name: "<yellow>Event Crate"
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Contains random event loot!"
     buy-price: 5000
     sell-price: 0
@@ -55,6 +57,8 @@ items:
     material: FIREWORK_ROCKET
     display-name: "<red>Firework Rocket"
     lore:
+      - "<gray>Buy Price: <gold>$%buy_price%"
+      - "<gray>Sell Price: <green>$%sell_price%"
       - "<gray>Celebrate the event!"
     buy-price: 50
     sell-price: 10

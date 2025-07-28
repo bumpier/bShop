@@ -48,6 +48,11 @@ public class ShopCommand implements CommandExecutor {
             return true;
         }
 
+        if (subCommand.equals("view")) {
+            handleView(sender, args);
+            return true;
+        }
+
         if (!(sender instanceof Player)) {
             messageService.send(sender, "player_only_command");
             return true;
@@ -80,6 +85,9 @@ public class ShopCommand implements CommandExecutor {
         moduleManager.reloadModules();
         
         messageService.send(sender, "admin.reload_complete");
+        if (sender instanceof Player) {
+            shopGuiManager.openMainMenu((Player) sender);
+        }
     }
 
     private void handleOpenCategory(Player player, String shopId) {
@@ -144,5 +152,33 @@ public class ShopCommand implements CommandExecutor {
             }
         } catch (Exception ignored) {}
         messageService.send(sender, "admin.rotate_success", Placeholder.unparsed("shop", shopId));
+    }
+
+    private void handleView(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("bshop.admin.view")) {
+            messageService.send(sender, "no_permission");
+            return;
+        }
+
+        if (args.length < 2) {
+            messageService.send(sender, "admin.view_usage");
+            return;
+        }
+
+        if (!(sender instanceof Player)) {
+            messageService.send(sender, "player_only_command");
+            return;
+        }
+
+        String targetUsername = args[1];
+        org.bukkit.OfflinePlayer targetPlayer = org.bukkit.Bukkit.getOfflinePlayer(targetUsername);
+
+        if (!targetPlayer.hasPlayedBefore()) {
+            messageService.send(sender, "admin.view_player_not_found", Placeholder.unparsed("player", targetUsername));
+            return;
+        }
+
+        // Open the recent purchases GUI for the target player
+        shopGuiManager.openRecentPurchasesMenuForPlayer((Player) sender, targetPlayer.getUniqueId());
     }
 }
