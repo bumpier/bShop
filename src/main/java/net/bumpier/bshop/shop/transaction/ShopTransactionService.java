@@ -58,7 +58,7 @@ public class ShopTransactionService {
                 purchaseCounts.get(playerId).get(shopId).get(item.id()).put(rotation, soFar + quantity);
             }
         }
-        // Check for currency-command
+        // Check for currency-command (prioritize over Vault)
         String currencyCommand = item.getCurrencyCommand();
         String currencyRequirement = item.getCurrencyRequirement();
         if (currencyCommand != null && !currencyCommand.isEmpty()) {
@@ -105,6 +105,12 @@ public class ShopTransactionService {
                 if (shopId == null) shopId = "unknown";
                 shopGuiManager.recordRecentTransaction(player, shopId, item.displayName(), item.material().name(), quantity, item.buyPrice() * quantity, "Buy", item.id());
             }
+            return;
+        }
+        
+        // Vault-based economy
+        if (economy == null) {
+            messageService.send(player, "shop.economy_not_available");
             return;
         }
         if (item.buyPrice() <= 0) {
@@ -209,6 +215,11 @@ public class ShopTransactionService {
                 if (shopId == null) shopId = "unknown";
                 shopGuiManager.recordRecentTransaction(player, shopId, item.displayName(), item.material().name(), quantity, item.sellPrice() * quantity, "Sell", item.id());
             }
+            return;
+        }
+        // Vault-based economy
+        if (economy == null) {
+            messageService.send(player, "shop.economy_not_available");
             return;
         }
         if (item.sellPrice() <= 0) {

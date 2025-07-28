@@ -22,6 +22,7 @@ shop:
   sell_disabled: "%prefix%<red>This item cannot be sold.</red>"
   item_not_owned: "%prefix%<red>You do not have <aqua>%amount%x %item%</aqua> to sell.</red>"
   insufficient_custom_currency: "<red>You do not have enough tokens to buy this item!</red>"
+  economy_not_available: "%prefix%<red>Economy system is not available. Please contact an administrator.</red>"
   purchase_limit_reached: "%prefix%<red>You have reached the purchase limit for this item!</red>"
   sell_limit_reached: "%prefix%<red>You have reached the sell limit for this item!</red>"
 

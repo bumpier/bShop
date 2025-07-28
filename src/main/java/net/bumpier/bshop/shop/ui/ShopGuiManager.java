@@ -533,22 +533,30 @@ public class ShopGuiManager {
         if (meta != null) {
             List<String> lore = meta.getLore();
             if (lore != null) {
-                String shopId = null;
-                for (Map.Entry<UUID, PageInfo> entry : openShopInventories.entrySet()) {
-                    if (entry.getValue().shopId() != null) {
-                        shopId = entry.getValue().shopId();
-                        break;
+                List<String> newLore = new ArrayList<>();
+                for (String line : lore) {
+                    // Replace price placeholders
+                    String processedLine = line
+                            .replace("%buy_price%", String.format("%,.2f", shopItem.buyPrice()))
+                            .replace("%sell_price%", String.format("%,.2f", shopItem.sellPrice()));
+                    
+                    // Replace timer placeholder for rotational shops
+                    String shopId = null;
+                    for (Map.Entry<UUID, PageInfo> entry : openShopInventories.entrySet()) {
+                        if (entry.getValue().shopId() != null) {
+                            shopId = entry.getValue().shopId();
+                            break;
+                        }
                     }
-                }
-                if (shopId != null) {
-                    long timeLeft = shopManager.getTimeUntilNextRotation(shopId);
-                    String timer = formatTimer(timeLeft);
-                    List<String> newLore = new ArrayList<>();
-                    for (String line : lore) {
-                        newLore.add(line.replace("%timer%", timer));
+                    if (shopId != null) {
+                        long timeLeft = shopManager.getTimeUntilNextRotation(shopId);
+                        String timer = formatTimer(timeLeft);
+                        processedLine = processedLine.replace("%timer%", timer);
                     }
-                    meta.setLore(newLore);
+                    
+                    newLore.add(processedLine);
                 }
+                meta.setLore(newLore);
             }
             itemStack.setItemMeta(meta);
         }
@@ -683,7 +691,6 @@ public class ShopGuiManager {
     }
 
     public void recordRecentTransaction(Player player, String shopId, String itemName, String material, int amount, double price, String type, String itemId) {
-        // For now, use dummy values for shopName, transactionId, and balanceAfter
         String shopName = "N/A";
         String transactionId = java.util.UUID.randomUUID().toString().substring(0, 8);
         double balanceAfter = 0.0;
