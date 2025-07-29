@@ -30,6 +30,50 @@ shop:
 multiplier:
   current: "%prefix%<green>Your current sell multiplier is <gold>%multiplier%</gold>.</green>"
   other: "%prefix%<green><gray>%player%</gray>'s current sell multiplier is <gold>%multiplier%</gold>.</green>"
+  # Command messages
+  give_success: "%prefix%<green>Set <gold>%multiplier%x</gold> multiplier for <gray>%player%</gray>.</green>"
+  give_failed: "%prefix%<red>Failed to set multiplier for <gray>%player%</gray>.</red>"
+  give_invalid_value: "%prefix%<red>Multiplier must be greater than 0!</red>"
+  give_invalid_number: "%prefix%<red>Invalid multiplier value: <gray>%value%</gray></red>"
+  give_player_not_found: "%prefix%<red>Player not found: <gray>%player%</gray></red>"
+  give_received: "%prefix%<green>You received a <gold>%multiplier%x</gold> sell multiplier!</green>"
+  
+  remove_success: "%prefix%<green>Removed multiplier from <gray>%player%</gray>.</green>"
+  remove_no_multiplier: "%prefix%<yellow><gray>%player%</gray> didn't have a temporary multiplier.</yellow>"
+  remove_received: "%prefix%<yellow>Your sell multiplier has been removed!</yellow>"
+  
+  check_header: "%prefix%<gold>=== Multiplier Info for <gray>%player%</gray> ===</gold>"
+  check_current: "%prefix%<green>Current Multiplier: <white>%multiplier%</white></green>"
+  check_temp: "%prefix%<green>Temporary Multiplier: <white>%multiplier%x</white></green>"
+  check_temp_none: "%prefix%<gray>Temporary Multiplier: None</gray>"
+  check_permission_header: "%prefix%<green>Permission Multipliers:</green>"
+  check_permission_entry: "%prefix%<gray>  • %permission%: %multiplier%x</gray>"
+  
+  list_header: "%prefix%<gold>=== Active Temporary Multipliers ===</gold>"
+  list_empty: "%prefix%<yellow>No temporary multipliers are currently active.</yellow>"
+  list_entry: "%prefix%<green>• <white>%player%</white><gray>: %multiplier%x</gray></green>"
+  
+  clear_success: "%prefix%<green>Cleared all temporary multipliers.</green>"
+  clear_received: "%prefix%<yellow>Your sell multiplier has been removed!</yellow>"
+  
+  # Help messages
+  help_header: "%prefix%<gold>=== Multiplier Commands ===</gold>"
+  help_give: "%prefix%<yellow>/shop multiplier give <player> <multiplier> <white>- Give a player a temporary multiplier</white></yellow>"
+  help_remove: "%prefix%<yellow>/shop multiplier remove <player> <white>- Remove a player's temporary multiplier</white></yellow>"
+  help_check: "%prefix%<yellow>/shop multiplier check <player> <white>- Check a player's current multiplier</white></yellow>"
+  help_list: "%prefix%<yellow>/shop multiplier list <white>- List all active temporary multipliers</white></yellow>"
+  help_clear: "%prefix%<yellow>/shop multiplier clear <white>- Clear all temporary multipliers</white></yellow>"
+  
+  # Permission messages
+  no_permission_give: "%prefix%<red>You don't have permission to give multipliers!</red>"
+  no_permission_remove: "%prefix%<red>You don't have permission to remove multipliers!</red>"
+  no_permission_list: "%prefix%<red>You don't have permission to list multipliers!</red>"
+  no_permission_clear: "%prefix%<red>You don't have permission to clear multipliers!</red>"
+  
+  # Usage messages
+  usage_give: "%prefix%<red>Usage: /shop multiplier give <player> <multiplier></red>"
+  usage_remove: "%prefix%<red>Usage: /shop multiplier remove <player></red>"
+  usage_check: "%prefix%<red>Usage: /shop multiplier check <player></red>"
 
 # GUI error messages
 gui:
@@ -45,3 +89,5 @@ admin:
   rotate_usage: "<red>Usage: /shop rotate <shop>"
   rotate_not_rotational: "<red>The shop <gray>%shop%</gray> is not a rotational shop."
   rotate_success: "<green>Rotated the <gray>%shop%</gray> shop!"
+  view_usage: "%prefix%<red>Usage: /shop view <player></red>"
+  view_player_not_found: "%prefix%<red>Player <gray>%player%</gray> not found.</red>"

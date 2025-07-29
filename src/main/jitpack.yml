@@ -1,2 +1,3 @@
 jdk:
   - openjdk21
+  Manages GUI operations and player interactions.

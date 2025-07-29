@@ -8,9 +8,21 @@ softdepend: [Vault]
 commands:
   shop:
     description: Opens the main shop GUI or performs an admin action.
-    usage: /shop [category|reload]
+    usage: /shop [category|reload|multiplier]
     aliases: [bshop, eshop]
 permissions:
   bshop.admin.reload:
     description: Allows the user to reload the bShop plugin configuration.
+    default: op
+  bshop.admin.multiplier.give:
+    description: Allows giving temporary multipliers to players.
+    default: op
+  bshop.admin.multiplier.remove:
+    description: Allows removing temporary multipliers from players.
+    default: op
+  bshop.admin.multiplier.list:
+    description: Allows listing all active temporary multipliers.
+    default: op
+  bshop.admin.multiplier.clear:
+    description: Allows clearing all temporary multipliers.
     default: op

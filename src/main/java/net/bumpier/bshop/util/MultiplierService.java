@@ -5,6 +5,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -13,6 +14,7 @@ import java.util.logging.Level;
 public class MultiplierService {
     private final BShop plugin;
     private final Map<String, Double> permissionMultipliers = new HashMap<>();
+    private final Map<UUID, Double> temporaryMultipliers = new HashMap<>();
     private boolean enabled = false;
     private double maxMultiplier = 5.0;
     private boolean stackMultipliers = false;
@@ -67,9 +69,20 @@ public class MultiplierService {
      * @return The total multiplier (1.0 if no multipliers apply)
      */
     public double getPlayerMultiplier(Player player) {
-        if (!enabled || permissionMultipliers.isEmpty()) {
+        if (!enabled) {
             return 1.0;
         }
+        
+        // Check for temporary multiplier first
+        Double tempMultiplier = temporaryMultipliers.get(player.getUniqueId());
+        if (tempMultiplier != null) {
+            return Math.min(tempMultiplier, maxMultiplier);
+        }
+        
+        if (permissionMultipliers.isEmpty()) {
+            return 1.0;
+        }
+        
         if (stackMultipliers) {
             // Stack all applicable multipliers
             double totalMultiplier = 1.0;
@@ -119,6 +132,31 @@ public class MultiplierService {
     }
 
     /**
+     * Get a formatted string showing the player's current multiplier by UUID
+     * @param playerUuid The player's UUID to check
+     * @return Formatted multiplier string
+     */
+    public String getMultiplierDisplay(UUID playerUuid) {
+        if (!enabled) {
+            return "1.0x";
+        }
+        
+        // Check for temporary multiplier first
+        Double tempMultiplier = temporaryMultipliers.get(playerUuid);
+        if (tempMultiplier != null) {
+            double multiplier = Math.min(tempMultiplier, maxMultiplier);
+            if (multiplier == 1.0) {
+                return "1.0x";
+            }
+            return String.format("%.1fx", multiplier);
+        }
+        
+        // For offline players, we can only check temporary multipliers
+        // Permission-based multipliers require the player to be online
+        return "1.0x";
+    }
+
+    /**
      * Check if multipliers are enabled
      * @return true if multipliers are enabled
      */
@@ -148,5 +186,127 @@ public class MultiplierService {
      */
     public Map<String, Double> getPermissionMultipliers() {
         return new HashMap<>(permissionMultipliers);
+    }
+
+    // --- Temporary Multiplier Methods ---
+
+    /**
+     * Set a temporary multiplier for a player
+     * @param player The player to set the multiplier for
+     * @param multiplier The multiplier value (must be > 0)
+     * @return true if successful, false if multiplier is invalid
+     */
+    public boolean setTemporaryMultiplier(Player player, double multiplier) {
+        if (multiplier <= 0) {
+            return false;
+        }
+        
+        if (multiplier > maxMultiplier) {
+            multiplier = maxMultiplier;
+        }
+        
+        temporaryMultipliers.put(player.getUniqueId(), multiplier);
+        plugin.getLogger().info("Set temporary multiplier for " + player.getName() + ": " + multiplier + "x");
+        return true;
+    }
+
+    /**
+     * Set a temporary multiplier for a player by UUID
+     * @param playerUuid The player's UUID
+     * @param multiplier The multiplier value (must be > 0)
+     * @return true if successful, false if multiplier is invalid
+     */
+    public boolean setTemporaryMultiplier(UUID playerUuid, double multiplier) {
+        if (multiplier <= 0) {
+            return false;
+        }
+        
+        if (multiplier > maxMultiplier) {
+            multiplier = maxMultiplier;
+        }
+        
+        temporaryMultipliers.put(playerUuid, multiplier);
+        plugin.getLogger().info("Set temporary multiplier for UUID " + playerUuid + ": " + multiplier + "x");
+        return true;
+    }
+
+    /**
+     * Remove a temporary multiplier from a player
+     * @param player The player to remove the multiplier from
+     * @return true if a temporary multiplier was removed, false if none existed
+     */
+    public boolean removeTemporaryMultiplier(Player player) {
+        Double removed = temporaryMultipliers.remove(player.getUniqueId());
+        if (removed != null) {
+            plugin.getLogger().info("Removed temporary multiplier from " + player.getName());
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Remove a temporary multiplier from a player by UUID
+     * @param playerUuid The player's UUID
+     * @return true if a temporary multiplier was removed, false if none existed
+     */
+    public boolean removeTemporaryMultiplier(UUID playerUuid) {
+        Double removed = temporaryMultipliers.remove(playerUuid);
+        if (removed != null) {
+            plugin.getLogger().info("Removed temporary multiplier from UUID " + playerUuid);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Get a player's temporary multiplier
+     * @param player The player to check
+     * @return The temporary multiplier value, or null if none exists
+     */
+    public Double getTemporaryMultiplier(Player player) {
+        return temporaryMultipliers.get(player.getUniqueId());
+    }
+
+    /**
+     * Get a player's temporary multiplier by UUID
+     * @param playerUuid The player's UUID
+     * @return The temporary multiplier value, or null if none exists
+     */
+    public Double getTemporaryMultiplier(UUID playerUuid) {
+        return temporaryMultipliers.get(playerUuid);
+    }
+
+    /**
+     * Check if a player has a temporary multiplier
+     * @param player The player to check
+     * @return true if the player has a temporary multiplier
+     */
+    public boolean hasTemporaryMultiplier(Player player) {
+        return temporaryMultipliers.containsKey(player.getUniqueId());
+    }
+
+    /**
+     * Check if a player has a temporary multiplier by UUID
+     * @param playerUuid The player's UUID
+     * @return true if the player has a temporary multiplier
+     */
+    public boolean hasTemporaryMultiplier(UUID playerUuid) {
+        return temporaryMultipliers.containsKey(playerUuid);
+    }
+
+    /**
+     * Get all temporary multipliers
+     * @return Map of player UUID to temporary multiplier value
+     */
+    public Map<UUID, Double> getTemporaryMultipliers() {
+        return new HashMap<>(temporaryMultipliers);
+    }
+
+    /**
+     * Clear all temporary multipliers
+     */
+    public void clearTemporaryMultipliers() {
+        temporaryMultipliers.clear();
+        plugin.getLogger().info("Cleared all temporary multipliers");
     }
 } 
