@@ -23,6 +23,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.Iterator;
 
 public class ShopManager {
 
@@ -49,6 +51,11 @@ public class ShopManager {
     private final ScheduledExecutorService cleanupExecutor = Executors.newScheduledThreadPool(1);
     private long cacheDuration = 300000; // 5 minutes default
     private int maxCachedShops = 100;
+    
+    // Add performance monitoring
+    private final AtomicLong cacheHits = new AtomicLong(0);
+    private final AtomicLong cacheMisses = new AtomicLong(0);
+    private final AtomicLong totalRequests = new AtomicLong(0);
 
     public ShopManager(BShop plugin) {
         this.plugin = plugin;
@@ -70,23 +77,67 @@ public class ShopManager {
         long cleanupInterval = perfConfig != null ? perfConfig.getLong("cleanup_interval", 300000) : 300000;
         
         cleanupExecutor.scheduleAtFixedRate(() -> {
-            long cutoff = System.currentTimeMillis() - cacheDuration;
-            shopCache.entrySet().removeIf(entry -> cacheTimestamps.getOrDefault(entry.getKey(), 0L) < cutoff);
-            itemCache.entrySet().removeIf(entry -> cacheTimestamps.getOrDefault(entry.getKey(), 0L) < cutoff);
-            
-            // Limit cache size
-            if (shopCache.size() > maxCachedShops) {
-                List<String> oldestKeys = cacheTimestamps.entrySet().stream()
-                        .sorted(Map.Entry.comparingByValue())
-                        .limit(shopCache.size() - maxCachedShops)
-                        .map(Map.Entry::getKey)
-                        .collect(Collectors.toList());
+            try {
+                long cutoff = System.currentTimeMillis() - cacheDuration;
+                int removedShops = 0;
+                int removedItems = 0;
                 
-                oldestKeys.forEach(key -> {
-                    shopCache.remove(key);
-                    itemCache.remove(key);
-                    cacheTimestamps.remove(key);
-                });
+                // Clean expired shop cache entries
+                Iterator<Map.Entry<String, Shop>> shopIterator = shopCache.entrySet().iterator();
+                while (shopIterator.hasNext()) {
+                    Map.Entry<String, Shop> entry = shopIterator.next();
+                    if (cacheTimestamps.getOrDefault(entry.getKey(), 0L) < cutoff) {
+                        shopIterator.remove();
+                        cacheTimestamps.remove(entry.getKey());
+                        removedShops++;
+                    }
+                }
+                
+                // Clean expired item cache entries
+                Iterator<Map.Entry<String, List<ShopItem>>> itemIterator = itemCache.entrySet().iterator();
+                while (itemIterator.hasNext()) {
+                    Map.Entry<String, List<ShopItem>> entry = itemIterator.next();
+                    if (cacheTimestamps.getOrDefault(entry.getKey(), 0L) < cutoff) {
+                        itemIterator.remove();
+                        cacheTimestamps.remove(entry.getKey());
+                        removedItems++;
+                    }
+                }
+                
+                // Limit cache size with LRU eviction
+                if (shopCache.size() > maxCachedShops) {
+                    List<String> oldestKeys = cacheTimestamps.entrySet().stream()
+                            .sorted(Map.Entry.comparingByValue())
+                            .limit(shopCache.size() - maxCachedShops)
+                            .map(Map.Entry::getKey)
+                            .collect(Collectors.toList());
+                    
+                    for (String key : oldestKeys) {
+                        shopCache.remove(key);
+                        itemCache.remove(key);
+                        cacheTimestamps.remove(key);
+                        removedShops++;
+                    }
+                }
+                
+                // Log cleanup statistics periodically
+                if (removedShops > 0 || removedItems > 0) {
+                    plugin.getLogger().fine("Cache cleanup: removed " + removedShops + " shops, " + removedItems + " item lists");
+                }
+                
+                // Log cache statistics every 10 minutes
+                if (System.currentTimeMillis() % 600000 < cleanupInterval) {
+                    long hits = cacheHits.get();
+                    long misses = cacheMisses.get();
+                    long total = totalRequests.get();
+                    double hitRate = total > 0 ? (double) hits / total * 100 : 0;
+                    
+                    plugin.getLogger().info(String.format("Cache stats: %d hits, %d misses, %.1f%% hit rate, %d cached shops", 
+                        hits, misses, hitRate, shopCache.size()));
+                }
+                
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.WARNING, "Error during cache cleanup", e);
             }
         }, cleanupInterval / 1000, cleanupInterval / 1000, TimeUnit.SECONDS);
     }
@@ -94,13 +145,11 @@ public class ShopManager {
     public void loadShops() {
         loadedShops.clear();
         if (!shopsDirectory.exists()) {
-            plugin.getLogger().info("Shops directory not found, creating one...");
             shopsDirectory.mkdirs();
         }
 
         // Save default examples if the directory is empty
         if (shopsDirectory.listFiles() == null || shopsDirectory.listFiles().length == 0) {
-            plugin.getLogger().info("Shops directory is empty. Saving default examples (rotational_example.yml, command_based.yml).");
             plugin.saveResource("shops/rotational_example.yml", false);
             plugin.saveResource("shops/command_based.yml", false);
             plugin.saveResource("shops/advanced_shop.yml", false);
@@ -113,11 +162,8 @@ public class ShopManager {
             return;
         }
 
-        plugin.getLogger().info("Found " + shopFiles.length + " shop file(s). Starting to load...");
-
         for (File shopFile : shopFiles) {
             String shopId = shopFile.getName().replace(".yml", "");
-            plugin.getLogger().info("-> Attempting to load shop '" + shopId + "' from " + shopFile.getName());
 
             FileConfiguration shopConfig = YamlConfiguration.loadConfiguration(shopFile);
 
@@ -170,41 +216,59 @@ public class ShopManager {
                 shopAnnouncements.put(shopId, new ShopAnnouncement(announceRotation, rotationMessage));
             }
             loadedShops.put(shopId.toLowerCase(), shop);
-            plugin.getLogger().info("   - SUCCESS: Successfully loaded shop '" + shopId + "'.");
         }
-        plugin.getLogger().info("Shop loading complete. Total loaded: " + loadedShops.size());
     }
 
     public void startRotationTask(BShop plugin) {
         new BukkitRunnable() {
             @Override
             public void run() {
-                long now = System.currentTimeMillis();
-                for (Shop shop : loadedShops.values()) {
-                    if (shop.type() != null && shop.type().equalsIgnoreCase("rotational")) {
-                        long next = nextRotationTimes.getOrDefault(shop.id(), 0L);
-                        if (now >= next) {
-                            // Rotate items
-                            List<ShopItem> shuffled = new ArrayList<>(shop.items());
-                            java.util.Collections.shuffle(shuffled);
-                            List<ShopItem> newActive = new ArrayList<>(shuffled.subList(0, Math.min(shop.slots(), shuffled.size())));
-                            // Update activeItems via reflection (since record is immutable)
-                            try {
-                                java.lang.reflect.Field f = shop.getClass().getDeclaredField("activeItems");
-                                f.setAccessible(true);
-                                f.set(shop, newActive);
-                            } catch (Exception ignored) {}
-                            // Schedule next rotation
-                            long intervalMs = parseInterval(shop.rotationInterval());
-                            nextRotationTimes.put(shop.id(), now + intervalMs);
-                            // Announce rotation if enabled
-                            ShopAnnouncement announcement = shopAnnouncements.get(shop.id());
-                            if (announcement != null && announcement.announce) {
-                                String msg = announcement.message.replace("%shop%", shop.title());
-                                Bukkit.broadcastMessage(msg);
+                try {
+                    long now = System.currentTimeMillis();
+                    int rotatedShops = 0;
+                    
+                    for (Shop shop : loadedShops.values()) {
+                        if (shop.type() != null && shop.type().equalsIgnoreCase("rotational")) {
+                            long next = nextRotationTimes.getOrDefault(shop.id(), 0L);
+                            if (now >= next) {
+                                // Rotate items
+                                List<ShopItem> shuffled = new ArrayList<>(shop.items());
+                                Collections.shuffle(shuffled);
+                                List<ShopItem> newActive = new ArrayList<>(shuffled.subList(0, Math.min(shop.slots(), shuffled.size())));
+                                
+                                // Update activeItems via reflection (since record is immutable)
+                                try {
+                                    java.lang.reflect.Field f = shop.getClass().getDeclaredField("activeItems");
+                                    f.setAccessible(true);
+                                    f.set(shop, newActive);
+                                } catch (Exception ignored) {}
+                                
+                                // Schedule next rotation
+                                long intervalMs = parseInterval(shop.rotationInterval());
+                                nextRotationTimes.put(shop.id(), now + intervalMs);
+                                
+                                // Announce rotation if enabled
+                                ShopAnnouncement announcement = shopAnnouncements.get(shop.id());
+                                if (announcement != null && announcement.announce) {
+                                    String msg = announcement.message.replace("%shop%", shop.title());
+                                    Bukkit.broadcastMessage(msg);
+                                }
+                                
+                                rotatedShops++;
+                                
+                                // Clear cache for this shop since items changed
+                                shopCache.remove(shop.id());
+                                cacheTimestamps.remove(shop.id());
                             }
                         }
                     }
+                    
+                    if (rotatedShops > 0) {
+                        plugin.getLogger().fine("Rotated " + rotatedShops + " shops");
+                    }
+                    
+                } catch (Exception e) {
+                    plugin.getLogger().log(Level.WARNING, "Error during shop rotation", e);
                 }
             }
         }.runTaskTimer(plugin, 20L, 1200L); // Run every minute
@@ -257,9 +321,16 @@ public class ShopManager {
                 String texture = itemMap.get("texture") != null ? (String) itemMap.get("texture") : null;
                 String currencyCommand = itemMap.get("currency-command") != null ? (String) itemMap.get("currency-command") : null;
                 String currencyRequirement = itemMap.get("currency-requirement") != null ? (String) itemMap.get("currency-requirement") : null;
+                
+                // Parse separate buy/sell currency commands
+                String buyCurrencyCommand = itemMap.get("buy-currency-command") != null ? (String) itemMap.get("buy-currency-command") : null;
+                String sellCurrencyCommand = itemMap.get("sell-currency-command") != null ? (String) itemMap.get("sell-currency-command") : null;
+                String buyCurrencyRequirement = itemMap.get("buy-currency-requirement") != null ? (String) itemMap.get("buy-currency-requirement") : null;
+                String sellCurrencyRequirement = itemMap.get("sell-currency-requirement") != null ? (String) itemMap.get("sell-currency-requirement") : null;
+                
                 Integer buyLimit = itemMap.get("buy-limit") != null ? (Integer) itemMap.get("buy-limit") : null;
                 Integer sellLimit = itemMap.get("sell-limit") != null ? (Integer) itemMap.get("sell-limit") : null;
-                items.add(new ShopItem(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot, commandBased, buyCommand, sellCommand, quantityGui, base64Head, texture, currencyCommand, currencyRequirement, buyLimit, sellLimit));
+                items.add(new ShopItem(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot, commandBased, buyCommand, sellCommand, quantityGui, base64Head, texture, currencyCommand, currencyRequirement, buyCurrencyCommand, sellCurrencyCommand, buyCurrencyRequirement, sellCurrencyRequirement, buyLimit, sellLimit));
             } catch (Exception e) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to parse an item in a shop file.", e);
             }
@@ -307,11 +378,16 @@ public class ShopManager {
     }
 
     public Shop getShop(String id) {
+        totalRequests.incrementAndGet();
+        
         // Check cache first
         Shop cached = shopCache.get(id);
         if (cached != null && System.currentTimeMillis() - cacheTimestamps.getOrDefault(id, 0L) < cacheDuration) {
+            cacheHits.incrementAndGet();
             return cached;
         }
+        
+        cacheMisses.incrementAndGet();
         
         // Load from database/file
         Shop shop = loadedShops.get(id.toLowerCase());
@@ -320,6 +396,14 @@ public class ShopManager {
             cacheTimestamps.put(id, System.currentTimeMillis());
         }
         return shop;
+    }
+
+    /**
+     * Returns a copy of the loaded shops map for tab completion and other read-only operations.
+     * @return Map of shop ID to Shop object
+     */
+    public Map<String, Shop> getLoadedShops() {
+        return new HashMap<>(loadedShops);
     }
 
     public void shutdown() {
@@ -333,5 +417,42 @@ public class ShopManager {
                 cleanupExecutor.shutdownNow();
             }
         }
+        
+        // Clear caches
+        shopCache.clear();
+        itemCache.clear();
+        cacheTimestamps.clear();
+        
+        // Log final statistics
+        long hits = cacheHits.get();
+        long misses = cacheMisses.get();
+        long total = totalRequests.get();
+        double hitRate = total > 0 ? (double) hits / total * 100 : 0;
+        
+        plugin.getLogger().info(String.format("Final cache stats: %d hits, %d misses, %.1f%% hit rate", 
+            hits, misses, hitRate));
+    }
+    
+    /**
+     * Get cache statistics for monitoring
+     */
+    public Map<String, Object> getCacheStats() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("cache_hits", cacheHits.get());
+        stats.put("cache_misses", cacheMisses.get());
+        stats.put("total_requests", totalRequests.get());
+        stats.put("cached_shops", shopCache.size());
+        stats.put("cached_items", itemCache.size());
+        stats.put("cache_duration_ms", cacheDuration);
+        stats.put("max_cached_shops", maxCachedShops);
+        
+        long total = totalRequests.get();
+        if (total > 0) {
+            stats.put("hit_rate_percent", (double) cacheHits.get() / total * 100);
+        } else {
+            stats.put("hit_rate_percent", 0.0);
+        }
+        
+        return stats;
     }
 }

@@ -8,11 +8,20 @@ softdepend: [Vault]
 commands:
   shop:
     description: Opens the main shop GUI or performs an admin action.
-    usage: /shop [category|reload|multiplier]
+    usage: /shop [category|reload|multiplier|rotate|view|debug|help]
     aliases: [bshop, eshop]
 permissions:
+  bshop.use:
+    description: Allows the user to use the bShop plugin.
+    default: true
   bshop.admin.reload:
     description: Allows the user to reload the bShop plugin configuration.
+    default: op
+  bshop.admin.rotate:
+    description: Allows the user to force rotate shops or schedule rotations.
+    default: op
+  bshop.admin.view:
+    description: Allows the user to view other players' recent transactions.
     default: op
   bshop.admin.multiplier.give:
     description: Allows giving temporary multipliers to players.
@@ -26,3 +35,60 @@ permissions:
   bshop.admin.multiplier.clear:
     description: Allows clearing all temporary multipliers.
     default: op
+  bshop.admin.multiplier.check:
+    description: Allows checking a player's current multiplier.
+    default: op
+  bshop.admin.multiplier.stats:
+    description: Allows viewing multiplier statistics.
+    default: op
+  bshop.admin.multiplier.history:
+    description: Allows viewing player multiplier history.
+    default: op
+  bshop.admin.debug:
+    description: Allows debugging multiplier and other plugin issues.
+    default: op
+  bshop.multiplier.notify:
+    description: Allows receiving multiplier broadcast notifications.
+    default: true
+  
+  # =============================================================================
+  # TIER-BASED MULTIPLIER PERMISSIONS
+  # =============================================================================
+  
+  # Basic tiers
+  bshop.tier.bronze:
+    description: Bronze tier - Small sell bonus (1.1x)
+    default: false
+  bshop.tier.silver:
+    description: Silver tier - Medium sell bonus (1.25x)
+    default: false
+  bshop.tier.gold:
+    description: Gold tier - Large sell bonus (1.5x)
+    default: false
+  bshop.tier.diamond:
+    description: Diamond tier - Premium sell bonus (2.0x)
+    default: false
+  
+  # VIP tiers
+  bshop.vip:
+    description: VIP tier - VIP sell bonus (1.75x)
+    default: false
+  bshop.premium:
+    description: Premium tier - Premium sell bonus (2.5x)
+    default: false
+  
+  # Event tiers
+  bshop.event.double:
+    description: Double Sell Event - Double sell prices (2.0x)
+    default: false
+  bshop.event.triple:
+    description: Triple Sell Event - Triple sell prices (3.0x)
+    default: false
+  
+  # Custom tiers
+  bshop.staff:
+    description: Staff tier - Staff sell bonus (1.3x)
+    default: false
+  bshop.donor:
+    description: Donor tier - Donor sell bonus (1.4x)
+    default: false

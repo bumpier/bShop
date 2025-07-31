@@ -30,13 +30,20 @@ public final class ShopItem {
     private final String texture; // NEW
     private final String currencyCommand;
     private final String currencyRequirement;
+    
+    // Separate buy/sell currency commands
+    private final String buyCurrencyCommand;
+    private final String sellCurrencyCommand;
+    private final String buyCurrencyRequirement;
+    private final String sellCurrencyRequirement;
+    
     private final Integer buyLimit;
     private final Integer sellLimit;
 
     // The final slot this item is assigned to on a generated GUI page.
     private int assignedSlot;
 
-    public ShopItem(String id, Material material, String displayName, List<String> lore, int customModelData, double buyPrice, double sellPrice, Integer pinnedPage, Integer pinnedSlot, Boolean commandBased, String buyCommand, String sellCommand, Boolean quantityGui, String base64Head, String texture, String currencyCommand, String currencyRequirement, Integer buyLimit, Integer sellLimit) {
+    public ShopItem(String id, Material material, String displayName, List<String> lore, int customModelData, double buyPrice, double sellPrice, Integer pinnedPage, Integer pinnedSlot, Boolean commandBased, String buyCommand, String sellCommand, Boolean quantityGui, String base64Head, String texture, String currencyCommand, String currencyRequirement, String buyCurrencyCommand, String sellCurrencyCommand, String buyCurrencyRequirement, String sellCurrencyRequirement, Integer buyLimit, Integer sellLimit) {
         this.id = id;
         this.material = material;
         this.displayName = displayName;
@@ -55,13 +62,22 @@ public final class ShopItem {
         this.texture = texture;
         this.currencyCommand = currencyCommand;
         this.currencyRequirement = currencyRequirement;
+        this.buyCurrencyCommand = buyCurrencyCommand;
+        this.sellCurrencyCommand = sellCurrencyCommand;
+        this.buyCurrencyRequirement = buyCurrencyRequirement;
+        this.sellCurrencyRequirement = sellCurrencyRequirement;
         this.buyLimit = buyLimit;
         this.sellLimit = sellLimit;
     }
 
     // Add legacy constructor for backward compatibility
     public ShopItem(String id, Material material, String displayName, List<String> lore, int customModelData, double buyPrice, double sellPrice, Integer pinnedPage, Integer pinnedSlot, Boolean commandBased, String buyCommand, String sellCommand, Boolean quantityGui, String base64Head, String texture, String currencyCommand, String currencyRequirement) {
-        this(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot, commandBased, buyCommand, sellCommand, quantityGui, base64Head, texture, currencyCommand, currencyRequirement, null, null);
+        this(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot, commandBased, buyCommand, sellCommand, quantityGui, base64Head, texture, currencyCommand, currencyRequirement, null, null, null, null, null, null);
+    }
+
+    // Legacy constructor with buy/sell limits
+    public ShopItem(String id, Material material, String displayName, List<String> lore, int customModelData, double buyPrice, double sellPrice, Integer pinnedPage, Integer pinnedSlot, Boolean commandBased, String buyCommand, String sellCommand, Boolean quantityGui, String base64Head, String texture, String currencyCommand, String currencyRequirement, Integer buyLimit, Integer sellLimit) {
+        this(id, material, displayName, lore, customModelData, buyPrice, sellPrice, pinnedPage, pinnedSlot, commandBased, buyCommand, sellCommand, quantityGui, base64Head, texture, currencyCommand, currencyRequirement, null, null, null, null, buyLimit, sellLimit);
     }
 
     // --- Getters ---
@@ -88,10 +104,16 @@ public final class ShopItem {
     public String getTexture() { return texture; }
     public String getCurrencyCommand() { return currencyCommand; }
     public String getCurrencyRequirement() { return currencyRequirement; }
+    
+    // New getters for separate buy/sell currency commands
+    public String getBuyCurrencyCommand() { return buyCurrencyCommand; }
+    public String getSellCurrencyCommand() { return sellCurrencyCommand; }
+    public String getBuyCurrencyRequirement() { return buyCurrencyRequirement; }
+    public String getSellCurrencyRequirement() { return sellCurrencyRequirement; }
+    
     public Integer getBuyLimit() { return buyLimit; }
     public Integer getSellLimit() { return sellLimit; }
 
-    // --- Assigned Slot Management ---
     public int getAssignedSlot() { return assignedSlot; }
     public void setAssignedSlot(int slot) { this.assignedSlot = slot; }
 }

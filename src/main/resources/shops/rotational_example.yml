@@ -1,65 +1,200 @@
-# Rotational Shop Example
-# Demonstrates: rotational shop with unique interval, slot config, and items
+# Rotational Example Shop
+# Demonstrates: rotational shop with unique interval, slot config, event-themed items
 
 title: "Event Rotational Shop"
-type: rotational
-size: 4
-rotation-interval: 6h
-slots: 4
-item-slots: [11, 13, 15, 29]
+size: 3
+type: "rotational"
+rotation-interval: "6h"
+slots: 3
 announce-rotation: true
-rotation-message: "<aqua>The %shop% event shop has rotated! New event items are available!"
+rotation-message: "<aqua>🎉 New event items available in <gray>%shop%</gray>!"
 
 pagination:
   next_page:
     material: LIME_STAINED_GLASS_PANE
     display-name: "<green><bold>Next Page →</bold>"
-    slot: 35
+    slot: 26
   previous_page:
     material: RED_STAINED_GLASS_PANE
     display-name: "<red><bold>← Previous Page</bold>"
-    slot: 27
+    slot: 18
   back_to_menu:
     material: BARRIER
     display-name: "<red><bold>Back to Main Menu</bold>"
     lore:
       - "<gray><i>Return to shop categories.</i>"
-    slot: 31
+    slot: 22
     action: "back_to_main_menu"
   filler:
     material: BLACK_STAINED_GLASS_PANE
     display-name: " "
 
-featured-items:
-  - id: event_token
-    material: NETHER_STAR
-    display-name: "<light_purple>Event Token"
-    lore:
-      - "<gray>Spend these on event rewards!"
-    buy-price: 1000
-    sell-price: 500
-    buy-limit: 5
-    slot: 13
-featured-slots: [13]
-
 items:
-  - id: event_crate
-    material: CHEST
-    display-name: "<yellow>Event Crate"
+  - id: pumpkin
+    material: PUMPKIN
+    display-name: "<orange>Pumpkin"
     lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Contains random event loot!"
-    buy-price: 5000
-    sell-price: 0
-    buy-limit: 1
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>(%multiplier_display%)</gold>"
+      - ""
+      - "<gold>🎃 Halloween Special!</gold>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 10.0
+    sell-price: 5.0
+    slot: 10
+
+  - id: snowball
+    material: SNOWBALL
+    display-name: "<white>Snowball"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <aqua>%multiplier_display%</aqua>"
+      - ""
+      - "<aqua>❄️ Winter Event!</aqua>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 5.0
+    sell-price: 2.5
+    slot: 11
+
   - id: firework_rocket
     material: FIREWORK_ROCKET
     display-name: "<red>Firework Rocket"
     lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Celebrate the event!"
-    buy-price: 50
-    sell-price: 10
-    buy-limit: 16
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>⚡ %multiplier_display%</gold>"
+      - ""
+      - "<gold>🎆 New Year Special!</gold>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 15.0
+    sell-price: 7.5
+    slot: 12
+
+  - id: cake
+    material: CAKE
+    display-name: "<pink>Cake"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <aqua>%multiplier_display%</aqua>"
+      - ""
+      - "<pink>🎂 Birthday Special!</pink>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 20.0
+    sell-price: 10.0
+    slot: 13
+
+  - id: golden_apple
+    material: GOLDEN_APPLE
+    display-name: "<gold>Golden Apple"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <green>%multiplier_display%</green>"
+      - ""
+      - "<gold>🍎 Premium Event Item!</gold>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 50.0
+    sell-price: 25.0
+    slot: 14
+
+  - id: diamond_sword
+    material: DIAMOND_SWORD
+    display-name: "<aqua>Diamond Sword"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>(%multiplier_display%)</gold>"
+      - ""
+      - "<aqua>⚔️ Event Weapon!</aqua>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 150.0
+    sell-price: 75.0
+    slot: 15
+
+  - id: emerald
+    material: EMERALD
+    display-name: "<green>Emerald"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <aqua>%multiplier_display%</aqua>"
+      - ""
+      - "<green>💎 Lucky Gem!</green>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 8.0
+    sell-price: 4.0
+    slot: 16
+
+  - id: experience_bottle
+    material: EXPERIENCE_BOTTLE
+    display-name: "<yellow>Experience Bottle"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>⚡ %multiplier_display%</gold>"
+      - ""
+      - "<yellow>📚 Knowledge Boost!</yellow>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 30.0
+    sell-price: 15.0
+    slot: 19
+
+  - id: netherite_ingot
+    material: NETHERITE_INGOT
+    display-name: "<purple>Netherite Ingot"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <green>%multiplier_display%</green>"
+      - ""
+      - "<purple>🔥 Ultimate Event Item!</purple>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 1000.0
+    sell-price: 500.0
+    slot: 20
+
+  - id: totem_of_undying
+    material: TOTEM_OF_UNDYING
+    display-name: "<gold>Totem of Undying"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <aqua>%multiplier_display%</aqua>"
+      - ""
+      - "<gold>🛡️ Life Saver!</gold>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 200.0
+    sell-price: 100.0
+    slot: 21
+
+  - id: elytra
+    material: ELYTRA
+    display-name: "<light_purple>Elytra"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>(%multiplier_display%)</gold>"
+      - ""
+      - "<light_purple>🦋 Fly High!</light_purple>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 500.0
+    sell-price: 250.0
+    slot: 22
+
+  - id: shulker_box
+    material: SHULKER_BOX
+    display-name: "<light_purple>Shulker Box"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <green>%multiplier_display%</green>"
+      - ""
+      - "<light_purple>📦 Portable Storage!</light_purple>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 75.0
+    sell-price: 37.5
+    slot: 23
+
+  - id: beacon
+    material: BEACON
+    display-name: "<aqua>Beacon"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <aqua>%multiplier_display%</aqua>"
+      - ""
+      - "<aqua>🌟 Ultimate Status!</aqua>"
+      - "<yellow>Click to buy or sell!"
+    buy-price: 300.0
+    sell-price: 150.0
+    slot: 24

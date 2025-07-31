@@ -50,24 +50,6 @@ public class MessageService {
         return legacySerializer.serialize(component);
     }
 
-    public void send(CommandSender sender, String key, java.util.Map<String, String> placeholders) {
-        String message = messagesConfig.getConfig().getString(key);
-        if (message == null || message.isEmpty()) {
-            Component errorMsg = Component.text("Missing message in messages.yml: " + key)
-                    .color(net.kyori.adventure.text.format.NamedTextColor.RED);
-            adventure.sender(sender).sendMessage(errorMsg);
-            return;
-        }
-        if (placeholders != null) {
-            for (var entry : placeholders.entrySet()) {
-                message = message.replace("%" + entry.getKey() + "%", entry.getValue());
-            }
-        }
-        message = message.replace("%prefix%", this.prefix);
-        TagResolver prefixResolver = Placeholder.component("prefix", parse(this.prefix));
-        adventure.sender(sender).sendMessage(parse(message, prefixResolver));
-    }
-
     public void send(CommandSender sender, String key, TagResolver... resolvers) {
         String message = messagesConfig.getConfig().getString(key);
         if (message == null || message.isEmpty()) {
@@ -76,32 +58,71 @@ public class MessageService {
             adventure.sender(sender).sendMessage(errorMsg);
             return;
         }
-        // Build a map for %placeholder% replacement from TagResolvers
-        java.util.Map<String, String> placeholderMap = new java.util.HashMap<>();
-        if (resolvers != null) {
-            for (TagResolver resolver : resolvers) {
-                // Only handle Placeholder.unparsed
-                if (resolver.getClass().getSimpleName().equals("Unparsed")) {
-                    try {
-                        var nameField = resolver.getClass().getDeclaredField("name");
-                        nameField.setAccessible(true);
-                        String name = (String) nameField.get(resolver);
-                        var valueField = resolver.getClass().getDeclaredField("value");
-                        valueField.setAccessible(true);
-                        String value = (String) valueField.get(resolver);
-                        placeholderMap.put(name, value);
-                    } catch (Exception ignored) {}
-                }
-                // If Placeholder.component, skip (MiniMessage handles it, but not for %placeholder% style)
+        
+        // Replace prefix placeholder first
+        message = message.replace("%prefix%", this.prefix);
+        
+        // Create TagResolver for prefix
+        TagResolver prefixResolver = Placeholder.component("prefix", parse(this.prefix));
+        
+        // Combine all resolvers
+        TagResolver[] allResolvers;
+        if (resolvers != null && resolvers.length > 0) {
+            allResolvers = new TagResolver[resolvers.length + 1];
+            allResolvers[0] = prefixResolver;
+            System.arraycopy(resolvers, 0, allResolvers, 1, resolvers.length);
+        } else {
+            allResolvers = new TagResolver[]{prefixResolver};
+        }
+        
+        // Send the message with all resolvers
+        adventure.sender(sender).sendMessage(parse(message, allResolvers));
+    }
+
+    /**
+     * Send a message with %placeholder% format support
+     * This method handles the legacy %placeholder% format used in messages.yml
+     */
+    public void send(CommandSender sender, String key, java.util.Map<String, String> placeholders) {
+        String message = messagesConfig.getConfig().getString(key);
+        if (message == null || message.isEmpty()) {
+            Component errorMsg = Component.text("Missing message in messages.yml: " + key)
+                    .color(net.kyori.adventure.text.format.NamedTextColor.RED);
+            adventure.sender(sender).sendMessage(errorMsg);
+            return;
+        }
+        
+        // Replace prefix placeholder
+        message = message.replace("%prefix%", this.prefix);
+        
+        // Replace all %placeholder% with values
+        if (placeholders != null) {
+            for (var entry : placeholders.entrySet()) {
+                message = message.replace("%" + entry.getKey() + "%", entry.getValue());
             }
         }
-        // Always do string replacement for all %placeholder% in the message
-        for (var entry : placeholderMap.entrySet()) {
-            message = message.replace("%" + entry.getKey() + "%", entry.getValue());
+        
+        // Send the parsed message
+        adventure.sender(sender).sendMessage(parse(message));
+    }
+
+    /**
+     * Send a simple message without any placeholders
+     */
+    public void send(CommandSender sender, String key) {
+        String message = messagesConfig.getConfig().getString(key);
+        if (message == null || message.isEmpty()) {
+            Component errorMsg = Component.text("Missing message in messages.yml: " + key)
+                    .color(net.kyori.adventure.text.format.NamedTextColor.RED);
+            adventure.sender(sender).sendMessage(errorMsg);
+            return;
         }
+        
+        // Replace prefix placeholder
         message = message.replace("%prefix%", this.prefix);
-        TagResolver prefixResolver = Placeholder.component("prefix", parse(this.prefix));
-        adventure.sender(sender).sendMessage(parse(message, prefixResolver));
+        
+        // Send the parsed message
+        adventure.sender(sender).sendMessage(parse(message));
     }
 
     /**

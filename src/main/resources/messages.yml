@@ -9,6 +9,7 @@ prefix: "<gray>[<gradient:#F7971E:#FFD200>bShop</gradient>] </gray>"
 no_permission: "%prefix%<red>You do not have permission to do that.</red>"
 player_only_command: "%prefix%<red>This command can only be executed by players.</red>"
 player_not_found: "%prefix%<red>Player <gray>%player%</gray> not found.</red>"
+command_usage: "%prefix%<red>Usage: %usage%</red>"
 
 # Shop messages
 shop:
@@ -25,69 +26,187 @@ shop:
   economy_not_available: "%prefix%<red>Economy system is not available. Please contact an administrator.</red>"
   purchase_limit_reached: "%prefix%<red>You have reached the purchase limit for this item!</red>"
   sell_limit_reached: "%prefix%<red>You have reached the sell limit for this item!</red>"
+  transaction_cancelled: "%prefix%<yellow>Transaction cancelled.</yellow>"
+  transaction_failed: "%prefix%<red>Transaction failed: %error%</red>"
+  quantity_invalid: "%prefix%<red>Invalid quantity specified.</red>"
+  quantity_too_high: "%prefix%<red>Quantity too high. Maximum allowed: %max%</red>"
+  quantity_too_low: "%prefix%<red>Quantity too low. Minimum allowed: %min%</red>"
 
-# Multiplier messages
+# =============================================================================
+# MULTIPLIER SYSTEM MESSAGES
+# =============================================================================
 multiplier:
+  # Basic multiplier information
   current: "%prefix%<green>Your current sell multiplier is <gold>%multiplier%</gold>.</green>"
   other: "%prefix%<green><gray>%player%</gray>'s current sell multiplier is <gold>%multiplier%</gold>.</green>"
-  # Command messages
+  
+  # Enhanced notifications with detailed placeholders
+  # Available placeholders: %old_multiplier%, %new_multiplier%, %reason%, %granted_by%, %time_remaining%
+  increased: "%prefix%<green>Your sell multiplier has been increased from <gray>%old_multiplier%</gray> to <gold>%new_multiplier%</gold>!</green>"
+  decreased: "%prefix%<yellow>Your sell multiplier has been decreased from <gray>%old_multiplier%</gray> to <gold>%new_multiplier%</gold>.</yellow>"
+  expired: "%prefix%<red>Your <gold>%multiplier%</gold> sell multiplier has expired!</red>"
+  removed: "%prefix%<yellow>Your <gold>%multiplier%</gold> sell multiplier has been removed.</yellow>"
+  cleared: "%prefix%<yellow>All temporary multipliers have been cleared.</yellow>"
+  
+  # Command responses - Give multiplier
   give_success: "%prefix%<green>Set <gold>%multiplier%x</gold> multiplier for <gray>%player%</gray>.</green>"
   give_failed: "%prefix%<red>Failed to set multiplier for <gray>%player%</gray>.</red>"
   give_invalid_value: "%prefix%<red>Multiplier must be greater than 0!</red>"
   give_invalid_number: "%prefix%<red>Invalid multiplier value: <gray>%value%</gray></red>"
+  give_invalid_duration: "%prefix%<red>Invalid duration format. Use: 30s, 5m, 2h, 1d, permanent</red>"
   give_player_not_found: "%prefix%<red>Player not found: <gray>%player%</gray></red>"
   give_received: "%prefix%<green>You received a <gold>%multiplier%x</gold> sell multiplier!</green>"
   
+  # Command responses - Remove multiplier
   remove_success: "%prefix%<green>Removed multiplier from <gray>%player%</gray>.</green>"
   remove_no_multiplier: "%prefix%<yellow><gray>%player%</gray> didn't have a temporary multiplier.</yellow>"
   remove_received: "%prefix%<yellow>Your sell multiplier has been removed!</yellow>"
   
+  # Command responses - Check multiplier
   check_header: "%prefix%<gold>=== Multiplier Info for <gray>%player%</gray> ===</gold>"
   check_current: "%prefix%<green>Current Multiplier: <white>%multiplier%</white></green>"
-  check_temp: "%prefix%<green>Temporary Multiplier: <white>%multiplier%x</white></green>"
+  check_temp: "%prefix%<green>Temporary Multiplier: <white>%multiplier%x</white> (expires: %time_remaining%)</green>"
   check_temp_none: "%prefix%<gray>Temporary Multiplier: None</gray>"
-  check_permission_header: "%prefix%<green>Permission Multipliers:</green>"
-  check_permission_entry: "%prefix%<gray>  • %permission%: %multiplier%x</gray>"
+  check_tier_header: "%prefix%<green>Active Tiers:</green>"
+  check_tier_entry: "%prefix%<gray>  • %tier_name%: %tier_multiplier%</gray>"
+  check_tier_none: "%prefix%<gray>No active tiers</gray>"
+  check_legacy_header: "%prefix%<yellow>Legacy Permission Multipliers:</yellow>"
+  check_legacy_entry: "%prefix%<gray>  • %permission%: %multiplier%x</gray>"
   
+  # Command responses - List multipliers
   list_header: "%prefix%<gold>=== Active Temporary Multipliers ===</gold>"
   list_empty: "%prefix%<yellow>No temporary multipliers are currently active.</yellow>"
-  list_entry: "%prefix%<green>• <white>%player%</white><gray>: %multiplier%x</gray></green>"
+  list_entry: "%prefix%<green>• <white>%player%</white><gray>: %multiplier%x (expires: %time_remaining%)</gray></green>"
   
+  # Command responses - Clear multipliers
   clear_success: "%prefix%<green>Cleared all temporary multipliers.</green>"
   clear_received: "%prefix%<yellow>Your sell multiplier has been removed!</yellow>"
   
+  # Advanced command responses
+  giveall_success: "%prefix%<green>Gave <gold>%multiplier%x</gold> multiplier to <gray>%count%</gray> players.</green>"
+  giveall_failed: "%prefix%<red>Failed to give <gold>%multiplier%x</gold> multiplier to <gray>%count%</gray> players.</red>"
+  giveall_player_not_found: "%prefix%<red>Player not found: <gray>%player%</gray></red>"
+  giveall_received: "%prefix%<green>You received a <gold>%multiplier%x</gold> sell multiplier!</green>"
+  expire_success: "%prefix%<green>Expired multiplier for <gray>%player%</gray>.</green>"
+  expire_no_multiplier: "%prefix%<yellow><gray>%player%</gray> didn't have a temporary multiplier.</yellow>"
+  expire_received: "%prefix%<yellow>Your sell multiplier has expired!</yellow>"
+  
+  # Statistics and history
+  stats_header: "%prefix%<gold>=== Multiplier Statistics ===</gold>"
+  stats_active: "%prefix%<green>Active Temporary: <white>%count%</white></green>"
+  stats_expired: "%prefix%<yellow>Expired: <white>%count%</white></yellow>"
+  stats_permission: "%prefix%<blue>Permission Types: <white>%count%</white></blue>"
+  stats_average: "%prefix%<purple>Average Multiplier: <white>%average%</white></purple>"
+  stats_cache: "%prefix%<gray>Cache Size: <white>%size%</white></gray>"
+  history_entry: "%prefix%<gray>• <white>%multiplier%x</white> - <yellow>%reason%</yellow> by <blue>%granted_by%</blue> at <white>%date%</white></gray>"
+  
+  # Tier-related messages
+  tiers_header: "%prefix%<gold>=== Available Multiplier Tiers ===</gold>"
+  tiers_empty: "%prefix%<yellow>No multiplier tiers are configured.</yellow>"
+  tiers_category_header: "%prefix%<blue>--- %category% Tiers ---</blue>"
+  tiers_tier_entry: "%prefix%<gray>  • %tier_name%: %tier_multiplier% <gray>(%permission%)</gray></gray>"
+  
   # Help messages
   help_header: "%prefix%<gold>=== Multiplier Commands ===</gold>"
-  help_give: "%prefix%<yellow>/shop multiplier give <player> <multiplier> <white>- Give a player a temporary multiplier</white></yellow>"
+  help_give: "%prefix%<yellow>/shop multiplier give <player> <multiplier> [duration] [reason] <white>- Give a player a temporary multiplier</white></yellow>"
+  help_giveall: "%prefix%<yellow>/shop multiplier giveall <multiplier> [duration] [reason] <white>- Give all online players a multiplier</white></yellow>"
   help_remove: "%prefix%<yellow>/shop multiplier remove <player> <white>- Remove a player's temporary multiplier</white></yellow>"
-  help_check: "%prefix%<yellow>/shop multiplier check <player> <white>- Check a player's current multiplier</white></yellow>"
+  help_expire: "%prefix%<yellow>/shop multiplier expire <player> <white>- Expire a player's multiplier immediately</white></yellow>"
+  help_check: "%prefix%<yellow>/shop multiplier check <player> <white>- Check a player's multiplier</white></yellow>"
   help_list: "%prefix%<yellow>/shop multiplier list <white>- List all active temporary multipliers</white></yellow>"
   help_clear: "%prefix%<yellow>/shop multiplier clear <white>- Clear all temporary multipliers</white></yellow>"
+  help_stats: "%prefix%<yellow>/shop multiplier stats <white>- Show multiplier statistics</white></yellow>"
+  help_history: "%prefix%<yellow>/shop multiplier history <player> <white>- Show player's multiplier history</white></yellow>"
+  help_tiers: "%prefix%<yellow>/shop multiplier tiers <white>- Show available multiplier tiers</white></yellow>"
   
   # Permission messages
   no_permission_give: "%prefix%<red>You don't have permission to give multipliers!</red>"
   no_permission_remove: "%prefix%<red>You don't have permission to remove multipliers!</red>"
   no_permission_list: "%prefix%<red>You don't have permission to list multipliers!</red>"
   no_permission_clear: "%prefix%<red>You don't have permission to clear multipliers!</red>"
+  no_permission_stats: "%prefix%<red>You don't have permission to view multiplier statistics!</red>"
+  no_permission_history: "%prefix%<red>You don't have permission to view multiplier history!</red>"
   
   # Usage messages
-  usage_give: "%prefix%<red>Usage: /shop multiplier give <player> <multiplier></red>"
+  usage_give: "%prefix%<red>Usage: /shop multiplier give <player> <multiplier> [duration] [reason]</red>"
+  usage_giveall: "%prefix%<red>Usage: /shop multiplier giveall <multiplier> [duration] [reason]</red>"
   usage_remove: "%prefix%<red>Usage: /shop multiplier remove <player></red>"
+  usage_expire: "%prefix%<red>Usage: /shop multiplier expire <player></red>"
   usage_check: "%prefix%<red>Usage: /shop multiplier check <player></red>"
+  usage_history: "%prefix%<red>Usage: /shop multiplier history <player></red>"
+  
+  # Broadcast messages for server-wide events
+  broadcast:
+    giveall: "%prefix%<green>All players received a <gold>%multiplier%x</gold> sell multiplier!</green>"
+    event: "%prefix%<blue>Special event: <gold>%multiplier%x</gold> sell multiplier active!</blue>"
+    holiday: "%prefix%<purple>Holiday bonus: <gold>%multiplier%x</gold> sell multiplier!</purple>"
 
-# GUI error messages
+# =============================================================================
+# GUI MESSAGES
+# =============================================================================
 gui:
   main_menu_not_configured: "%prefix%<red>The main menu GUI is not configured in guis.yml.</red>"
   quantity_menu_not_configured: "%prefix%<red>The quantity menu GUI is not configured in guis.yml.</red>"
   stack_gui_not_configured: "%prefix%<red>The stack selection GUI is not configured in guis.yml.</red>"
   error_opening_quantity_gui: "%prefix%<red>Error opening quantity GUI: %error%</red>"
+  error_opening_main_menu: "%prefix%<red>Error opening main menu: %error%</red>"
+  error_opening_shop: "%prefix%<red>Error opening shop '%shop%': %error%</red>"
+  error_opening_recent_purchases: "%prefix%<red>Error opening recent purchases: %error%</red>"
+  error_opening_wallet: "%prefix%<red>Error opening wallet: %error%</red>"
+  invalid_action: "%prefix%<red>Invalid action: %action%</red>"
 
-# Admin command messages
+# =============================================================================
+# ADMIN COMMAND MESSAGES
+# =============================================================================
 admin:
   reload_start: "%prefix%<yellow>Reloading bShop configurations...</yellow>"
   reload_complete: "%prefix%<green>Reload complete.</green>"
-  rotate_usage: "<red>Usage: /shop rotate <shop>"
-  rotate_not_rotational: "<red>The shop <gray>%shop%</gray> is not a rotational shop."
-  rotate_success: "<green>Rotated the <gray>%shop%</gray> shop!"
+  reload_failed: "%prefix%<red>Reload failed: %error%</red>"
+  rotate_usage: "%prefix%<red>Usage: /shop rotate <shop></red>"
+  rotate_not_rotational: "%prefix%<red>The shop <gray>%shop%</gray> is not a rotational shop.</red>"
+  rotate_success: "%prefix%<green>Rotated the <gray>%shop%</gray> shop!</green>"
+  rotate_failed: "%prefix%<red>Failed to rotate shop <gray>%shop%</gray>: %error%</red>"
+  rotate_force_usage: "%prefix%<red>Usage: /shop rotate force <shop></red>"
+  rotate_schedule_usage: "%prefix%<red>Usage: /shop rotate schedule <shop></red>"
   view_usage: "%prefix%<red>Usage: /shop view <player></red>"
   view_player_not_found: "%prefix%<red>Player <gray>%player%</gray> not found.</red>"
+  debug:
+    usage: "%prefix%<red>Usage: /shop debug <player></red>"
+    player_not_found: "%prefix%<red>Player <gray>%player%</gray> not found.</red>"
+    header: "%prefix%<gold>=== Debug Info for <gray>%player%</gray> ===</gold>"
+    current_multiplier: "%prefix%<green>Current Multiplier: <white>%multiplier%</white></green>"
+    temp_multiplier: "%prefix%<green>Temporary Multiplier: <white>%multiplier%x</white></green>"
+    temp_multiplier_none: "%prefix%<gray>Temporary Multiplier: None</gray>"
+    permission_multipliers_header: "%prefix%<green>Permission Multipliers:</green>"
+    permission_multipliers_entry: "%prefix%<gray>  • %permission%: %multiplier%x</gray>"
+    balance: "%prefix%<green>Balance: <white>$%balance%</white></green>"
+    recent_transactions: "%prefix%<green>Recent Transactions: <white>%count%</white></green>"
+
+# =============================================================================
+# WALLET MESSAGES
+# =============================================================================
+wallet:
+  balance_display: "%prefix%<green>Your balance: <gold>$%balance%</gold></green>"
+  balance_refreshed: "%prefix%<green>Balance refreshed!</green>"
+  insufficient_balance: "%prefix%<red>Insufficient balance. You have <gold>$%balance%</gold> but need <gold>$%required%</gold>.</red>"
+
+# =============================================================================
+# RECENT PURCHASES MESSAGES
+# =============================================================================
+recent_purchases:
+  no_transactions: "%prefix%<yellow>You haven't made any transactions yet.</yellow>"
+  page_info: "%prefix%<gray>Page %current% of %total%</gray>"
+  transaction_display: "%prefix%<gray>%type%: <aqua>%amount%x %item%</aqua> for <gold>$%price%</gold> at <white>%date%</white></gray>"
+
+# =============================================================================
+# HELP MESSAGES
+# =============================================================================
+help:
+  header: "%prefix%<gold>=== bShop Commands ===</gold>"
+  main: "%prefix%<yellow>/shop <white>- Open the main shop menu</yellow>"
+  reload: "%prefix%<yellow>/shop reload <white>- Reload plugin configuration (Admin)</yellow>"
+  multiplier: "%prefix%<yellow>/shop multiplier <white>- Manage sell multipliers (Admin)</yellow>"
+  rotate: "%prefix%<yellow>/shop rotate <shop> <white>- Force rotate a shop (Admin)</yellow>"
+  view: "%prefix%<yellow>/shop view <player> <white>- View player's recent transactions (Admin)</yellow>"
+  debug: "%prefix%<yellow>/shop debug <player> <white>- Debug player information (Admin)</yellow>"
+  help: "%prefix%<yellow>/shop help <white>- Show this help message</yellow>"

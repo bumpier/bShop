@@ -33,6 +33,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import org.bukkit.inventory.meta.SkullMeta;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class ShopGuiManager {
 
@@ -54,15 +56,53 @@ public class ShopGuiManager {
     private final Map<UUID, Long> lastGuiUpdate = new ConcurrentHashMap<>();
     private final Map<UUID, Long> lastInventoryCheck = new ConcurrentHashMap<>();
     private final Map<UUID, Long> shopOpenTimes = new ConcurrentHashMap<>();
-    private static final long GUI_UPDATE_COOLDOWN = 100; // 100ms cooldown
-    private static final long INVENTORY_CHECK_COOLDOWN = 500; // 500ms cooldown
-    private static final long AUTO_CLICK_PREVENTION_COOLDOWN = 100; // 1 second cooldown to prevent auto-clicks
+    
+    // Add item stack caching for better performance
+    private final Map<String, ItemStack> itemStackCache = new ConcurrentHashMap<>();
+    private final Map<String, Long> itemStackCacheTimestamps = new ConcurrentHashMap<>();
+    private long itemStackCacheDuration = 60000; // 1 minute cache for item stacks
+    private int maxCachedItemStacks = 1000;
+    private long cacheCleanupInterval = 300000; // 5 minutes
+    private boolean enableItemStackCaching = true;
+    private boolean enableLazyLoading = true;
+
+    // Configurable cooldowns (loaded from config)
+    private long guiUpdateCooldown = 100; // Default 100ms cooldown
+    private long inventoryCheckCooldown = 500; // Default 500ms cooldown
+    private long autoClickPreventionCooldown = 100; // Default 100ms cooldown
 
     public ShopGuiManager(BShop plugin, ShopManager shopManager, MessageService messageService, ConfigManager guisConfig) {
         this.plugin = plugin;
         this.shopManager = shopManager;
         this.messageService = messageService;
         this.guisConfig = guisConfig;
+        
+        // Load cooldown settings from config
+        loadCooldownSettings();
+    }
+    
+    private void loadCooldownSettings() {
+        ConfigurationSection cooldownConfig = plugin.getConfig().getConfigurationSection("performance.cooldowns");
+        if (cooldownConfig != null) {
+            this.guiUpdateCooldown = cooldownConfig.getLong("gui_update", 100);
+            this.inventoryCheckCooldown = cooldownConfig.getLong("inventory_check", 500);
+            this.autoClickPreventionCooldown = cooldownConfig.getLong("auto_click_prevention", 100);
+        }
+        
+        // Load GUI optimization settings
+        ConfigurationSection guiConfig = plugin.getConfig().getConfigurationSection("performance.gui");
+        if (guiConfig != null) {
+            this.enableItemStackCaching = guiConfig.getBoolean("enable_item_stack_caching", true);
+            this.maxCachedItemStacks = guiConfig.getInt("max_cached_item_stacks", 1000);
+            this.cacheCleanupInterval = guiConfig.getLong("cache_cleanup_interval", 300000);
+            this.enableLazyLoading = guiConfig.getBoolean("enable_lazy_loading", true);
+        }
+        
+        // Load item stack cache duration from caching section
+        ConfigurationSection cachingConfig = plugin.getConfig().getConfigurationSection("performance.caching");
+        if (cachingConfig != null) {
+            this.itemStackCacheDuration = cachingConfig.getLong("item_stack_cache_duration", 60000);
+        }
     }
 
     // --- State Management ---
@@ -82,7 +122,7 @@ public class ShopGuiManager {
     public boolean isWithinAutoClickPreventionCooldown(Player player) {
         Long openTime = shopOpenTimes.get(player.getUniqueId());
         if (openTime == null) return false;
-        return System.currentTimeMillis() - openTime < AUTO_CLICK_PREVENTION_COOLDOWN;
+        return System.currentTimeMillis() - openTime < autoClickPreventionCooldown;
     }
     
     public void clearShopOpenTime(Player player) {
@@ -181,7 +221,7 @@ public class ShopGuiManager {
         
         // Rate limiting for GUI updates
         long now = System.currentTimeMillis();
-        if (now - lastGuiUpdate.getOrDefault(player.getUniqueId(), 0L) < GUI_UPDATE_COOLDOWN) {
+        if (now - lastGuiUpdate.getOrDefault(player.getUniqueId(), 0L) < guiUpdateCooldown) {
             return;
         }
         lastGuiUpdate.put(player.getUniqueId(), now);
@@ -213,7 +253,7 @@ public class ShopGuiManager {
                     int slot = item.getPinnedSlot().get();
                     if (slot < shop.size() && !takenSlots.contains(slot)) {
                         item.setAssignedSlot(slot);
-                        inventory.setItem(slot, createShopItemStack(item));
+                        inventory.setItem(slot, getCachedShopItemStack(item, player));
                         takenSlots.add(slot);
                     }
                 });
@@ -223,7 +263,7 @@ public class ShopGuiManager {
                 ShopItem featured = shop.featuredItems().get(i);
                 int slot = shop.featuredSlots().get(i);
                 featured.setAssignedSlot(slot);
-                inventory.setItem(slot, createShopItemStack(featured));
+                inventory.setItem(slot, getCachedShopItemStack(featured, player));
                 takenSlots.add(slot);
             }
         }
@@ -246,7 +286,7 @@ public class ShopGuiManager {
                 ShopItem shopItem = flowItems.get(itemIndex);
                 int slot = availableSlots.get(i);
                 shopItem.setAssignedSlot(slot);
-                inventory.setItem(slot, createShopItemStack(shopItem));
+                inventory.setItem(slot, getCachedShopItemStack(shopItem, player));
             }
         }
         int maxPinnedPage = displayItems.stream().filter(ShopItem::isPinned)
@@ -351,7 +391,17 @@ public class ShopGuiManager {
         
         ShopItem shopItem = context.getItem();
         TransactionType type = context.getType();
-        double pricePerItem = (type == TransactionType.BUY) ? shopItem.buyPrice() : shopItem.sellPrice();
+        
+        // Apply multiplier for sell transactions
+        double pricePerItem;
+        if (type == TransactionType.SELL) {
+            double basePrice = shopItem.sellPrice();
+            double multiplier = getPlayerMultiplierSafely(player);
+            pricePerItem = basePrice * multiplier;
+        } else {
+            pricePerItem = shopItem.buyPrice();
+        }
+        
         int stackSize = shopItem.material().getMaxStackSize();
         
         // Add configurable stack items
@@ -386,12 +436,51 @@ public class ShopGuiManager {
                         .replace("%price%", String.format("%,.2f", totalPrice))
                         .replace("%item_name%", shopItem.displayName());
                 
+                // Get multiplier for display purposes
+                final double multiplier = (type == TransactionType.SELL) ? getPlayerMultiplierSafely(player) : 1.0;
+                
                 // Process placeholders in lore
                 List<String> lore = itemConfig.getStringList("lore").stream()
-                        .map(line -> line.replace("%stacks%", stacksDisplay)
-                                .replace("%amount%", String.valueOf(totalAmount))
-                                .replace("%price%", String.format("%,.2f", totalPrice))
-                                .replace("%item_name%", shopItem.displayName()))
+                        .map(line -> {
+                            String processedLine = line.replace("%stacks%", stacksDisplay)
+                                    .replace("%amount%", String.valueOf(totalAmount))
+                                    .replace("%price%", String.format("%,.2f", totalPrice))
+                                    .replace("%item_name%", shopItem.displayName());
+                            
+                            // Handle multiplier display placeholder
+                            if (processedLine.contains("%multiplier_display%")) {
+                                try {
+                                    // Get multiplier display format from config
+                                    String displayFormat = plugin.getConfig().getString("multipliers.display.format", "%multiplier%x");
+                                    boolean showPercentageBonus = plugin.getConfig().getBoolean("multipliers.display.show_percentage_bonus", false);
+                                    
+                                    String multiplierText;
+                                    if (multiplier > 1.0) {
+                                        if (showPercentageBonus) {
+                                            double percentage = (multiplier - 1.0) * 100;
+                                            multiplierText = String.format("+%.0f%%", percentage);
+                                        } else {
+                                            multiplierText = displayFormat.replace("%multiplier%", String.format("%.1f", multiplier));
+                                        }
+                                    } else {
+                                        // Show "1.0x" for no multiplier or use percentage format
+                                        if (showPercentageBonus) {
+                                            multiplierText = "+0%";
+                                        } else {
+                                            multiplierText = "1.0x";
+                                        }
+                                    }
+                                    
+                                    processedLine = processedLine.replace("%multiplier_display%", multiplierText);
+                                } catch (Exception e) {
+                                    plugin.getLogger().warning("Error processing multiplier display in stack GUI for player " + player.getName() + ": " + e.getMessage());
+                                    // Fallback to simple format
+                                    processedLine = processedLine.replace("%multiplier_display%", multiplier > 1.0 ? String.format("%.1fx", multiplier) : "1.0x");
+                                }
+                            }
+                            
+                            return processedLine;
+                        })
                         .collect(Collectors.toList());
                 
                 ItemStack stackItem = new ItemBuilder(plugin, material, messageService)
@@ -452,7 +541,7 @@ public class ShopGuiManager {
     public void updateQuantityGui(Inventory inventory, Player player, TransactionContext context) {
         // Rate limiting for inventory updates
         long now = System.currentTimeMillis();
-        if (now - lastInventoryCheck.getOrDefault(player.getUniqueId(), 0L) < INVENTORY_CHECK_COOLDOWN) {
+        if (now - lastInventoryCheck.getOrDefault(player.getUniqueId(), 0L) < inventoryCheckCooldown) {
             return;
         }
         lastInventoryCheck.put(player.getUniqueId(), now);
@@ -463,7 +552,21 @@ public class ShopGuiManager {
         ShopItem item = context.getItem();
         TransactionType type = context.getType();
         int quantity = context.getQuantity();
-        double pricePerItem = (type == TransactionType.BUY) ? item.buyPrice() : item.sellPrice();
+        
+        // Apply multiplier for sell transactions
+        double pricePerItem;
+        if (type == TransactionType.SELL) {
+            double basePrice = item.sellPrice();
+            double multiplier = plugin.getMultiplierService().getPlayerMultiplier(player);
+            pricePerItem = basePrice * multiplier;
+            plugin.getLogger().info("Quantity GUI - Player: " + player.getName() + 
+                ", Base Price: " + basePrice + 
+                ", Multiplier: " + multiplier + 
+                ", Final Price: " + pricePerItem);
+        } else {
+            pricePerItem = item.buyPrice();
+        }
+        
         double totalPrice = pricePerItem * quantity;
         
         // Get display item configuration
@@ -487,14 +590,54 @@ public class ShopGuiManager {
             );
         }
         
+        // Get multiplier for display purposes
+        final double multiplier = (type == TransactionType.SELL) ? 
+            getPlayerMultiplierSafely(player) : 1.0;
+        
         // Replace placeholders
         displayName = displayName.replace("%item_name%", item.displayName()).replace("%item%", item.displayName());
         List<String> processedLore = lore.stream()
-                .map(line -> line.replace("%quantity%", String.valueOf(quantity))
-                        .replace("%price_per_item%", String.format("%,.2f", pricePerItem))
-                        .replace("%total_price%", String.format("%,.2f", totalPrice))
-                        .replace("%item_name%", item.displayName())
-                        .replace("%item%", item.displayName()))
+                .map(line -> {
+                    String processedLine = line.replace("%quantity%", String.valueOf(quantity))
+                            .replace("%price_per_item%", String.format("%,.2f", pricePerItem))
+                            .replace("%total_price%", String.format("%,.2f", totalPrice))
+                            .replace("%item_name%", item.displayName())
+                            .replace("%item%", item.displayName());
+                    
+                    // Handle multiplier display placeholder
+                    if (processedLine.contains("%multiplier_display%")) {
+                        try {
+                            // Get multiplier display format from config
+                            String displayFormat = plugin.getConfig().getString("multipliers.display.format", "%multiplier%x");
+                            boolean showPercentageBonus = plugin.getConfig().getBoolean("multipliers.display.show_percentage_bonus", false);
+                            
+                            String multiplierText;
+                            if (multiplier > 1.0) {
+                                if (showPercentageBonus) {
+                                    double percentage = (multiplier - 1.0) * 100;
+                                    multiplierText = String.format("+%.0f%%", percentage);
+                                } else {
+                                    multiplierText = displayFormat.replace("%multiplier%", String.format("%.1f", multiplier));
+                                }
+                            } else {
+                                // Show "1.0x" for no multiplier or use percentage format
+                                if (showPercentageBonus) {
+                                    multiplierText = "+0%";
+                                } else {
+                                    multiplierText = "1.0x";
+                                }
+                            }
+                            
+                            processedLine = processedLine.replace("%multiplier_display%", multiplierText);
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Error processing multiplier display in quantity GUI for player " + player.getName() + ": " + e.getMessage());
+                            // Fallback to simple format
+                            processedLine = processedLine.replace("%multiplier_display%", multiplier > 1.0 ? String.format("%.1fx", multiplier) : "1.0x");
+                        }
+                    }
+                    
+                    return processedLine;
+                })
                 .collect(Collectors.toList());
         
         ItemStack displayItem = new ItemBuilder(plugin, item.material(), messageService)
@@ -563,45 +706,158 @@ public class ShopGuiManager {
         }
     }
 
-    private ItemStack createShopItemStack(ShopItem shopItem) {
-        // Build the item stack using the ItemBuilder constructor and chain methods
-        ItemBuilder builder = new ItemBuilder(plugin, shopItem.material(), messageService)
-                .withDisplayName(shopItem.displayName())
-                .withLore(shopItem.lore())
-                .withCustomModelData(shopItem.customModelData());
-        ItemStack itemStack = builder.build();
-        ItemMeta meta = itemStack.getItemMeta();
-        if (meta != null) {
-            List<String> lore = meta.getLore();
-            if (lore != null) {
-                List<String> newLore = new ArrayList<>();
-                for (String line : lore) {
-                    // Replace price placeholders
-                    String processedLine = line
-                            .replace("%buy_price%", String.format("%,.2f", shopItem.buyPrice()))
-                            .replace("%sell_price%", String.format("%,.2f", shopItem.sellPrice()));
-                    
-                    // Replace timer placeholder for rotational shops
-                    String shopId = null;
-                    for (Map.Entry<UUID, PageInfo> entry : openShopInventories.entrySet()) {
-                        if (entry.getValue().shopId() != null) {
-                            shopId = entry.getValue().shopId();
-                            break;
-                        }
-                    }
-                    if (shopId != null) {
-                        long timeLeft = shopManager.getTimeUntilNextRotation(shopId);
-                        String timer = formatTimer(timeLeft);
-                        processedLine = processedLine.replace("%timer%", timer);
-                    }
-                    
-                    newLore.add(processedLine);
-                }
-                meta.setLore(newLore);
-            }
-            itemStack.setItemMeta(meta);
+    /**
+     * Get cached shop item stack or create new one
+     */
+    private ItemStack getCachedShopItemStack(ShopItem shopItem, Player player) {
+        // Check if item stack caching is enabled
+        if (!enableItemStackCaching) {
+            return createShopItemStack(shopItem, player);
         }
-        return itemStack;
+        
+        String cacheKey = shopItem.id() + "_" + player.getUniqueId();
+        long now = System.currentTimeMillis();
+        
+        // Check cache first
+        ItemStack cached = itemStackCache.get(cacheKey);
+        if (cached != null && now - itemStackCacheTimestamps.getOrDefault(cacheKey, 0L) < itemStackCacheDuration) {
+            return cached.clone(); // Return a clone to avoid modification issues
+        }
+        
+        // Create new item stack
+        ItemStack newStack = createShopItemStack(shopItem, player);
+        
+        // Check cache size limit before adding
+        if (itemStackCache.size() >= maxCachedItemStacks) {
+            // Remove oldest entries to make space
+            long oldestTime = Long.MAX_VALUE;
+            String oldestKey = null;
+            for (Map.Entry<String, Long> entry : itemStackCacheTimestamps.entrySet()) {
+                if (entry.getValue() < oldestTime) {
+                    oldestTime = entry.getValue();
+                    oldestKey = entry.getKey();
+                }
+            }
+            if (oldestKey != null) {
+                itemStackCache.remove(oldestKey);
+                itemStackCacheTimestamps.remove(oldestKey);
+            }
+        }
+        
+        // Cache the result
+        itemStackCache.put(cacheKey, newStack.clone());
+        itemStackCacheTimestamps.put(cacheKey, now);
+        
+        return newStack;
+    }
+
+    private ItemStack createShopItemStack(ShopItem shopItem, Player player) {
+        try {
+            // Get player's multiplier with error handling
+            double multiplier = 1.0;
+            try {
+                multiplier = plugin.getMultiplierService().getPlayerMultiplier(player);
+                // Ensure multiplier is valid
+                if (multiplier <= 0 || Double.isNaN(multiplier) || Double.isInfinite(multiplier)) {
+                    multiplier = 1.0;
+                }
+            } catch (Exception e) {
+                plugin.getLogger().warning("Error getting multiplier for player " + player.getName() + ": " + e.getMessage());
+                multiplier = 1.0;
+            }
+            
+            double baseBuyPrice = shopItem.buyPrice();
+            double baseSellPrice = shopItem.sellPrice();
+            double adjustedSellPrice = baseSellPrice * multiplier;
+            
+            // Build the item stack using the ItemBuilder constructor and chain methods
+            ItemBuilder builder = new ItemBuilder(plugin, shopItem.material(), messageService)
+                    .withDisplayName(shopItem.displayName())
+                    .withLore(shopItem.lore())
+                    .withCustomModelData(shopItem.customModelData());
+            ItemStack itemStack = builder.build();
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta != null) {
+                List<String> lore = meta.getLore();
+                if (lore != null) {
+                    List<String> newLore = new ArrayList<>();
+                    for (String line : lore) {
+                        // Replace price placeholders with multiplier-adjusted prices
+                        String processedLine = line
+                                .replace("%buy_price%", String.format("%,.2f", baseBuyPrice))
+                                .replace("%sell_price%", String.format("%,.2f", adjustedSellPrice));
+                        
+                        // Handle multiplier display placeholder
+                        if (processedLine.contains("%multiplier_display%")) {
+                            try {
+                                // Get multiplier display format from config
+                                String displayFormat = plugin.getConfig().getString("multipliers.display.format", "%multiplier%x");
+                                boolean showPercentageBonus = plugin.getConfig().getBoolean("multipliers.display.show_percentage_bonus", false);
+                                
+                                String multiplierText;
+                                if (multiplier > 1.0) {
+                                    if (showPercentageBonus) {
+                                        double percentage = (multiplier - 1.0) * 100;
+                                        multiplierText = String.format("+%.0f%%", percentage);
+                                    } else {
+                                        multiplierText = displayFormat.replace("%multiplier%", String.format("%.1f", multiplier));
+                                    }
+                                } else {
+                                    // Show "1.0x" for no multiplier or use percentage format
+                                    if (showPercentageBonus) {
+                                        multiplierText = "+0%";
+                                    } else {
+                                        multiplierText = "1.0x";
+                                    }
+                                }
+                                
+                                processedLine = processedLine.replace("%multiplier_display%", multiplierText);
+                            } catch (Exception e) {
+                                plugin.getLogger().warning("Error processing multiplier display for player " + player.getName() + ": " + e.getMessage());
+                                // Fallback to simple format
+                                processedLine = processedLine.replace("%multiplier_display%", multiplier > 1.0 ? String.format("%.1fx", multiplier) : "1.0x");
+                            }
+                        }
+                        
+                        // Replace timer placeholder for rotational shops
+                        if (processedLine.contains("%timer%")) {
+                            try {
+                                String shopId = null;
+                                for (Map.Entry<UUID, PageInfo> entry : openShopInventories.entrySet()) {
+                                    if (entry.getValue().shopId() != null) {
+                                        shopId = entry.getValue().shopId();
+                                        break;
+                                    }
+                                }
+                                if (shopId != null) {
+                                    long timeLeft = shopManager.getTimeUntilNextRotation(shopId);
+                                    String timer = formatTimer(timeLeft);
+                                    processedLine = processedLine.replace("%timer%", timer);
+                                } else {
+                                    processedLine = processedLine.replace("%timer%", "N/A");
+                                }
+                            } catch (Exception e) {
+                                plugin.getLogger().warning("Error processing timer placeholder for player " + player.getName() + ": " + e.getMessage());
+                                processedLine = processedLine.replace("%timer%", "N/A");
+                            }
+                        }
+                        
+                        newLore.add(processedLine);
+                    }
+                    meta.setLore(newLore);
+                }
+                itemStack.setItemMeta(meta);
+            }
+            return itemStack;
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error creating shop item stack for " + shopItem.displayName() + " for player " + player.getName() + ": " + e.getMessage());
+            // Return a fallback item stack
+            return new ItemBuilder(plugin, shopItem.material(), messageService)
+                    .withDisplayName(shopItem.displayName())
+                    .withLore(shopItem.lore())
+                    .withCustomModelData(shopItem.customModelData())
+                    .build();
+        }
     }
 
     public ItemStack createPaginationItemStack(PaginationItem paginationItem) {
@@ -990,5 +1246,73 @@ public class ShopGuiManager {
      */
     public void reloadConfig() {
         guisConfig.reloadConfig();
+        loadCooldownSettings();
+        
+        // Clear item stack cache when config is reloaded
+        itemStackCache.clear();
+        itemStackCacheTimestamps.clear();
+    }
+    
+    /**
+     * Clean up expired item stack cache entries
+     */
+    public void cleanupItemStackCache() {
+        if (!enableItemStackCaching) {
+            return;
+        }
+        
+        long cutoff = System.currentTimeMillis() - itemStackCacheDuration;
+        int removed = 0;
+        
+        Iterator<Map.Entry<String, ItemStack>> iterator = itemStackCache.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ItemStack> entry = iterator.next();
+            if (itemStackCacheTimestamps.getOrDefault(entry.getKey(), 0L) < cutoff) {
+                iterator.remove();
+                itemStackCacheTimestamps.remove(entry.getKey());
+                removed++;
+            }
+        }
+        
+        if (removed > 0) {
+            plugin.getLogger().fine("Cleaned up " + removed + " expired item stack cache entries");
+        }
+    }
+    
+    /**
+     * Get GUI performance statistics
+     */
+    public Map<String, Object> getGuiStats() {
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("open_shop_inventories", openShopInventories.size());
+        stats.put("active_transactions", activeTransactions.size());
+        stats.put("recent_transactions", recentTransactions.size());
+        stats.put("item_stack_cache_size", itemStackCache.size());
+        stats.put("gui_update_cooldown_ms", guiUpdateCooldown);
+        stats.put("inventory_check_cooldown_ms", inventoryCheckCooldown);
+        stats.put("auto_click_prevention_cooldown_ms", autoClickPreventionCooldown);
+        stats.put("item_stack_cache_duration_ms", itemStackCacheDuration);
+        stats.put("enable_item_stack_caching", enableItemStackCaching);
+        stats.put("max_cached_item_stacks", maxCachedItemStacks);
+        stats.put("cache_cleanup_interval_ms", cacheCleanupInterval);
+        stats.put("enable_lazy_loading", enableLazyLoading);
+        
+        return stats;
+    }
+    
+    /**
+     * Safely get player multiplier with error handling
+     */
+    private double getPlayerMultiplierSafely(Player player) {
+        try {
+            double multiplier = plugin.getMultiplierService().getPlayerMultiplier(player);
+            if (multiplier <= 0 || Double.isNaN(multiplier) || Double.isInfinite(multiplier)) {
+                return 1.0;
+            }
+            return multiplier;
+        } catch (Exception e) {
+            plugin.getLogger().warning("Error getting multiplier for player " + player.getName() + ": " + e.getMessage());
+            return 1.0;
+        }
     }
 }

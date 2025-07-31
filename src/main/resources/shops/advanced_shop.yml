@@ -25,76 +25,150 @@ pagination:
     display-name: " "
 
 items:
-  # Page 1
   - id: diamond_sword
     material: DIAMOND_SWORD
-    display-name: "<aqua><bold>Diamond Sword</bold>"
-    slot: 10
-    page: 0
+    display-name: "<yellow>Diamond Sword"
     lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Sharp and shiny!"
-    buy-price: 1000
-    sell-price: 500
-    buy-limit: 2
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>(%multiplier_display%)</gold>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 100.0
+    sell-price: 50.0
+    buy-limit: 10
+    sell-limit: 5
+    slot: 10
+
   - id: golden_apple
     material: GOLDEN_APPLE
-    display-name: "<gold><bold>Golden Apple</bold>"
-    slot: 11
-    page: 0
+    display-name: "<gold>Golden Apple"
     lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Heals you instantly."
-    buy-price: 250
-    sell-price: 100
-    buy-limit: 8
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <aqua>%multiplier_display%</aqua>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 25.0
+    sell-price: 12.5
+    slot: 11
+
+  - id: netherite_ingot
+    material: NETHERITE_INGOT
+    display-name: "<purple>Netherite Ingot"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <green>Multiplier: %multiplier_display%</green>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 500.0
+    sell-price: 250.0
+    slot: 12
+
+  - id: emerald
+    material: EMERALD
+    display-name: "<green>Emerald"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red>"
+      - "<gray>Multiplier: <red>%multiplier_display%</red>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 5.0
+    sell-price: 2.5
+    slot: 13
+
+  - id: diamond
+    material: DIAMOND
+    display-name: "<aqua>Diamond"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>⚡ %multiplier_display%</gold>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 50.0
+    sell-price: 25.0
+    slot: 14
+
   - id: bread
     material: BREAD
     display-name: "<yellow>Bread"
-    slot: 12
-    page: 0
     lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Freshly baked."
-    buy-price: 10
-    sell-price: 3
-  # Page 2
-  - id: ender_pearl
-    material: ENDER_PEARL
-    display-name: "<light_purple>Ender Pearl"
-    slot: 10
-    page: 1
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red>"
+      - "<gray>Bonus: <green>%multiplier_display%</green>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 2.0
+    sell-price: 1.0
+    slot: 15
+
+  - id: iron_ingot
+    material: IRON_INGOT
+    display-name: "<gray>Iron Ingot"
     lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Teleportation device."
-    buy-price: 200
-    sell-price: 80
-    buy-limit: 4
-  - id: blaze_rod
-    material: BLAZE_ROD
-    display-name: "<gold>Blaze Rod"
-    slot: 11
-    page: 1
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>(%multiplier_display%)</gold>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 10.0
+    sell-price: 5.0
+    slot: 19
+
+  - id: gold_ingot
+    material: GOLD_INGOT
+    display-name: "<gold>Gold Ingot"
     lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Hot to the touch!"
-    buy-price: 150
-    sell-price: 60
-  - id: phantom_membrane
-    material: PHANTOM_MEMBRANE
-    display-name: "<blue>Phantom Membrane"
-    slot: 12
-    page: 1
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <aqua>%multiplier_display%</aqua>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 15.0
+    sell-price: 7.5
+    slot: 20
+
+  - id: coal
+    material: COAL
+    display-name: "<dark_gray>Coal"
     lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Rare drop from phantoms."
-    buy-price: 300
-    sell-price: 120
-    command-based: true
-    sell-command: "player:heal %player%"
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <green>%multiplier_display%</green>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 1.0
+    sell-price: 0.5
+    slot: 21
+
+  - id: redstone
+    material: REDSTONE
+    display-name: "<red>Redstone"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <gold>⚡ %multiplier_display%</gold>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 3.0
+    sell-price: 1.5
+    slot: 22
+
+  - id: lapis_lazuli
+    material: LAPIS_LAZULI
+    display-name: "<blue>Lapis Lazuli"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <aqua>%multiplier_display%</aqua>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 4.0
+    sell-price: 2.0
+    slot: 23
+
+  - id: quartz
+    material: QUARTZ
+    display-name: "<white>Quartz"
+    lore:
+      - "<gray>Buy Price: <green>$%buy_price%</green>"
+      - "<gray>Sell Price: <red>$%sell_price%</red> <green>%multiplier_display%</green>"
+      - ""
+      - "<yellow>Click to buy or sell!"
+    buy-price: 6.0
+    sell-price: 3.0
+    slot: 24

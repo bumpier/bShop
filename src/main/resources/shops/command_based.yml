@@ -1,66 +1,111 @@
-# Command-Based Shop Example
-# Demonstrates: items that execute commands, console/player actions
+# =============================================================================
+# COMMAND-BASED SHOP EXAMPLE
+# =============================================================================
+# This shop demonstrates how to use custom currency commands for buying and selling
+# items that don't use Vault economy.
 
-title: "Command Shop"
-size: 3
+shop:
+  id: "command_based"
+  name: "Command-Based Shop"
+  description: "Shop using custom currency commands"
+  type: "advanced"
+  rotation:
+    enabled: false
+    interval: "1h"
+    announce: true
+    message: "<green>Command-based shop has rotated!</green>"
 
-pagination:
-  next_page:
-    material: LIME_STAINED_GLASS_PANE
-    display-name: "<green><bold>Next Page →</bold>"
-    slot: 23
-  previous_page:
-    material: RED_STAINED_GLASS_PANE
-    display-name: "<red><bold>← Previous Page</bold>"
-    slot: 21
-  back_to_menu:
-    material: BARRIER
-    display-name: "<red><bold>Back to Main Menu</bold>"
-    lore:
-      - "<gray><i>Return to shop categories.</i>"
-    slot: 22
-    action: "back_to_main_menu"
-  filler:
-    material: BLACK_STAINED_GLASS_PANE
-    display-name: " "
+  items:
+    - id: instant_health
+      material: GOLDEN_APPLE
+      display-name: "<green><bold>Instant Health Potion</bold></green>"
+      lore:
+        - "<gray>A powerful healing potion</gray>"
+        - "<green>Instantly heals you to full health!</green>"
+        - "<yellow>Click to buy or sell!</yellow>"
+      buy-price: 50.0
+      sell-price: 25.0
+      buy-currency-command: "customcurrency take %player% money %amount%"
+      sell-currency-command: "customcurrency give %player% money %amount%"
+      buy-currency-requirement: "%customcurrency_money%"
+      sell-currency-requirement: "%customcurrency_money%"
+      slot: 10
+    
+    - id: teleport_home
+      material: ENDER_PEARL
+      display-name: "<blue><bold>Home Teleporter</bold></blue>"
+      lore:
+        - "<gray>Teleport to your home instantly</gray>"
+        - "<blue>No cooldown, no restrictions!</blue>"
+        - "<yellow>Click to buy or sell!</yellow>"
+      buy-price: 100.0
+      sell-price: 50.0
+      buy-currency-command: "points take %player% %amount%"
+      sell-currency-command: "points give %player% %amount%"
+      buy-currency-requirement: "%playerpoints_points%"
+      sell-currency-requirement: "%playerpoints_points%"
+      slot: 11
+    
+    - id: speed_boost
+      material: SUGAR
+      display-name: "<yellow><bold>Speed Boost</bold></yellow>"
+      lore:
+        - "<gray>Gain temporary speed boost</gray>"
+        - "<yellow>+50% movement speed for 5 minutes!</yellow>"
+        - "<yellow>Click to buy or sell!</yellow>"
+      buy-price: 75.0
+      sell-price: 35.0
+      buy-currency-command: "tokens remove %player% %amount%"
+      sell-currency-command: "tokens add %player% %amount%"
+      buy-currency-requirement: "%tokenmanager_tokens%"
+      sell-currency-requirement: "%tokenmanager_tokens%"
+      slot: 12
+    
+    - id: double_exp
+      material: EXPERIENCE_BOTTLE
+      display-name: "<purple><bold>Double EXP Booster</bold></purple>"
+      lore:
+        - "<gray>Double your experience gain</gray>"
+        - "<purple>2x EXP for 30 minutes!</purple>"
+        - "<yellow>Click to buy or sell!</yellow>"
+      buy-price: 200.0
+      sell-price: 100.0
+      buy-currency-command: "coins take %player% %amount%"
+      sell-currency-command: "coins give %player% %amount%"
+      buy-currency-requirement: "%coinmanager_coins%"
+      sell-currency-requirement: "%coinmanager_coins%"
+      slot: 13
+    
+    - id: flight_potion
+      material: FEATHER
+      display-name: "<cyan><bold>Flight Potion</bold></cyan>"
+      lore:
+        - "<gray>Gain temporary flight ability</gray>"
+        - "<cyan>Fly freely for 10 minutes!</cyan>"
+        - "<yellow>Click to buy or sell!</yellow>"
+      buy-price: 150.0
+      sell-price: 75.0
+      buy-currency-command: "credits remove %player% %amount%"
+      sell-currency-command: "credits add %player% %amount%"
+      buy-currency-requirement: "%creditmanager_credits%"
+      sell-currency-requirement: "%creditmanager_credits%"
+      slot: 14
 
-items:
-  - id: rank_vip
-    material: NAME_TAG
-    display-name: "<gold><bold>VIP Rank</bold>"
-    slot: 10
-    page: 0
-    lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Grants VIP rank on purchase."
-    buy-price: 10000
-    sell-price: -1
-    command-based: true
-    buy-command: "console:lp user %player% parent add vip"
-  - id: fly_ability
-    material: FEATHER
-    display-name: "<aqua>Fly Ability (1h)"
-    slot: 11
-    page: 0
-    lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Grants /fly for 1 hour."
-    buy-price: 2500
-    sell-price: -1
-    command-based: true
-    buy-command: "console:lp user %player% permission settemp essentials.fly true 1h"
-  - id: heal_command
-    material: GOLDEN_APPLE
-    display-name: "<green>Instant Heal"
-    slot: 12
-    page: 0
-    lore:
-      - "<gray>Buy Price: <gold>$%buy_price%"
-      - "<gray>Sell Price: <green>$%sell_price%"
-      - "<gray>Heals you instantly on purchase."
-    buy-price: 500
-    sell-price: -1
-    command-based: true
-    buy-command: "player:heal %player%"
+  pagination:
+    next:
+      slot: 26
+      material: ARROW
+      display-name: "<green><bold>Next Page →</bold></green>"
+      lore:
+        - "<gray>Go to the next page</gray>"
+    
+    previous:
+      slot: 18
+      material: ARROW
+      display-name: "<red><bold>← Previous Page</bold></red>"
+      lore:
+        - "<gray>Go to the previous page</gray>"
+    
+    filler:
+      material: BLACK_STAINED_GLASS_PANE
+      display-name: " "

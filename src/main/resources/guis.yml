@@ -92,13 +92,14 @@ quantity-menu:
   size: 3
   display_item_slot: 13
   # Display item configuration - shows what the player is buying/selling
-  # Available placeholders: %item%, %quantity%, %price_per_item%, %total_price%
+  # Available placeholders: %item%, %quantity%, %price_per_item%, %total_price%, %multiplier_display%
   display_item:
     buy_display-name: "<#66ff2e><bold>ʙᴜʏɪɴɢ</bold> <#ffffff>%item%"
     sell_display-name: "<#e42121><bold>sᴇʟʟɪɴɢ</bold> <#ffffff>%item%"
     lore:
       - "<#BDBDBD>• Quantity: <#ffffff>%quantity%</#ffffff>"
       - "<#BDBDBD>• Price/Item: <#ffffff>%price_per_item%</#ffffff>"
+      - "<#BDBDBD>• Multiplier: <#ffd700>%multiplier_display%</#ffd700>"
       - ""
       - "<#BDBDBD>• Total Price: <#66ff2e>%total_price%</#66ff2e>"
       - ""
@@ -174,6 +175,8 @@ quantity-menu:
         display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>1</#B2FF96> sᴛᴀᴄᴋ"
         sell_display-name: "<#e42121>sᴇʟʟ <#F19090>1</#F19090> sᴛᴀᴄᴋ"
         lore:
+          - "<#BDBDBD>• Price: <#ffffff>%price%</#ffffff>"
+          - "<#BDBDBD>• Multiplier: <#ffd700>%multiplier_display%</#ffd700>"
           - ""
           - "<#BDBDBD><i>Click to select this amount.</i>"
         slot: 9
@@ -184,6 +187,8 @@ quantity-menu:
         display-name: "<#66ff2e>ʙᴜʏ <#B2FF96>2</#B2FF96> sᴛᴀᴄᴋs"
         sell_display-name: "<#e42121>sᴇʟʟ <#F19090>2</#F19090> sᴛᴀᴄᴋs"
         lore:
+          - "<#BDBDBD>• Price: <#ffffff>%price%</#ffffff>"
+          - "<#BDBDBD>• Multiplier: <#ffd700>%multiplier_display%</#ffd700>"
           - ""
           - "<#BDBDBD><i>Click to select this amount.</i>"
         slot: 10
@@ -273,6 +278,7 @@ quantity-menu:
       display-name: " "
       lore: []
 
+# --- Recent Purchases Menu ---
 recent-purchases-menu:
   title: "<gold>Recent Purchases"
   size: 3

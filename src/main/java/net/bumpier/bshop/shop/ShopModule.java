@@ -29,8 +29,11 @@ public class ShopModule implements Module {
         ShopGuiManager shopGuiManager = plugin.getShopGuiManager();
         ShopTransactionService transactionService = plugin.getTransactionService();
 
-        // Register Commands and Listeners
-        plugin.getCommand("shop").setExecutor(new ShopCommand(shopGuiManager, messageService, shopManager, moduleManager));
+        // Create and register the command executor and tab completer
+        ShopCommand shopCommand = new ShopCommand(shopGuiManager, messageService, shopManager, moduleManager);
+        plugin.getCommand("shop").setExecutor(shopCommand);
+        plugin.getCommand("shop").setTabCompleter(shopCommand);
+        
         plugin.getServer().getPluginManager().registerEvents(new ShopListener(shopGuiManager, transactionService, shopManager, messageService), plugin);
     }
 

@@ -24,7 +24,7 @@ public class DatabaseManager {
                 break;
         }
 
-        plugin.getLogger().info("Using " + dbType + " for database storage.");
+
         this.database.connect();
         this.database.createTables();
     }

@@ -23,7 +23,7 @@ public class ModuleManager {
         modules.forEach(module -> {
             try {
                 module.onEnable();
-                plugin.getLogger().log(Level.INFO, "Enabled module: " + module.getName());
+
             } catch (Exception e) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to enable module: " + module.getName(), e);
             }
@@ -34,7 +34,7 @@ public class ModuleManager {
         modules.forEach(module -> {
             try {
                 module.onDisable();
-                plugin.getLogger().log(Level.INFO, "Disabled module: " + module.getName());
+
             } catch (Exception e) {
                 plugin.getLogger().log(Level.SEVERE, "Failed to disable module: " + module.getName(), e);
             }
@@ -47,9 +47,7 @@ public class ModuleManager {
      * This is the primary method for applying configuration changes.
      */
     public void reloadModules() {
-        plugin.getLogger().info("Reloading all bShop modules...");
         unloadModules();
         loadModules();
-        plugin.getLogger().info("bShop reload complete.");
     }
 }
