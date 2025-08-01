@@ -4,7 +4,10 @@ import net.bumpier.bshop.shop.model.Shop;
 import net.bumpier.bshop.shop.model.ShopItem;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +27,7 @@ public class ShopAPI {
      * @return List of all shops
      */
     public List<Shop> getAllShops() {
-        return api.getShopManager().getAllShops();
+        return new ArrayList<>(api.getShopManager().getLoadedShops().values());
     }
     
     /**
@@ -66,6 +69,70 @@ public class ShopAPI {
         return getShopItems(shopId).stream()
                 .filter(item -> item.material() == material)
                 .toList();
+    }
+    
+    /**
+     * Find a shop item by ItemStack in a specific shop
+     * @param shopId Shop ID
+     * @param itemStack ItemStack to search for
+     * @return Optional containing the matching shop item if found
+     */
+    public Optional<ShopItem> findItemByItemStack(String shopId, ItemStack itemStack) {
+        if (itemStack == null) return Optional.empty();
+        
+        return getShopItems(shopId).stream()
+                .filter(item -> matchesItemStack(item, itemStack))
+                .findFirst();
+    }
+    
+    /**
+     * Find a shop item by ItemStack across all shops
+     * @param itemStack ItemStack to search for
+     * @return Optional containing the matching shop item if found
+     */
+    public Optional<ShopItem> findItemByItemStack(ItemStack itemStack) {
+        if (itemStack == null) return Optional.empty();
+        
+        return getAllShops().stream()
+                .flatMap(shop -> shop.items().stream())
+                .filter(item -> matchesItemStack(item, itemStack))
+                .findFirst();
+    }
+    
+    /**
+     * Find all shop items matching an ItemStack across all shops
+     * @param itemStack ItemStack to search for
+     * @return List of matching shop items
+     */
+    public List<ShopItem> findAllItemsByItemStack(ItemStack itemStack) {
+        if (itemStack == null) return List.of();
+        
+        return getAllShops().stream()
+                .flatMap(shop -> shop.items().stream())
+                .filter(item -> matchesItemStack(item, itemStack))
+                .toList();
+    }
+    
+    /**
+     * Check if an ItemStack matches a ShopItem
+     * @param shopItem Shop item to compare against
+     * @param itemStack ItemStack to compare
+     * @return true if the items match
+     */
+    private boolean matchesItemStack(ShopItem shopItem, ItemStack itemStack) {
+        if (shopItem.material() != itemStack.getType()) {
+            return false;
+        }
+        
+        // Check custom model data if the shop item has it
+        if (shopItem.customModelData() > 0) {
+            ItemMeta meta = itemStack.getItemMeta();
+            if (meta == null || !meta.hasCustomModelData() || meta.getCustomModelData() != shopItem.customModelData()) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     /**

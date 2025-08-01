@@ -21,6 +21,9 @@ public class BShopAPI {
     private final ShopTransactionService transactionService;
     private final MultiplierService multiplierService;
     private final MultiplierAPI multiplierAPI;
+    private final ShopAPI shopAPI;
+    private final TransactionAPI transactionAPI;
+    private final PriceAPI priceAPI;
     
     private BShopAPI(BShop plugin) {
         this.plugin = plugin;
@@ -29,6 +32,9 @@ public class BShopAPI {
         this.transactionService = plugin.getTransactionService();
         this.multiplierService = plugin.getMultiplierService();
         this.multiplierAPI = new MultiplierAPI(this);
+        this.shopAPI = new ShopAPI(this);
+        this.transactionAPI = new TransactionAPI(this);
+        this.priceAPI = new PriceAPI(this);
     }
     
     /**
@@ -94,6 +100,30 @@ public class BShopAPI {
      */
     public MultiplierAPI getMultiplierAPI() {
         return multiplierAPI;
+    }
+    
+    /**
+     * Get the shop API
+     * @return ShopAPI instance
+     */
+    public ShopAPI getShopAPI() {
+        return shopAPI;
+    }
+    
+    /**
+     * Get the transaction API
+     * @return TransactionAPI instance
+     */
+    public TransactionAPI getTransactionAPI() {
+        return transactionAPI;
+    }
+    
+    /**
+     * Get the price API
+     * @return PriceAPI instance
+     */
+    public PriceAPI getPriceAPI() {
+        return priceAPI;
     }
     
     // --- Utility Methods ---

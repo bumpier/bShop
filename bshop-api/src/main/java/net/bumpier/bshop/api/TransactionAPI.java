@@ -3,6 +3,10 @@ package net.bumpier.bshop.api;
 import net.bumpier.bshop.shop.model.ShopItem;
 import net.bumpier.bshop.shop.transaction.TransactionResult;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * API for transaction operations
@@ -92,6 +96,80 @@ public class TransactionAPI {
     public double getSellPrice(Player player, ShopItem item, int quantity) {
         double basePrice = item.sellPrice() * quantity;
         return api.getMultiplierService().applyMultiplier(player, basePrice);
+    }
+    
+    /**
+     * Get the sell price for an ItemStack (searches across all shops)
+     * @param player Player selling (for multiplier calculation)
+     * @param itemStack ItemStack to get price for
+     * @param quantity Quantity to sell
+     * @return Sell price, or 0.0 if item not found in any shop
+     */
+    public double getSellPrice(Player player, ItemStack itemStack, int quantity) {
+        Optional<ShopItem> shopItem = api.getShopAPI().findItemByItemStack(itemStack);
+        if (shopItem.isPresent()) {
+            return getSellPrice(player, shopItem.get(), quantity);
+        }
+        return 0.0;
+    }
+    
+    /**
+     * Get the sell price for an ItemStack in a specific shop
+     * @param player Player selling (for multiplier calculation)
+     * @param shopId Shop ID to search in
+     * @param itemStack ItemStack to get price for
+     * @param quantity Quantity to sell
+     * @return Sell price, or 0.0 if item not found in the shop
+     */
+    public double getSellPrice(Player player, String shopId, ItemStack itemStack, int quantity) {
+        Optional<ShopItem> shopItem = api.getShopAPI().findItemByItemStack(shopId, itemStack);
+        if (shopItem.isPresent()) {
+            return getSellPrice(player, shopItem.get(), quantity);
+        }
+        return 0.0;
+    }
+    
+    /**
+     * Get the sell price for an ItemStack (base price without multipliers)
+     * @param itemStack ItemStack to get price for
+     * @param quantity Quantity to sell
+     * @return Base sell price, or 0.0 if item not found in any shop
+     */
+    public double getBaseSellPrice(ItemStack itemStack, int quantity) {
+        Optional<ShopItem> shopItem = api.getShopAPI().findItemByItemStack(itemStack);
+        if (shopItem.isPresent()) {
+            return shopItem.get().sellPrice() * quantity;
+        }
+        return 0.0;
+    }
+    
+    /**
+     * Get the sell price for an ItemStack in a specific shop (base price without multipliers)
+     * @param shopId Shop ID to search in
+     * @param itemStack ItemStack to get price for
+     * @param quantity Quantity to sell
+     * @return Base sell price, or 0.0 if item not found in the shop
+     */
+    public double getBaseSellPrice(String shopId, ItemStack itemStack, int quantity) {
+        Optional<ShopItem> shopItem = api.getShopAPI().findItemByItemStack(shopId, itemStack);
+        if (shopItem.isPresent()) {
+            return shopItem.get().sellPrice() * quantity;
+        }
+        return 0.0;
+    }
+    
+    /**
+     * Get all possible sell prices for an ItemStack across all shops
+     * @param player Player selling (for multiplier calculation)
+     * @param itemStack ItemStack to get prices for
+     * @param quantity Quantity to sell
+     * @return List of sell prices from different shops
+     */
+    public List<Double> getAllSellPrices(Player player, ItemStack itemStack, int quantity) {
+        List<ShopItem> shopItems = api.getShopAPI().findAllItemsByItemStack(itemStack);
+        return shopItems.stream()
+                .map(item -> getSellPrice(player, item, quantity))
+                .toList();
     }
     
     /**
